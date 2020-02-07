@@ -1,0 +1,12 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cloudfoundry/cflinuxfs3
+inputs:
+  - name: bre-ci
+  - name: source
+  - name: dependency
+run:
+  path: bre-ci/tasks/test-dependency/run
