@@ -1,0 +1,50 @@
+resources:
+- name: dependency-resource
+  type: git
+  source:
+    uri: git@github.com:pivotal/dependency-resource.git
+    private_key: ((dependency-resource-deploy-key.private_key))
+    branch: master
+
+- name: external-dependency-resource
+  type: git
+  source:
+    uri: git@github.com:pivotal/external-dependency-resource.git
+    private_key: ((external-dependency-resource-deploy-key.private_key))
+    branch: master
+
+- name: dependency-resource-image
+  type: docker-image
+  source:
+    repository: cfbuildpacks/dependency-resource
+    username: ((cfbuildpacks-dockerhub-user.username))
+    password: ((cfbuildpacks-dockerhub-user.password))
+
+- name: external-dependency-resource-image
+  type: docker-image
+  source:
+    repository: cfbuildpacks/external-dependency-resource
+    username: ((cfbuildpacks-dockerhub-user.username))
+    password: ((cfbuildpacks-dockerhub-user.password))
+
+jobs:
+- name: build-and-push-dependency-resource
+  plan:
+  - in_parallel:
+    - get: dependency-resource
+      trigger: true
+  - put: dependency-resource-image
+    params:
+      build: dependency-resource
+      build_args:
+        DEPENDENCY_RESOURCE_ACCESS_KEY_ID: ((dependency-resource-access-key-id))
+        DEPENDENCY_RESOURCE_SECRET_ACCESS_KEY: ((dependency-resource-secret-access-key))
+
+- name: build-and-push-external-dependency-resource
+  plan:
+  - in_parallel:
+    - get: external-dependency-resource
+      trigger: true
+  - put: external-dependency-resource-image
+    params:
+      build: external-dependency-resource
