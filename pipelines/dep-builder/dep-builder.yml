@@ -1,0 +1,102 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:struct", "struct")
+#@yaml/text-templated-strings
+
+---
+resource_types:
+- name: dependency-resource
+  type: docker-image
+  source:
+    repository: cfbuildpacks/dependency-resource
+- name: external-dependency-resource
+  type: docker-image
+  source:
+    repository: cfbuildpacks/external-dependency-resource
+
+resources:
+- name: bre-ci
+  type: git
+  source:
+    uri: git@github.com:pivotal/bre-ci.git
+    branch: master
+    private_key: ((bre-ci-deploy-key.private_key))
+- name: buildpacks-ci
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/buildpacks-ci.git
+    branch: master
+- name: binary-builder
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/binary-builder.git
+    branch: master
+- name: builds
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots.git
+    branch: master
+    paths: [ binary-builds-new/ ]
+
+#@ for dependency in data.values.dependencies:
+- name: #@ dependency.name + "-source"
+  type: external-dependency-resource
+  source:
+    type: #@ dependency.source_type
+
+- name: #@ dependency.name + "-dependency-resource"
+  type: dependency-resource
+  source:
+    bucket: pivotal-buildpacks
+    access_key_id: ((pivotal-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-buildpacks-s3-secret-key))
+    region_name: "us-east-1"
+    s3_prefix: #@ "deps/" + dependency.name
+    dependency_name: #@ dependency.name
+#@ end
+
+#@ for stack in data.values.build_stacks:
+- name: #@ stack + "-image"
+  type: docker-image
+  source:
+    repository: #@ "cloudfoundry/" + stack
+#@ end
+
+jobs:
+#@ for dependency in data.values.dependencies:
+- name: #@ "build-" + dependency.name
+  serial: true
+  plan:
+  - in_parallel:
+    - get: bre-ci
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: builds
+    - get: source
+      resource: #@ dependency.name + "-source"
+      trigger: true
+  #@ for stack in dependency.stacks:
+    - get: #@ stack + "-image"
+  #@ end
+  - in_parallel:
+  #@ for stack in dependency.stacks:
+    - do:
+      - task: #@ "build-binary-" + stack
+        image: #@ stack + "-image"
+        file: buildpacks-ci/tasks/build-binary-new/build.yml
+        output_mapping:
+          artifacts: #@ stack + "-artifacts"
+          builds-artifacts: #@ stack + "-builds-metadata"
+        params:
+          STACK: #@ stack
+      - task: #@ "run-tests-" + stack
+        file: bre-ci/tasks/test-dependency/task.yml
+        input_mapping:
+          dependency: #@ stack + "-artifacts"
+      - in_parallel:
+        - put: #@ "{}-{}-dependency-resource".format(dependency.name, stack)
+          resource: #@ dependency.name + "-dependency-resource"
+          params:
+            dependency_file: #@ stack + "-artifacts/*.tgz"
+            metadata_file: #@ stack + "-builds-metadata/*.json"
+  #@ end
+#@ end

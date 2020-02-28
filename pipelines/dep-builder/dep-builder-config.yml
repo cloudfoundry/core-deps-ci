@@ -1,0 +1,13 @@
+#@data/values
+---
+#@ build_stacks = ['cflinuxfs3']
+build_stacks: #@ build_stacks
+dependencies:
+- name: node
+  stacks: #@ build_stacks
+  version_lines:
+    - 10.X.X
+    - 12.X.X
+    - 13.X.X
+  source_type: node
+  link: https://github.com/nodejs/Release
