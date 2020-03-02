@@ -5,6 +5,6 @@ set -euo pipefail
 parent_dir="$(cd "$(dirname "$0")" && pwd)"
 
 dependency_name="$(jq -r .source.name source/data.json)"
-version="$(jq -r .version.ref source/data.json)"
+version="$(jq -r .version source/data.json)"
 
 "${parent_dir}/${dependency_name}/run" "${version}"
