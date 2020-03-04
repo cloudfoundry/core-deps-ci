@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -euo pipefail
+
+check_for_extra_dashes() {
+  num_dashes="$(awk -F'-' '{print NF-1}' <<< "${dependency_name}")"
+  if [[ "${num_dashes}" -gt 5 ]]; then
+    echo "Can't convert files with more than five dashes"
+    exit 1
+  fi
+}
+
+rename_files() {
+  new_dependency_name="$(sed 's/-/_/g' <<< "${dependency_name}")"
+  mv "dependency/${dependency_name}" "updated-dependency/${new_dependency_name}"
+  mv metadata/* "updated-metadata/${new_dependency_name}_metadata.json"
+}
+
+
+main() {
+  dependency_name="$(basename dependency/*)"
+  check_for_extra_dashes
+  rename_files
+}
+
+main "$@"

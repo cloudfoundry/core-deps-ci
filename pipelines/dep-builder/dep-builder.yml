@@ -85,18 +85,26 @@ jobs:
         file: buildpacks-ci/tasks/build-binary-new/build.yml
         output_mapping:
           artifacts: #@ stack + "-artifacts"
-          builds-artifacts: #@ stack + "-builds-metadata"
+          dep-metadata: #@ stack + "-dep-metadata"
         params:
           STACK: #@ stack
+      - task: #@ "rename-{}-dependency-and-metadata".format(stack)
+        file: bre-ci/tasks/rename-dependency-and-metadata/task.yml
+        input_mapping:
+          dependency: #@ stack + "-artifacts"
+          metadata: #@ stack + "-dep-metadata"
+        output_mapping:
+          updated-dependency: #@ stack + "-dependency"
+          updated-metadata: #@ stack + "-metadata"
       - task: #@ "run-tests-" + stack
         file: bre-ci/tasks/test-dependency/task.yml
         input_mapping:
-          dependency: #@ stack + "-artifacts"
+          dependency: #@ stack + "-dependency"
       - in_parallel:
         - put: #@ "{}-{}-dependency-resource".format(dependency.name, stack)
           resource: #@ dependency.name + "-dependency-resource"
           params:
-            dependency_file: #@ stack + "-artifacts/*.tgz"
-            metadata_file: #@ stack + "-builds-metadata/*.json"
+            dependency_file: #@ stack + "-dependency/*"
+            metadata_file: #@ stack + "-metadata/*.json"
   #@ end
 #@ end
