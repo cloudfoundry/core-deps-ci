@@ -13,6 +13,14 @@ resources:
     private_key: ((external-dependency-resource-deploy-key.private_key))
     branch: master
 
+- name: depwatcher
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/buildpacks-ci.git
+    private_key: ((buildpacks-ci-deploy-key.private_key))
+    branch: master
+    paths: [ dockerfiles/depwatcher/ ]
+
 - name: dependency-resource-image
   type: docker-image
   source:
@@ -24,6 +32,13 @@ resources:
   type: docker-image
   source:
     repository: cfbuildpacks/external-dependency-resource
+    username: ((cfbuildpacks-dockerhub-user.username))
+    password: ((cfbuildpacks-dockerhub-user.password))
+
+- name: depwatcher-image
+  type: docker-image
+  source:
+    repository: cfbuildpacks/depwatcher
     username: ((cfbuildpacks-dockerhub-user.username))
     password: ((cfbuildpacks-dockerhub-user.password))
 
@@ -48,3 +63,12 @@ jobs:
   - put: external-dependency-resource-image
     params:
       build: external-dependency-resource
+
+- name: build-and-push-depwatcher
+  plan:
+  - in_parallel:
+    - get: depwatcher
+      trigger: true
+  - put: depwatcher-image
+    params:
+      build: depwatcher
