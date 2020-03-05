@@ -71,4 +71,4 @@ jobs:
       trigger: true
   - put: depwatcher-image
     params:
-      build: depwatcher
+      build: depwatcher/dockerfiles/depwatcher
