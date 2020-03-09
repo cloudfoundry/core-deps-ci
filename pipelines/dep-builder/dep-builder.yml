@@ -64,7 +64,6 @@ resources:
 jobs:
 #@ for dependency in data.values.dependencies:
 - name: #@ "build-" + dependency.name
-  serial: true
   plan:
   - in_parallel:
     - get: bre-ci
