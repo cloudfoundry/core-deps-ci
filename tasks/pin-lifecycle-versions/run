@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -euo pipefail
+
+fly -t ci login -n "${CONCOURSE_TEAM}" -u "${CONCOURSE_USERNAME}" -p "${CONCOURSE_PASSWORD}"
+
+fly -t ci pin-resource -r "cnb-lifecycle-release-latest" -v "$(jq -r '.latest.lifecycle_ref' metadata-file/*.json)"
+fly -t ci pin-resource -r "cnb-lifecycle-release-n-1" -v "$(jq -r '."n-1".lifecycle_ref' metadata-file/*.json)"
+fly -t ci pin-resource -r "cnb-lifecycle-release-n-2" -v "$(jq -r '."n-2".lifecycle_ref' metadata-file/*.json)"

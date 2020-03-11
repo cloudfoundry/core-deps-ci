@@ -81,6 +81,23 @@ resources:
     user: buildpacks
     access_token: ((buildpacks-github-token))
 
+#@ for version in data.values.supported-lifecycle-versions:
+- name: #@ "cnb-lifecycle-release-" + version
+  type: github-release
+  source:
+    repository: lifecycle
+    user: buildpacks
+    access_token: ((buildpacks-github-token))
+#@ end
+
+- name: lifecycle-metadata-file
+  type: s3
+  source:
+    bucket: lifecycle-metadata
+    access_key_id: ((lifecycle-metadata-s3-access-key))
+    secret_access_key: ((lifecycle-metadata-s3-secret-key))
+    versioned_file: lifecycle-metadata.json
+
 #! Versions
 #@ for builder in data.values.builders:
 - name: #@ builder.version_key + "-version"
@@ -136,131 +153,153 @@ resources:
     location: America/New_York
 
 jobs:
-#@ for builder in data.values.builders:
-  - name: #@ "create-{}-builder-rc".format(builder.name)
-    plan:
-      - in_parallel:
-        - get: sunday-night
-          trigger: true
-        - get: buildpacks-ci
-        - get: ci-image
-        - get: packager
-        - get: pack
-          resource: pack-release
-          trigger: true
-        - get: lifecycle
-          resource: cnb-lifecycle-release
-        - get: #@ builder.stack + "-build-cnb-image"
-          trigger: true
-        - get: #@ builder.stack + "-run-cnb-image"
-          trigger: true
-  #@ for cnb in cnbs_for_builder(builder):
-        - get: #@ cnb.name + "-cnb"
-          resource: #@ cnb.name + "-cnb-release"
-  #@ end
-        - get: cnb-builder
-        - get: version
-          resource: #@ builder.version_key + "-version"
-          params:
-            pre: rc
-      - task: get-cnb-sources
-        image: ci-image
-        config:
-          platform: linux
-          inputs:
-  #@ for cnb in cnbs_for_builder(builder):
-            - name: #@ cnb.name + "-cnb"
-  #@ end
-          outputs:
-            - name: sources
-          run:
-            path: bash
-            args:
-              - -cl
-              - cp -r *-cnb sources/
-      - task: create-builder-image
-        image: ci-image
-        file: buildpacks-ci/tasks/create-builder/task.yml
-        privileged: true
-        params:
-          REPO: cloudfoundry/cnb
-          STACK: #@ builder.builder_image_stack
-          BUILD_IMAGE: #@ "cloudfoundry/build:" + builder.builder_image_name
-          RUN_IMAGE: #@ "cloudfoundry/run:" + builder.builder_image_name
-          HOST: "hub.docker.com"
-      - put: #@ builder.name + "-rc-image"
-        params:
-          additional_tags: tag/name
-          image: builder-image/builder.tgz
-      - put: version
-        resource: #@ builder.version_key + "-version"
-        params:
-          file: version/version
+- name: pin-cnb-lifecycle-releases
+  plan:
+  - in_parallel:
+    - get: bre-ci
+    - get: lifecycle-metadata-file
+    - get: cnb-lifecycle-release
+#@ for version in data.values.supported-lifecycle-versions:
+    - get: #@ "cnb-lifecycle-release-" +version
+#@ end
+  - task: update-lifecycle-metadata
+    path: bre-ci/tasks/update-lifecycle-platform-api-mappings/task.yml
+  - task: pin-cnb-lifecycle-releases
+    path: bre-ci/tasks/pin-cnb-lifecycle-releases/task.yml
+    params:
+      CONCOURSE_USERNAME: ((concourse_user.username))
+      CONCOURSE_PASSWORD: ((concourse_user.password))
+      CONCOURSE_TEAM: releng
+  - put: lifecycle-metadata-file
+    params:
+      file: lifecycle-metadata-file/lifecycle-metadata.json
 
-  - name: #@ "test-{}-builder-rc".format(builder.name)
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: ci-image
-        - get: version
-          resource: #@ builder.version_key + "-version"
-          passed: #@ ["create-{}-builder-rc".format(builder.name)]
-        - get: builder-image
-          resource: #@ builder.name + "-rc-image"
-          trigger: true
-          passed: #@ ["create-{}-builder-rc".format(builder.name)]
-          params:
-            format: oci
-        - get: pack
-          resource: pack-release
-        - get: cnb-builder
-      - task: smoke-test-builder
-        image: ci-image
-        file: buildpacks-ci/tasks/test-builder/task.yml
-        privileged: true
-        params:
-          STACK: #@ builder.name
-          REPO: gcr.io/cf-buildpacks/builder-rcs
-          #! Why do we need this?
-          RUN_IMAGE: #@ "cloudfoundry/run:" + builder.builder_image_name
-      - task: builder-release-story
-        image: ci-image
-        file: buildpacks-ci/tasks/builder-release-story/task.yml
-        params:
-          GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-          TAG: #@ builder.name
-          TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
-          TRACKER_PROJECT_ID: ((cf-buildpacks-releng-tracker-id))
-          BEFORE_STORY_ID: ((builder_release_marker_story_number))
-
-  - name: #@ "ship-{}-builder".format(builder.name)
-    plan:
-      - get: ci-image
+#@ for version in data.values.supported-lifecycle-versions:
+  #@ for builder in data.values.builders:
+- name: #@ "create-{}-builder-rc".format(builder.name)
+  plan:
+    - in_parallel:
+      - get: sunday-night
+        trigger: true
       - get: buildpacks-ci
-      - get: #@ builder.name + "-rc-image"
-        passed: #@ ["test-{}-builder-rc".format(builder.name)]
-        params:
-          format: oci
+      - get: ci-image
+      - get: packager
+      - get: pack
+        resource: pack-release
+        trigger: true
+      - get: lifecycle
+        resource: #@ "cnb-lifecycle-release-" + version
+      - get: #@ builder.stack + "-build-cnb-image"
+        trigger: true
+      - get: #@ builder.stack + "-run-cnb-image"
+        trigger: true
+    #@ for cnb in cnbs_for_builder(builder):
+      - get: #@ cnb.name + "-cnb"
+        resource: #@ cnb.name + "-cnb-release"
+    #@ end
+      - get: cnb-builder
       - get: version
         resource: #@ builder.version_key + "-version"
-        passed: #@ ["test-{}-builder-rc".format(builder.name)]
         params:
-          bump: final
-          pre: #@ builder.name
-          pre_without_version: true
-      - task: write-tags-list
-        image: ci-image
-        file: buildpacks-ci/tasks/write-tags-list/task.yml
-        params:
-          TAGS: #@ generate_tags(builder)
-      - put: #@ builder.name + "-builder-image"
-        params:
-          additional_tags: tags/tags
-          image: #@ builder.name + "-rc-image/image.tar"
-      - put: version
+          pre: rc
+    - task: get-cnb-sources
+      image: ci-image
+      config:
+        platform: linux
+        inputs:
+    #@ for cnb in cnbs_for_builder(builder):
+          - name: #@ cnb.name + "-cnb"
+    #@ end
+        outputs:
+          - name: sources
+        run:
+          path: bash
+          args:
+            - -cl
+            - cp -r *-cnb sources/
+    - task: create-builder-image
+      image: ci-image
+      file: buildpacks-ci/tasks/create-builder/task.yml
+      privileged: true
+      params:
+        REPO: cloudfoundry/cnb
+        STACK: #@ builder.builder_image_stack
+        BUILD_IMAGE: #@ "cloudfoundry/build:" + builder.builder_image_name
+        RUN_IMAGE: #@ "cloudfoundry/run:" + builder.builder_image_name
+        HOST: "hub.docker.com"
+    - put: #@ builder.name + "-rc-image"
+      params:
+        additional_tags: tag/name
+        image: builder-image/builder.tgz
+    - put: version
+      resource: #@ builder.version_key + "-version"
+      params:
+        file: version/version
+
+- name: #@ "test-{}-builder-rc".format(builder.name)
+  plan:
+    - in_parallel:
+      - get: buildpacks-ci
+      - get: ci-image
+      - get: version
         resource: #@ builder.version_key + "-version"
+        passed: #@ ["create-{}-builder-rc".format(builder.name)]
+      - get: builder-image
+        resource: #@ builder.name + "-rc-image"
+        trigger: true
+        passed: #@ ["create-{}-builder-rc".format(builder.name)]
         params:
-          bump: patch
+          format: oci
+      - get: pack
+        resource: pack-release
+      - get: cnb-builder
+    - task: smoke-test-builder
+      image: ci-image
+      file: buildpacks-ci/tasks/test-builder/task.yml
+      privileged: true
+      params:
+        STACK: #@ builder.name
+        REPO: gcr.io/cf-buildpacks/builder-rcs
+        RUN_IMAGE: #@ "cloudfoundry/run:" + builder.builder_image_name
+    - task: builder-release-story
+      image: ci-image
+      file: buildpacks-ci/tasks/builder-release-story/task.yml
+      params:
+        GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+        TAG: #@ builder.name
+        TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
+        TRACKER_PROJECT_ID: ((cf-buildpacks-releng-tracker-id))
+        BEFORE_STORY_ID: ((builder_release_marker_story_number))
+
+- name: #@ "ship-{}-builder".format(builder.name)
+  plan:
+    - get: ci-image
+    - get: buildpacks-ci
+    - get: #@ builder.name + "-rc-image"
+      passed: #@ ["test-{}-builder-rc".format(builder.name)]
+      params:
+        format: oci
+    - get: version
+      resource: #@ builder.version_key + "-version"
+      passed: #@ ["test-{}-builder-rc".format(builder.name)]
+      params:
+        bump: final
+        pre: #@ builder.name
+        pre_without_version: true
+    - task: write-tags-list
+      image: ci-image
+      file: buildpacks-ci/tasks/write-tags-list/task.yml
+      params:
+        TAGS: #@ generate_tags(builder)
+    - put: #@ builder.name + "-builder-image"
+      params:
+        additional_tags: tags/tags
+        image: #@ builder.name + "-rc-image/image.tar"
+    - put: version
+      resource: #@ builder.version_key + "-version"
+      params:
+        bump: patch
+  #@ end
 #@ end
 
 groups:

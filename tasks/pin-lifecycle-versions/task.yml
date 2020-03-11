@@ -1,0 +1,15 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/bre-ci
+inputs:
+  - name: bre-ci
+  - name: metadata-file
+run:
+  path: bre-ci/tasks/pin-lifecycle-versions/run
+params:
+  CONCOURSE_USERNAME:
+  CONCOURSE_PASSWORD:
+  CONCOURSE_TEAM:
