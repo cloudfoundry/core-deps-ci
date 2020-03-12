@@ -1,0 +1,122 @@
+#@data/values
+---
+images:
+  - build
+  - run
+stacks:
+- name: cflinuxfs3
+  tag: full
+- name: bionic
+  tag: base
+- name: tiny
+  tag: tiny
+builders:
+- name: tiny
+  stack: tiny
+  version_key: tiny
+  repository: cloudfoundry/cnb
+  latest: false
+  builder_image_stack: org.cloudfoundry.stacks.tiny
+  builder_image_name: tiny-cnb
+- name: bionic
+  stack: bionic
+  version_key: bionic
+  repository: cloudfoundry/cnb
+  latest: false
+  builder_image_stack: io.buildpacks.stacks.bionic
+  builder_image_name: base-cnb
+- name: cflinuxfs3
+  stack: cflinuxfs3
+  version_key: cflinuxfs3
+  repository: cloudfoundry/cnb
+  latest: true
+  builder_image_stack: org.cloudfoundry.stacks.cflinuxfs3
+  builder_image_name: full-cnb
+cnbs:
+- name: nodejs
+  git_repo: "https://github.com/cloudfoundry/nodejs-cnb"
+  skip_stack:
+    - "tiny"
+- name: python
+  git_repo: "https://github.com/cloudfoundry/python-cnb"
+  skip_stack:
+    - "bionic"
+    - "tiny"
+- name: go
+  git_repo: "https://github.com/cloudfoundry/go-cnb"
+  skip_stack: []
+- name: httpd
+  git_repo: "https://github.com/cloudfoundry/httpd-cnb"
+  skip_stack:
+    - "bionic"
+    - "tiny"
+- name: nginx
+  git_repo: "https://github.com/cloudfoundry/nginx-cnb"
+  skip_stack:
+    - "bionic"
+    - "tiny"
+- name: php
+  git_repo: "https://github.com/cloudfoundry/php-cnb"
+  skip_stack:
+    - "bionic"
+    - "tiny"
+- name: openjdk
+  git_repo: "https://github.com/cloudfoundry/openjdk-cnb"
+  skip_stack:
+    - "tiny"
+- name: buildsystem
+  git_repo: "https://github.com/cloudfoundry/build-system-cnb"
+  skip_stack:
+    - "tiny"
+- name: jvmapplication
+  git_repo: "https://github.com/cloudfoundry/jvm-application-cnb"
+  skip_stack:
+    - "tiny"
+- name: azureapplicationinsights
+  git_repo: "https://github.com/cloudfoundry/azure-application-insights-cnb"
+  skip_stack:
+    - "tiny"
+- name: debug
+  git_repo: "https://github.com/cloudfoundry/debug-cnb"
+  skip_stack:
+    - "tiny"
+- name: googlestackdriver
+  git_repo: "https://github.com/cloudfoundry/google-stackdriver-cnb"
+  skip_stack:
+    - "tiny"
+- name: jmx
+  git_repo: "https://github.com/cloudfoundry/jmx-cnb"
+  skip_stack:
+    - "tiny"
+- name: procfile
+  git_repo: "https://github.com/cloudfoundry/procfile-cnb"
+  skip_stack:
+    - "tiny"
+- name: dotnet-core
+  git_repo: "https://github.com/cloudfoundry/dotnet-core-cnb"
+  skip_stack:
+    - "tiny"
+- name: archiveexpanding
+  git_repo: "https://github.com/cloudfoundry/archive-expanding-cnb"
+  skip_stack:
+    - "tiny"
+- name: tomcat
+  git_repo: "https://github.com/cloudfoundry/tomcat-cnb"
+  skip_stack:
+    - "tiny"
+- name: jdbc
+  git_repo: "https://github.com/cloudfoundry/jdbc-cnb"
+  skip_stack:
+    - "tiny"
+- name: springautoreconfiguration
+  git_repo: "https://github.com/cloudfoundry/spring-auto-reconfiguration-cnb"
+  skip_stack:
+    - "tiny"
+- name: springboot
+  git_repo: "https://github.com/cloudfoundry/spring-boot-cnb"
+  skip_stack:
+    - "tiny"
+- name: distzip
+  git_repo: "https://github.com/cloudfoundry/dist-zip-cnb"
+  skip_stack:
+    - "tiny"
