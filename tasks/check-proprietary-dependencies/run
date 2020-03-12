@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+shopt -s inherit_errexit
+
+get_updated_pivotal_io_dependencies() {
+  contents="$(curl -H "Authorization: token ${GITHUB_TOKEN}" -Ssf "https://api.github.com/repos/${CNB_ORG}/${CNB_NAME}/contents/compat/buildpack.toml")"
+  buildpack_toml="$(echo "${contents}" | jq -r .content | base64 -d)"
+  dependencies="$(echo "${buildpack_toml}" | yj -tj | jq -r .metadata.dependencies)"
+
+  echo "${dependencies}" | jq -c '.[]' | while read -r dependency; do
+    id="$(echo "${dependency}" | jq -r '.id')"
+    if ! [[ "${id}" == io.pivotal.* ]]; then
+      return
+    fi
+
+    source="$(echo "${dependency}" | jq -r '.source')"
+    if ! [[ "$source" =~ https://github.com/([^/]+/[^/]+)/.+ ]]; then
+      >&2 echo "Could not determine repo for source ${source}"
+      exit 1
+    fi
+    repo="${BASH_REMATCH[1]}"
+    tags="$(curl -H "Authorization: token ${GITHUB_TOKEN}" -Ssf "https://api.github.com/repos/${repo}/tags")"
+
+    version="$(echo "${dependency}" | jq -r '.version')"
+    latest_version_tag="$(echo "${tags}" | jq -r '.[].name' | grep '^v[0-9\.]\+' | head -n1 | tr -d 'v')"
+    if [[ "${version}" != "${latest_version_tag}" ]]; then
+      echo "${id}   ${version} --> ${latest_version_tag}"
+    fi
+  done
+}
+
+create_tracker_story() {
+  updates=$1
+
+  set +e
+  read -r -d '' description <<EOF
+**When** A new dependency is patched for our supported ISV p-buildpacks
+**I Want** To update the buildpack.toml with the latest patch
+**So That** we are shipping secure ISV p-buildpacks
+
+**Given** The team is still manually bumping ISV deps
+**When** I check the ISV vendor sites for new dependencies
+**And** A patch has been released
+**Then** I add the patch and replace old versions in the buildpack.toml
+
+**Notes**
+\`\`\`
+${updates}
+\`\`\`
+EOF
+  set -e
+
+  request_body="$(jq -n --arg cnb "${CNB_NAME}" --arg description "${description}" \
+    '{"name": "Update dependencies in \($cnb)", "description": $description, "estimate": 1}'
+  )"
+
+  curl -X POST -d "${request_body}" -H "X-TrackerToken: ${TRACKER_API_TOKEN}" -H "Content-Type: application/json" \
+    "https://www.pivotaltracker.com/services/v5/projects/${TRACKER_PROJECT_ID}/stories"
+}
+
+main() {
+  updates="$(get_updated_pivotal_io_dependencies)"
+  if [[ -z "${updates}" ]]; then
+    echo "Dependencies are up to date"
+    exit
+  fi
+
+  create_tracker_story "${updates}"
+}
+
+main "$@"
