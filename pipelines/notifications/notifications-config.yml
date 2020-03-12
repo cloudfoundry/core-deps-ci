@@ -1,0 +1,6 @@
+#@data/values
+
+---
+proprietary_cnbs:
+- name: p-nodejs-cnb
+  org: pivotal
