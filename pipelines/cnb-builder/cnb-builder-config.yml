@@ -1,6 +1,6 @@
 #@data/values
 ---
-supported-lifecycle-versions:
+supported_lifecycle_versions:
   - latest
   - n-1
   - n-2

@@ -7,9 +7,7 @@ image_resource:
 inputs:
   - name: bre-ci
   - name: cnb-lifecycle-release
-  - name: lifecycle-metadata-file
-  - name: platform-api-version
 outputs:
-  - name: lifecycle-metadata-file
+  - name: platform-api-version
 run:
-  path: bre-ci/tasks/update-lifecycle-platform-api-mappings/run
+  path: bre-ci/tasks/get-platform-api-version/run

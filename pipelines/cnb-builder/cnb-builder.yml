@@ -44,6 +44,13 @@ resources:
     uri: https://github.com/cloudfoundry/buildpacks-ci
     branch: master
 
+- name: bre-ci
+  type: git
+  source:
+    uri: git@github.com:pivotal/bre-ci.git
+    private_key: ((bre-ci-deploy-key.private_key))
+    branch: master
+
 - name: cnb-builder
   type: git
   source:
@@ -81,7 +88,7 @@ resources:
     user: buildpacks
     access_token: ((buildpacks-github-token))
 
-#@ for version in data.values.supported-lifecycle-versions:
+#@ for version in data.values.supported_lifecycle_versions:
 - name: #@ "cnb-lifecycle-release-" + version
   type: github-release
   source:
@@ -146,12 +153,6 @@ resources:
     username: ((buildpacks-docker-user.username))
     password: ((buildpacks-docker-user.password))
 
-- name: sunday-night
-  type: cron
-  source:
-    expression: 0 18 * * 0
-    location: America/New_York
-
 jobs:
 - name: pin-cnb-lifecycle-releases
   plan:
@@ -159,13 +160,16 @@ jobs:
     - get: bre-ci
     - get: lifecycle-metadata-file
     - get: cnb-lifecycle-release
-#@ for version in data.values.supported-lifecycle-versions:
+      trigger: true
+#@ for version in data.values.supported_lifecycle_versions:
     - get: #@ "cnb-lifecycle-release-" +version
 #@ end
+  - task: get-platform-api-version
+    file: bre-ci/tasks/get-platform-api-version/task.yml
   - task: update-lifecycle-metadata
-    path: bre-ci/tasks/update-lifecycle-platform-api-mappings/task.yml
+    file: bre-ci/tasks/update-lifecycle-platform-api-mappings/task.yml
   - task: pin-cnb-lifecycle-releases
-    path: bre-ci/tasks/pin-cnb-lifecycle-releases/task.yml
+    file: bre-ci/tasks/pin-cnb-lifecycle-releases/task.yml
     params:
       CONCOURSE_USERNAME: ((concourse_user.username))
       CONCOURSE_PASSWORD: ((concourse_user.password))
@@ -174,13 +178,11 @@ jobs:
     params:
       file: lifecycle-metadata-file/lifecycle-metadata.json
 
-#@ for version in data.values.supported-lifecycle-versions:
+#@ for version in data.values.supported_lifecycle_versions:
   #@ for builder in data.values.builders:
-- name: #@ "create-{}-builder-rc".format(builder.name)
+- name: #@ "create-{}-builder-rc-platform-api-{}".format(builder.name, version)
   plan:
     - in_parallel:
-      - get: sunday-night
-        trigger: true
       - get: buildpacks-ci
       - get: ci-image
       - get: packager
@@ -189,6 +191,8 @@ jobs:
         trigger: true
       - get: lifecycle
         resource: #@ "cnb-lifecycle-release-" + version
+        passed: [ pin-cnb-lifecycle-releases ]
+        trigger: true
       - get: #@ builder.stack + "-build-cnb-image"
         trigger: true
       - get: #@ builder.stack + "-run-cnb-image"
@@ -196,6 +200,7 @@ jobs:
     #@ for cnb in cnbs_for_builder(builder):
       - get: #@ cnb.name + "-cnb"
         resource: #@ cnb.name + "-cnb-release"
+        trigger: true
     #@ end
       - get: cnb-builder
       - get: version
@@ -227,27 +232,33 @@ jobs:
         BUILD_IMAGE: #@ "cloudfoundry/build:" + builder.builder_image_name
         RUN_IMAGE: #@ "cloudfoundry/run:" + builder.builder_image_name
         HOST: "hub.docker.com"
+    - task: get-platform-api-version
+      file: bre-ci/tasks/get-platform-api-version/task.yml
+    - task: write-tags-list
+      file: buildpacks-ci/tasks/write-tags-list/task.yml
+      params:
+        TAGS: #@ generate_tags(builder)
     - put: #@ builder.name + "-rc-image"
       params:
-        additional_tags: tag/name
+        additional_tags: tags/tags
         image: builder-image/builder.tgz
     - put: version
       resource: #@ builder.version_key + "-version"
       params:
         file: version/version
 
-- name: #@ "test-{}-builder-rc".format(builder.name)
+- name: #@ "test-{}-builder-rc-platform-api-{}".format(builder.name, version)
   plan:
     - in_parallel:
       - get: buildpacks-ci
       - get: ci-image
       - get: version
         resource: #@ builder.version_key + "-version"
-        passed: #@ ["create-{}-builder-rc".format(builder.name)]
+        passed: #@ ["create-{}-builder-rc-platform-api-{}".format(builder.name, version)]
       - get: builder-image
         resource: #@ builder.name + "-rc-image"
         trigger: true
-        passed: #@ ["create-{}-builder-rc".format(builder.name)]
+        passed: #@ ["create-{}-builder-rc-platform-api-{}".format(builder.name, version)]
         params:
           format: oci
       - get: pack
@@ -271,23 +282,26 @@ jobs:
         TRACKER_PROJECT_ID: ((cf-buildpacks-releng-tracker-id))
         BEFORE_STORY_ID: ((builder_release_marker_story_number))
 
-- name: #@ "ship-{}-builder".format(builder.name)
+- name: #@ "ship-{}-builder-platform-api-{}".format(builder.name, version)
   plan:
-    - get: ci-image
-    - get: buildpacks-ci
-    - get: #@ builder.name + "-rc-image"
-      passed: #@ ["test-{}-builder-rc".format(builder.name)]
-      params:
-        format: oci
-    - get: version
-      resource: #@ builder.version_key + "-version"
-      passed: #@ ["test-{}-builder-rc".format(builder.name)]
-      params:
-        bump: final
-        pre: #@ builder.name
-        pre_without_version: true
+    - in_parallel:
+      - get: ci-image
+      - get: buildpacks-ci
+      - get: #@ builder.name + "-rc-image"
+        passed: #@ ["test-{}-builder-rc-platform-api-{}".format(builder.name, version)]
+        trigger: true
+        params:
+          format: oci
+      - get: version
+        resource: #@ builder.version_key + "-version"
+        passed: #@ ["test-{}-builder-rc-platform-api-{}".format(builder.name, version)]
+        params:
+          bump: final
+          pre: #@ builder.name
+          pre_without_version: true
+    - task: get-platform-api-version
+      file: bre-ci/tasks/get-platform-api-version/task.yml
     - task: write-tags-list
-      image: ci-image
       file: buildpacks-ci/tasks/write-tags-list/task.yml
       params:
         TAGS: #@ generate_tags(builder)
@@ -305,16 +319,31 @@ jobs:
 groups:
 - name: all
   jobs:
-#@ for builder in data.values.builders:
-  - #@ "create-{}-builder-rc".format(builder.name)
-  - #@ "test-{}-builder-rc".format(builder.name)
-  - #@ "ship-{}-builder".format(builder.name)
+  - pin-cnb-lifecycle-releases
+#@ for version in data.values.supported_lifecycle_versions:
+  #@ for builder in data.values.builders:
+  - #@ "create-{}-builder-rc-platform-api-{}".format(builder.name, version)
+  - #@ "test-{}-builder-rc-platform-api-{}".format(builder.name, version)
+  - #@ "ship-{}-builder-platform-api-{}".format(builder.name, version)
+  #@ end
 #@ end
 
 #@ for builder in data.values.builders:
 - name: #@ builder.name + "-builder"
   jobs:
-  - #@ "create-{}-builder-rc".format(builder.name)
-  - #@ "test-{}-builder-rc".format(builder.name)
-  - #@ "ship-{}-builder".format(builder.name)
+  #@ for version in data.values.supported_lifecycle_versions:
+  - #@ "create-{}-builder-rc-platform-api-{}".format(builder.name, version)
+  - #@ "test-{}-builder-rc-platform-api-{}".format(builder.name, version)
+  - #@ "ship-{}-builder-platform-api-{}".format(builder.name, version)
+  #@ end
+#@ end
+
+#@ for version in data.values.supported_lifecycle_versions:
+- name: #@ "platform-api-" + version
+  jobs:
+  #@ for builder in data.values.builders:
+  - #@ "create-{}-builder-rc-platform-api-{}".format(builder.name, version)
+  - #@ "test-{}-builder-rc-platform-api-{}".format(builder.name, version)
+  - #@ "ship-{}-builder-platform-api-{}".format(builder.name, version)
+  #@ end
 #@ end

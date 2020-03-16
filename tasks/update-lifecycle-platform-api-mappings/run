@@ -3,16 +3,12 @@
 set -euo pipefail
 
 lifecycle_ref="$(cat cnb-lifecycle-release/tag)"
-platform_api_version=
+platform_api_version="$(cat platform-api-version/version)"
 latest_version=
 n_1_version=
 n_2_version=
 
 get_current_and_latest_platform_api_version() {
-  mkdir -p lifecycle-out
-  tar -xf cnb-lifecycle-release/*.tgz -C lifecycle-out
-  platform_api_version="$(grep 'platform' lifecycle-out/lifecycle.toml | awk -F' ' '{print $3}' | sed 's/"//g')"
-
   latest_version="$(jq -r .latest.platform_api_version lifecycle-metadata-file/*.json)"
   n_1_version="$(jq -r '."n-1".platform_api_version' lifecycle-metadata-file/*.json)"
   n_2_version="$(jq -r '."n-2".platform_api_version' lifecycle-metadata-file/*.json)"

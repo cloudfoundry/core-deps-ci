@@ -6,10 +6,16 @@ image_resource:
     repository: cfbuildpacks/bre-ci
 inputs:
   - name: bre-ci
-  - name: cnb-lifecycle-release
-  - name: lifecycle-metadata-file
   - name: platform-api-version
+    optional: true
+  - name: version
+    optional: true
+
 outputs:
-  - name: lifecycle-metadata-file
+  - name: tags
+
 run:
-  path: bre-ci/tasks/update-lifecycle-platform-api-mappings/run
+  path: bre-ci/tasks/write-tags-list/run
+
+params:
+  TAGS:
