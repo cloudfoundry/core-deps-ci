@@ -6,7 +6,7 @@ image_resource:
     repository: cfbuildpacks/bre-ci
 inputs:
   - name: bre-ci
-  - name: metadata-file
+  - name: lifecycle-metadata-file
 run:
   path: bre-ci/tasks/pin-lifecycle-versions/run
 params:

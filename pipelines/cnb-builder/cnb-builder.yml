@@ -168,8 +168,8 @@ jobs:
     file: bre-ci/tasks/get-platform-api-version/task.yml
   - task: update-lifecycle-metadata
     file: bre-ci/tasks/update-lifecycle-platform-api-mappings/task.yml
-  - task: pin-cnb-lifecycle-releases
-    file: bre-ci/tasks/pin-cnb-lifecycle-releases/task.yml
+  - task: pin-lifecycle-versions
+    file: bre-ci/tasks/pin-lifecycle-versions/task.yml
     params:
       CONCOURSE_USERNAME: ((concourse_user.username))
       CONCOURSE_PASSWORD: ((concourse_user.password))
