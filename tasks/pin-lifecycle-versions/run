@@ -4,6 +4,12 @@ set -euo pipefail
 
 fly -t ci login -c https://buildpacks.ci.cf-app.com -n "${CONCOURSE_TEAM}" -u "${CONCOURSE_USERNAME}" -p "${CONCOURSE_PASSWORD}"
 
-fly -t ci pin-resource -r "cnb-builder/cnb-lifecycle-release-latest" -v "$(jq -r '.latest.lifecycle_ref' lifecycle-metadata-file/*.json)"
-fly -t ci pin-resource -r "cnb-builder/cnb-lifecycle-release-n-1" -v "$(jq -r '."n-1".lifecycle_ref' lifecycle-metadata-file/*.json)"
-fly -t ci pin-resource -r "cnb-builder/cnb-lifecycle-release-n-2" -v "$(jq -r '."n-2".lifecycle_ref' lifecycle-metadata-file/*.json)"
+fly -t ci pin-resource \
+  -r "cnb-builder/cnb-lifecycle-release-latest" \
+  -v "{\"tag\": \"$(jq -r '.latest.lifecycle_ref' lifecycle-metadata-file/*.json)\"}"
+fly -t ci pin-resource \
+  -r "cnb-builder/cnb-lifecycle-release-n-1" \
+  -v "{\"tag\": \"$(jq -r '."n-1".lifecycle_ref' lifecycle-metadata-file/*.json)\"}"
+fly -t ci pin-resource \
+  -r "cnb-builder/cnb-lifecycle-release-n-2" \
+  -v "{\"tag\": \"$(jq -r '."n-2".lifecycle_ref' lifecycle-metadata-file/*.json)\"}"
