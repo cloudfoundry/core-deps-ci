@@ -236,7 +236,7 @@ jobs:
     - task: get-platform-api-version
       file: bre-ci/tasks/get-platform-api-version/task.yml
     - task: write-tags-list
-      file: buildpacks-ci/tasks/write-tags-list/task.yml
+      file: bre-ci/tasks/write-tags-list/task.yml
       params:
         TAGS: #@ generate_tags(builder)
     - put: #@ builder.name + "-rc-image"
@@ -253,13 +253,16 @@ jobs:
     - in_parallel:
       - get: buildpacks-ci
       - get: ci-image
+      - get: lifecycle
+        resource: #@ "cnb-lifecycle-release-" + version
+        passed: #@ [ "create-{}-builder-rc-platform-api-{}".format(builder.name, version) ]
       - get: version
         resource: #@ builder.version_key + "-version"
-        passed: #@ ["create-{}-builder-rc-platform-api-{}".format(builder.name, version)]
+        passed: #@ [ "create-{}-builder-rc-platform-api-{}".format(builder.name, version) ]
       - get: builder-image
         resource: #@ builder.name + "-rc-image"
         trigger: true
-        passed: #@ ["create-{}-builder-rc-platform-api-{}".format(builder.name, version)]
+        passed: #@ [ "create-{}-builder-rc-platform-api-{}".format(builder.name, version) ]
         params:
           format: oci
       - get: pack
@@ -287,15 +290,19 @@ jobs:
   plan:
     - in_parallel:
       - get: ci-image
+      - get: bre-ci
       - get: buildpacks-ci
+      - get: lifecycle
+        resource: #@ "cnb-lifecycle-release-" + version
+        passed: #@ [ "test-{}-builder-rc-platform-api-{}".format(builder.name, version) ]
       - get: #@ builder.name + "-rc-image"
-        passed: #@ ["test-{}-builder-rc-platform-api-{}".format(builder.name, version)]
+        passed: #@ [ "test-{}-builder-rc-platform-api-{}".format(builder.name, version) ]
         trigger: true
         params:
           format: oci
       - get: version
         resource: #@ builder.version_key + "-version"
-        passed: #@ ["test-{}-builder-rc-platform-api-{}".format(builder.name, version)]
+        passed: #@ [ "test-{}-builder-rc-platform-api-{}".format(builder.name, version) ]
         params:
           bump: final
           pre: #@ builder.name
@@ -303,7 +310,7 @@ jobs:
     - task: get-platform-api-version
       file: bre-ci/tasks/get-platform-api-version/task.yml
     - task: write-tags-list
-      file: buildpacks-ci/tasks/write-tags-list/task.yml
+      file: bre-ci/tasks/write-tags-list/task.yml
       params:
         TAGS: #@ generate_tags(builder)
     - put: #@ builder.name + "-builder-image"
