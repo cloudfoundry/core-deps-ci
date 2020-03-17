@@ -317,7 +317,7 @@ jobs:
     - put: #@ builder.name + "-platform-api-" + version + "-builder-image"
       params:
         additional_tags: tags/tags
-        image: #@ builder.name + "-rc-image/image.tar"
+        image: #@ builder.name + "-platform-api-" + version + "-rc-image/image.tar"
     - put: version
       resource: #@ builder.version_key + "-version"
       params:
