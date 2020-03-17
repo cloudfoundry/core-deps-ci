@@ -1,7 +1,10 @@
 #@ load("@ytt:data", "data")
 #@yaml/text-templated-strings
 
-#@ def generate_tags(builder):
+#@ def generate_tags(builder, version):
+#@   if version != "latest":
+#@     return ""
+#@   end
 #@   tags = builder.stack
 #@   for stack in data.values.stacks:
 #@     if stack.name == builder.stack:
@@ -240,7 +243,7 @@ jobs:
     - task: write-tags-list
       file: bre-ci/tasks/write-tags-list/task.yml
       params:
-        TAGS: #@ generate_tags(builder)
+        TAGS: #@ generate_tags(builder, version)
         STACK: #@ builder.name
     - put: #@ builder.name + "-rc-image"
       params:
@@ -307,7 +310,7 @@ jobs:
       image: ci-image
       file: bre-ci/tasks/write-tags-list/task.yml
       params:
-        TAGS: #@ generate_tags(builder)
+        TAGS: #@ generate_tags(builder, version)
         STACK: #@ builder.name
     - put: #@ builder.name + "-builder-image"
       params:
