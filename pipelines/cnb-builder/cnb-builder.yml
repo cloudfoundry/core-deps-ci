@@ -276,15 +276,6 @@ jobs:
         STACK: #@ builder.name
         REPO: gcr.io/cf-buildpacks/builder-rcs
         RUN_IMAGE: #@ "cloudfoundry/run:" + builder.builder_image_name
-    - task: builder-release-story
-      image: ci-image
-      file: buildpacks-ci/tasks/builder-release-story/task.yml
-      params:
-        GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-        TAG: #@ builder.name
-        TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
-        TRACKER_PROJECT_ID: ((cf-buildpacks-releng-tracker-id))
-        BEFORE_STORY_ID: ((builder_release_marker_story_number))
 
 - name: #@ "ship-{}-builder-platform-api-{}".format(builder.name, version)
   plan:
