@@ -183,6 +183,7 @@ jobs:
 - name: #@ "create-{}-builder-rc-platform-api-{}".format(builder.name, version)
   plan:
     - in_parallel:
+      - get: bre-ci
       - get: buildpacks-ci
       - get: ci-image
       - get: packager

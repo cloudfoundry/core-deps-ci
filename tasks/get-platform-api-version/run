@@ -2,5 +2,5 @@
 
 set -euo pipefail
 
-tar -xf cnb-lifecycle-release/*.tgz lifecycle.toml
+tar -xf lifecycle/*.tgz lifecycle.toml
 yj -tj < lifecycle.toml | jq -r .api.platform > platform-api-version/version
