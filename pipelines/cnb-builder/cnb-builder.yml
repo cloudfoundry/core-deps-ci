@@ -159,10 +159,11 @@ jobs:
   - in_parallel:
     - get: bre-ci
     - get: lifecycle-metadata-file
-    - get: cnb-lifecycle-release
+    - get: lifecycle
+      resource: cnb-lifecycle-release
       trigger: true
 #@ for version in data.values.supported_lifecycle_versions:
-    - get: #@ "cnb-lifecycle-release-" +version
+    - get: #@ "cnb-lifecycle-release-" + version
 #@ end
   - task: get-platform-api-version
     file: bre-ci/tasks/get-platform-api-version/task.yml
@@ -190,9 +191,10 @@ jobs:
       - get: pack
         resource: pack-release
         trigger: true
+      - get: cnb-lifecycle-release
+        passed: [ pin-cnb-lifecycle-releases ]
       - get: lifecycle
         resource: #@ "cnb-lifecycle-release-" + version
-        passed: [ pin-cnb-lifecycle-releases ]
         trigger: true
       - get: #@ builder.stack + "-build-cnb-image"
         trigger: true
@@ -239,6 +241,7 @@ jobs:
       file: bre-ci/tasks/write-tags-list/task.yml
       params:
         TAGS: #@ generate_tags(builder)
+        STACK: #@ builder.name
     - put: #@ builder.name + "-rc-image"
       params:
         additional_tags: tags/tags
@@ -301,9 +304,11 @@ jobs:
     - task: get-platform-api-version
       file: bre-ci/tasks/get-platform-api-version/task.yml
     - task: write-tags-list
+      image: ci-image
       file: bre-ci/tasks/write-tags-list/task.yml
       params:
         TAGS: #@ generate_tags(builder)
+        STACK: #@ builder.name
     - put: #@ builder.name + "-builder-image"
       params:
         additional_tags: tags/tags

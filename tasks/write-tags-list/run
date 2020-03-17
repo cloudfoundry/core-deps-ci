@@ -4,7 +4,11 @@ set -euo pipefail
 
 if [[ -d "platform-api-version" ]]; then
   platform_api_version="$(cat platform-api-version/version)"
-  echo "platform-api-${platform_api_version} " > tags/tags
+  if [[ "${STACK}" == "" ]]; then
+    echo "error: must set STACK param in pipeline config with platform-api-version"
+    exit 1
+  fi
+  echo "${STACK}-platform-api-${platform_api_version} " > tags/tags
 fi
 
 if [[ -d "version" ]]; then

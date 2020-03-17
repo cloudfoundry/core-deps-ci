@@ -6,7 +6,7 @@ image_resource:
     repository: cfbuildpacks/bre-ci
 inputs:
   - name: bre-ci
-  - name: cnb-lifecycle-release
+  - name: lifecycle
   - name: lifecycle-metadata-file
   - name: platform-api-version
 outputs:
