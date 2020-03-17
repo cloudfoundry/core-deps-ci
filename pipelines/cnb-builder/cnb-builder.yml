@@ -57,7 +57,7 @@ resources:
 - name: cnb-builder
   type: git
   source:
-    uri: https://github.com/cloudfoundry/cnb-builder
+    uri: #@ data.values.cnb_builder_uri
     branch: master
 
 #@ for cnb in data.values.cnbs:
@@ -120,21 +120,23 @@ resources:
     secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
 
 #! Docker Images
-- name: #@ builder.name + "-builder-image"
+  #@ for version in data.values.supported_lifecycle_versions:
+- name: #@ builder.name + "-platform-api-" + version + "-builder-image"
   type: registry-image
   source:
     repository: #@ builder.repository
-    tag: #@ builder.stack
+    tag: #@ builder.stack + "-platform-api-" + version
     username: ((buildpacks-docker-user.username))
     password: ((buildpacks-docker-user.password))
 
-- name: #@ builder.name + "-rc-image"
+- name: #@ builder.name + "-platform-api-" + version + "-rc-image"
   type: registry-image
   source:
     repository: gcr.io/cf-buildpacks/builder-rcs
-    tag: #@ builder.name
+    tag: #@ builder.name + "-platform-api-" + version
     username: _json_key
     password: ((gcp-service-account-key))
+  #@ end
 #@ end
 
 #@ for stack in data.values.stacks:
@@ -245,7 +247,7 @@ jobs:
       params:
         TAGS: #@ generate_tags(builder, version)
         STACK: #@ builder.name
-    - put: #@ builder.name + "-rc-image"
+    - put: #@ builder.name + "-platform-api-" + version + "-rc-image"
       params:
         additional_tags: tags/tags
         image: builder-image/builder.tgz
@@ -266,7 +268,7 @@ jobs:
         resource: #@ builder.version_key + "-version"
         passed: #@ [ "create-{}-builder-rc-platform-api-{}".format(builder.name, version) ]
       - get: builder-image
-        resource: #@ builder.name + "-rc-image"
+        resource: #@ builder.name + "-platform-api-" + version + "-rc-image"
         trigger: true
         passed: #@ [ "create-{}-builder-rc-platform-api-{}".format(builder.name, version) ]
         params:
@@ -292,7 +294,7 @@ jobs:
       - get: lifecycle
         resource: #@ "cnb-lifecycle-release-" + version
         passed: #@ [ "test-{}-builder-rc-platform-api-{}".format(builder.name, version) ]
-      - get: #@ builder.name + "-rc-image"
+      - get: #@ builder.name + "-platform-api-" + version + "-rc-image"
         passed: #@ [ "test-{}-builder-rc-platform-api-{}".format(builder.name, version) ]
         trigger: true
         params:
@@ -312,7 +314,7 @@ jobs:
       params:
         TAGS: #@ generate_tags(builder, version)
         STACK: #@ builder.name
-    - put: #@ builder.name + "-builder-image"
+    - put: #@ builder.name + "-platform-api-" + version + "-builder-image"
       params:
         additional_tags: tags/tags
         image: #@ builder.name + "-rc-image/image.tar"

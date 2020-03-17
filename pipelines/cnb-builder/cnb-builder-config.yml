@@ -1,5 +1,6 @@
 #@data/values
 ---
+cnb_builder_uri: https://github.com/cloudfoundry/cnb-builder
 supported_lifecycle_versions:
   - latest
   - n-1
