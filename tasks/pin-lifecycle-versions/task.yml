@@ -10,6 +10,7 @@ inputs:
 run:
   path: bre-ci/tasks/pin-lifecycle-versions/run
 params:
+  CONCOURSE_URL:
   CONCOURSE_USERNAME:
   CONCOURSE_PASSWORD:
   CONCOURSE_TEAM:

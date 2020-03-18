@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-fly -t ci login -c https://buildpacks.ci.cf-app.com -n "${CONCOURSE_TEAM}" -u "${CONCOURSE_USERNAME}" -p "${CONCOURSE_PASSWORD}"
+fly -t ci login -c "${CONCOURSE_URL}" -n "${CONCOURSE_TEAM}" -u "${CONCOURSE_USERNAME}" -p "${CONCOURSE_PASSWORD}"
 
 fly -t ci pin-resource \
   -r "cnb-builder/cnb-lifecycle-release-latest" \

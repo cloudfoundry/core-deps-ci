@@ -1,5 +1,6 @@
 #@data/values
 ---
+concourse_url: https://buildpacks.ci.cf-app.com
 cnb_builder_uri: git@github.com:cloudfoundry/cnb-builder
 cnb_builder_private_key: ((cnb-builder-deploy-key.private_key))
 supported_lifecycle_versions:

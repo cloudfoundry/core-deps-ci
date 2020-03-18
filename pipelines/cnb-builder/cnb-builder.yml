@@ -186,6 +186,7 @@ jobs:
   - task: pin-lifecycle-versions
     file: bre-ci/tasks/pin-lifecycle-versions/task.yml
     params:
+      CONCOURSE_URL: #@ data.values.concourse_url
       CONCOURSE_USERNAME: ((concourse_user.username))
       CONCOURSE_PASSWORD: ((concourse_user.password))
       CONCOURSE_TEAM: releng
