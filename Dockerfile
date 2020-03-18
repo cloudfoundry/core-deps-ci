@@ -7,6 +7,7 @@ ARG GO_VERSION=1.13.8
 ARG GO_SHA256=0567734d558aef19112f2b2873caa0c600f1b4a5827930eb5a7f35235219e9d8
 ARG BOSH_VERSION=6.2.1
 ARG BBL_VERSION=8.4.0
+ARG CREDHUB_VERSION=2.7.0
 
 RUN apt-get -qqy update \
   && apt-get -qqy install \
@@ -40,3 +41,6 @@ RUN curl -sL -o /usr/local/bin/bosh https://github.com/cloudfoundry/bosh-cli/rel
 
 RUN curl -sL -o /usr/local/bin/bbl https://github.com/cloudfoundry/bosh-bootloader/releases/download/v${BBL_VERSION}/bbl-v${BBL_VERSION}_linux_x86-64 \
   && chmod +x /usr/local/bin/bbl
+
+RUN curl -sL https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-${CREDHUB_VERSION}.tgz |
+  | tar -C /usr/local/bin -xz
