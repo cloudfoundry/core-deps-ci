@@ -17,6 +17,14 @@
 #@   return tags
 #@ end
 
+#@ def get_params(builder):
+#@   params_dict = {}
+#@   for param in builder.builder_image_params:
+#@     params_dict.update( [(param.name, param.value)] )
+#@   end
+#@   return params_dict
+#@ end
+
 #@ def cnbs_for_builder(builder):
 #@   cnbs = []
 #@   for cnb in data.values.cnbs:
@@ -58,6 +66,7 @@ resources:
   type: git
   source:
     uri: #@ data.values.cnb_builder_uri
+    private_key: #@ data.values.cnb_builder_private_key
     branch: master
 
 #@ for cnb in data.values.cnbs:
@@ -234,12 +243,7 @@ jobs:
       image: ci-image
       file: buildpacks-ci/tasks/create-builder/task.yml
       privileged: true
-      params:
-        REPO: cloudfoundry/cnb
-        STACK: #@ builder.builder_image_stack
-        BUILD_IMAGE: #@ "cloudfoundry/build:" + builder.builder_image_name
-        RUN_IMAGE: #@ "cloudfoundry/run:" + builder.builder_image_name
-        HOST: "hub.docker.com"
+      params: #@ get_params(builder)
     - task: get-platform-api-version
       file: bre-ci/tasks/get-platform-api-version/task.yml
     - task: write-tags-list
@@ -283,7 +287,7 @@ jobs:
       params:
         STACK: #@ builder.name
         REPO: gcr.io/cf-buildpacks/builder-rcs
-        RUN_IMAGE: #@ "cloudfoundry/run:" + builder.builder_image_name
+        RUN_IMAGE: #@ get_params(builder).get("RUN_IMAGE")
 
 - name: #@ "ship-{}-builder-platform-api-{}".format(builder.name, version)
   plan:

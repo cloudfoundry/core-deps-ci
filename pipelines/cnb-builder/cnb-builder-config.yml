@@ -1,6 +1,7 @@
 #@data/values
 ---
-cnb_builder_uri: https://github.com/cloudfoundry/cnb-builder
+cnb_builder_uri: git@github.com:cloudfoundry/cnb-builder
+cnb_builder_private_key: ((cnb-builder-deploy-key.private_key))
 supported_lifecycle_versions:
   - latest
   - n-1
@@ -21,22 +22,49 @@ builders:
   version_key: tiny
   repository: cloudfoundry/cnb
   latest: false
-  builder_image_stack: org.cloudfoundry.stacks.tiny
-  builder_image_name: tiny-cnb
+  builder_image_params:
+  - name: REPO
+    value: cloudfoundry/cnb
+  - name: STACK
+    value: "org.cloudfoundry.stacks.tiny"
+  - name: BUILD_IMAGE
+    value: "cloudfoundry/build:tiny-cnb"
+  - name: RUN_IMAGE
+    value: "cloudfoundry/run:tiny-cnb"
+  - name: HOST
+    value: "hub.docker.com"
 - name: bionic
   stack: bionic
   version_key: bionic
   repository: cloudfoundry/cnb
   latest: false
-  builder_image_stack: io.buildpacks.stacks.bionic
-  builder_image_name: base-cnb
+  builder_image_params:
+  - name: REPO
+    value: cloudfoundry/cnb
+  - name: STACK
+    value: "io.buildpacks.stacks.bionic"
+  - name: BUILD_IMAGE
+    value: "cloudfoundry/build:base-cnb"
+  - name: RUN_IMAGE
+    value: "cloudfoundry/run:base-cnb"
+  - name: HOST
+    value: "hub.docker.com"
 - name: cflinuxfs3
   stack: cflinuxfs3
   version_key: cflinuxfs3
   repository: cloudfoundry/cnb
   latest: true
-  builder_image_stack: org.cloudfoundry.stacks.cflinuxfs3
-  builder_image_name: full-cnb
+  builder_image_params:
+  - name: REPO
+    value: cloudfoundry/cnb
+  - name: STACK
+    value: "org.cloudfoundry.stacks.cflinuxfs3"
+  - name: BUILD_IMAGE
+    value: "cloudfoundry/build:full-cnb"
+  - name: RUN_IMAGE
+    value: "cloudfoundry/run:full-cnb"
+  - name: HOST
+    value: "hub.docker.com"
 cnbs:
 - name: nodejs
   git_repo: "https://github.com/cloudfoundry/nodejs-cnb"
