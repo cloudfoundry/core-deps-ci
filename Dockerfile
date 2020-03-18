@@ -5,6 +5,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 ARG GO_VERSION=1.13.8
 ARG GO_SHA256=0567734d558aef19112f2b2873caa0c600f1b4a5827930eb5a7f35235219e9d8
+ARG BOSH_VERSION=6.2.1
 
 RUN apt-get -qqy update \
   && apt-get -qqy install \
@@ -30,5 +31,8 @@ ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 RUN curl -sL -o /usr/local/bin/yj https://github.com/sclevine/yj/releases/latest/download/yj-linux \
   && chmod +x /usr/local/bin/yj
 
-RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly \
+RUN curl -sL -o /usr/local/bin/fly "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" \
   && chmod +x /usr/local/bin/fly
+
+RUN curl -sL -o /usr/local/bin/bosh https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 \
+  && chmod +x /usr/local/bin/bosh
