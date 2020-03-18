@@ -42,5 +42,5 @@ RUN curl -sL -o /usr/local/bin/bosh https://github.com/cloudfoundry/bosh-cli/rel
 RUN curl -sL -o /usr/local/bin/bbl https://github.com/cloudfoundry/bosh-bootloader/releases/download/v${BBL_VERSION}/bbl-v${BBL_VERSION}_linux_x86-64 \
   && chmod +x /usr/local/bin/bbl
 
-RUN curl -sL https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-${CREDHUB_VERSION}.tgz |
+RUN curl -sL https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-${CREDHUB_VERSION}.tgz \
   | tar -C /usr/local/bin -xz
