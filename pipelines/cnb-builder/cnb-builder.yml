@@ -142,8 +142,8 @@ resources:
   source:
     repository: #@ builder.repository
     tag: #@ builder.stack + "-platform-api-" + version
-    username: #@ data.values.destination_registry_username
-    password: #@ data.values.destination_registry_password
+    username: #@ data.values.registry_username
+    password: #@ data.values.registry_password
 
 - name: #@ builder.name + "-platform-api-" + version + "-rc-image"
   type: registry-image
@@ -162,8 +162,8 @@ resources:
   source:
     repository: #@ "cloudfoundry/" + image
     tag: #@ stack.tag + "-cnb"
-    username: ((buildpacks-docker-user.username))
-    password: ((buildpacks-docker-user.password))
+    username: #@ data.values.registry_username
+    password: #@ data.values.registry_password
   #@ end
 #@ end
 
@@ -171,8 +171,8 @@ resources:
   type: registry-image
   source:
     repository: cfbuildpacks/ci
-    username: ((buildpacks-docker-user.username))
-    password: ((buildpacks-docker-user.password))
+    username: #@ data.values.registry_username
+    password: #@ data.values.registry_password
 
 jobs:
 - name: pin-cnb-lifecycle-releases

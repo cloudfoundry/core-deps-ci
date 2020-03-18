@@ -3,8 +3,8 @@
 concourse_url: https://buildpacks.ci.cf-app.com
 cnb_builder_uri: git@github.com:cloudfoundry/cnb-builder
 cnb_builder_private_key: ((cnb-builder-deploy-key.private_key))
-destination_registry_username: ((buildpacks-docker-user.username))
-destination_registry_password: ((buildpacks-docker-user.password))
+registry_username: ((buildpacks-docker-user.username))
+registry_password: ((buildpacks-docker-user.password))
 supported_lifecycle_versions:
   - latest
   - n-1
