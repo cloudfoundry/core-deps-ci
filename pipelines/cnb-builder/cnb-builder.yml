@@ -135,8 +135,8 @@ resources:
   source:
     repository: #@ builder.repository
     tag: #@ builder.stack + "-platform-api-" + version
-    username: ((buildpacks-docker-user.username))
-    password: ((buildpacks-docker-user.password))
+    username: #@ data.values.destination_registry_username
+    password: #@ data.values.destination_registry_password
 
 - name: #@ builder.name + "-platform-api-" + version + "-rc-image"
   type: registry-image
