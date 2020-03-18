@@ -20,7 +20,7 @@
 #@ def get_params(builder):
 #@   params_dict = {}
 #@   for param in builder.builder_image_params:
-#@     params_dict.update( [(param.name, param.value)] )
+#@     params_dict.update({param.name: param.value})
 #@   end
 #@   return params_dict
 #@ end
@@ -39,6 +39,16 @@
 #@     end
 #@   end
 #@   return cnbs
+#@ end
+
+#@ def get_cnb_source_config(cnb):
+#@   config = {"uri": cnb.git_repo, "tag_filter": 'v*'}
+#@   if hasattr(cnb, "private_key"):
+#@     config.update({"private_key": cnb.private_key})
+#@   else:
+#@     config.update({"private_key": "((cf-buildpacks-eng-github-ssh-key.private_key))"})
+#@   end
+#@   return config
 #@ end
 
 ---
@@ -73,10 +83,7 @@ resources:
 - name: #@ cnb.name + "-cnb-release"
   type: git
   check_every: 15m #! to avoid thundering herd of cnb autobumping
-  source:
-    uri: #@ cnb.git_repo
-    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    tag_filter: 'v*'
+  source: #@ get_cnb_source_config(cnb)
 #@ end
 
 - name: packager
