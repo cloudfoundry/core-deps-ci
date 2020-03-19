@@ -10,4 +10,13 @@ dependencies:
     - 12.X.X
     - 13.X.X
   source_type: node
+  requires:
   link: https://github.com/nodejs/Release
+- name: yarn
+  stacks: #@ build_stacks
+  version_lines:
+    - 1.22.X
+  source_type: yarn
+  requires:
+    - node
+  link: https://github.com/yarnpkg/releases
