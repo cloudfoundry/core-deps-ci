@@ -141,7 +141,7 @@ resources:
   type: registry-image
   source:
     repository: #@ builder.repository
-    tag: #@ builder.stack + "-platform-api-" + version
+    tag: #@ builder.name + "-platform-api-" + version
     username: #@ data.values.destination_registry_username
     password: #@ data.values.destination_registry_password
 
