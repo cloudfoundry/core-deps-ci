@@ -1,5 +1,3 @@
-#@ load("@ytt:data", "data")
-
 ---
 resource_types:
 - name: cf-tracker-resource
@@ -59,13 +57,6 @@ resources:
   source:
     uri: https://github.com/cloudfoundry/buildpacks-ci
     branch: master
-
-- name: bre-ci
-  type: git
-  source:
-    uri: git@github.com:pivotal/bre-ci.git
-    branch: master
-    private_key: ((bre-ci-deploy-key.private_key))
 
 - name: new-releases
   type: git
@@ -294,21 +285,3 @@ jobs:
         TRACKER_PROJECT_ID: 2398049
         TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
         TRACKER_REQUESTER_ID: 1431988
-
-- name: isv-cnb-updates
-  plan:
-  - in_parallel:
-    - get: bre-ci
-    - get: monday-funday
-      trigger: true
-  - in_parallel:
-#@ for cnb in data.values.proprietary_cnbs:
-    - task: #@ "check-{}-proprietary-dependencies".format(cnb.name)
-      file: bre-ci/tasks/check-proprietary-dependencies/task.yml
-      params:
-        CNB_NAME: #@ cnb.name
-        CNB_ORG: #@ cnb.org
-        GITHUB_TOKEN: ((bre-ci-bot-github-token))
-        TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
-        TRACKER_PROJECT_ID: 2398049
-#@ end
