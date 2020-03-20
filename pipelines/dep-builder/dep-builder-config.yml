@@ -12,3 +12,7 @@ dependencies:
   source_type: yarn
   requires:
     - node
+- name: go
+  stacks: #@ build_stacks
+  source_type: go
+  requires: []
