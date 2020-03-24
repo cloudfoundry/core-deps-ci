@@ -46,5 +46,5 @@ RUN curl -sL -o /usr/local/bin/bbl https://github.com/cloudfoundry/bosh-bootload
 RUN curl -sL https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-${CREDHUB_VERSION}.tgz \
   | tar -C /usr/local/bin -xz
 
-RUN curl -sL -o /usr/local/bin/om https://github.com/pivotal-cf/om/releases/download/${OM_VERSION}/om-linux-{OM_VERSION} \
+RUN curl -sL -o /usr/local/bin/om https://github.com/pivotal-cf/om/releases/download/${OM_VERSION}/om-linux-${OM_VERSION} \
   && chmod +x /usr/local/bin/om
