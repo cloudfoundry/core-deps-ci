@@ -12,6 +12,7 @@ ARG OM_VERSION=4.6.0
 
 RUN apt-get -qqy update \
   && apt-get -qqy install \
+    build-essential \
     curl \
     git \
     jq \
@@ -48,3 +49,12 @@ RUN curl -sL https://github.com/cloudfoundry-incubator/credhub-cli/releases/down
 
 RUN curl -sL -o /usr/local/bin/om https://github.com/pivotal-cf/om/releases/download/${OM_VERSION}/om-linux-${OM_VERSION} \
   && chmod +x /usr/local/bin/om
+
+RUN curl -sL "https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key" | apt-key add - \
+  && echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+
+RUN apt-get -qqy update \
+  && apt-get -qqy install \
+    cf-cli \
+  && apt-get -qqy clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
