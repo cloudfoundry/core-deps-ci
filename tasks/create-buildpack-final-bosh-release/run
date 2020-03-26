@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+get_version() {
+  local versions
+  for version_file in buildpack-zip*/version; do
+    local version
+    version="$(sed 's/[#+].*$//' "${version_file}" | sed 's/Java Buildpack //')"
+    versions+="${version}\n"
+  done
+
+  version="$(echo -e "${versions}" | grep -v '^$' | sort -u)"
+  if [[ "$(echo -e "${version}" | wc -l)" -gt 1 ]]; then
+    >&2 echo -e "versions do not match:\n${version}"
+    exit 1
+  fi
+
+  echo "${version}" > version/version
+  echo "${version}"
+}
+
+check_if_release_version_exists() {
+  local version=$1
+
+  if [[ -n "$(git -C release tag --list "${version}")" ]]; then
+    >&2 echo "BOSH release version ${version} already exists"
+    exit 1
+  fi
+}
+
+write_private_yml() {
+  cat >release/config/private.yml <<-EOF
+---
+blobstore:
+  options:
+    access_key_id: ${ACCESS_KEY_ID}
+    secret_access_key: ${SECRET_ACCESS_KEY}
+EOF
+}
+
+remove_old_blobs() {
+  bosh blobs --dir release --json \
+    | jq -r '.Tables[0].Rows[].path' \
+    | grep buildpack \
+    | xargs -I {} bosh remove-blob --dir release {}
+}
+
+add_new_blobs() {
+  for buildpack_file in buildpack-zip*/"${LANGUAGE}"*.zip; do
+    local blob_name
+    blob_name="$(basename "${buildpack_file}" | sed 's/+.*\.zip/.zip/')"
+    bosh add-blob --dir release "${buildpack_file}" "${LANGUAGE}-buildpack/${blob_name}"
+  done
+}
+
+create_release() {
+  local version=$1
+
+  bosh create-release \
+    --dir release \
+    --final \
+    --force \
+    --version "${version}" \
+    --name "${RELEASE_NAME}" \
+    --tarball release-tarball/release.tgz
+}
+
+commit_changes() {
+  local version=$1
+
+  git -C release add releases/**/*-"${version}".yml
+  git -C release add releases/**/index.yml
+  git -C release add .final_builds/**/index.yml
+  git -C release add .final_builds/**/**/index.yml
+  git -C release commit -m "Final release for ${RELEASE_NAME} at ${version}"
+}
+
+main() {
+  local version
+  version="$(get_version)"
+  check_if_release_version_exists "${version}"
+  write_private_yml
+  remove_old_blobs
+  add_new_blobs
+  create_release "${version}"
+  commit_changes "${version}"
+}
+
+main "$@"

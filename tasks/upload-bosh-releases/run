@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source cf-deployment-concourse-tasks/shared-functions
+setup_bosh_env_vars
+
+for release in releases-dir/*.tgz; do
+  bosh upload-release "$release"
+done

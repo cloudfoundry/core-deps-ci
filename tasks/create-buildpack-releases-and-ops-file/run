@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+shopt -s inherit_errexit
+
+version="0.$(date +%s)"
+
+create_releases_and_ops_file() {
+  for bosh_release in *-bosh-release; do
+    local buildpack_name="${bosh_release%-bosh-release}"
+
+    create_release "${bosh_release}" "${buildpack_name}"
+    append_to_ops_file "${buildpack_name}"
+  done
+}
+
+create_release() {
+  local bosh_release=$1
+  local buildpack_name=$2
+
+  pushd "${bosh_release}" >/dev/null
+    rm -rf blobs
+    echo '{}' > config/blobs.yml
+
+    for blob in $(bosh blobs | grep '\-buildpack/.*buildpack' | awk '{print $1}'); do
+      bosh remove-blob "${blob}"
+    done
+
+    for blob in ../"${buildpack_name}"*/*.zip; do
+      bosh -n add-blob "${blob}" "${buildpack_name}/$(basename "${blob}")"
+    done
+
+    bosh create-release --force --tarball "dev_releases/${buildpack_name}/${buildpack_name}-${version}.tgz" --name "${buildpack_name}" --version "${version}"
+    cp dev_releases/*/*.tgz ../buildpack-releases
+  popd >/dev/null
+}
+
+append_to_ops_file() {
+  cat >>buildpacks-ops-file/bump-buildpacks.yml <<-EOF
+- path: /releases/name=${buildpack_name}
+  type: replace
+  value:
+    name: "${buildpack_name}"
+    version: "${version}"
+EOF
+}
+
+main() {
+  create_releases_and_ops_file
+}
+
+main "$@"

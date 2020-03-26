@@ -1,0 +1,13 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/bre-ci
+inputs:
+- name: bre-ci
+- name: cf-deployment-concourse-tasks
+- name: toolsmiths-env
+- name: releases-dir
+run:
+  path: bre-ci/tasks/upload-bosh-releases/run

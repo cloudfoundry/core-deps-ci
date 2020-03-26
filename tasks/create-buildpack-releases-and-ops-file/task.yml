@@ -1,0 +1,34 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/bre-ci
+inputs:
+- name: bre-ci
+- name: java-buildpack
+- name: go-buildpack-stack0
+- name: python-buildpack-stack0
+- name: nodejs-buildpack-stack0
+- name: ruby-buildpack-stack0
+- name: php-buildpack-stack0
+- name: staticfile-buildpack-stack0
+- name: dotnet-core-buildpack-stack0
+- name: binary-buildpack-stack0
+- name: binary-buildpack-stack1
+- name: binary-buildpack-stack2
+- name: binary-buildpack-stack3
+- name: java-buildpack-bosh-release
+- name: go-buildpack-bosh-release
+- name: python-buildpack-bosh-release
+- name: nodejs-buildpack-bosh-release
+- name: ruby-buildpack-bosh-release
+- name: php-buildpack-bosh-release
+- name: staticfile-buildpack-bosh-release
+- name: binary-buildpack-bosh-release
+- name: dotnet-core-buildpack-bosh-release
+outputs:
+- name: buildpacks-ops-file
+- name: buildpack-releases
+run:
+  path: bre-ci/tasks/create-buildpack-releases-and-ops-file/run
