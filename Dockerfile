@@ -16,7 +16,9 @@ RUN apt-get -qqy update \
     curl \
     git \
     jq \
+    unzip \
     vim \
+    zip \
   && apt-get -qqy clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
