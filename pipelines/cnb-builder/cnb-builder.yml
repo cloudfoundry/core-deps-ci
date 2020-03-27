@@ -145,6 +145,16 @@ resources:
     username: #@ data.values.destination_registry_username
     password: #@ data.values.destination_registry_password
 
+    #@ if builder.repository == "paketobuildpacks/builder":
+- name: #@ builder.name + "-platform-api-" + version + "-cloudfoundry-builder-image"
+  type: registry-image
+  source:
+    repository: cloudfoundry/cnb
+    tag: #@ builder.name + "-platform-api-" + version
+    username: ((buildpacks-docker-user.username))
+    password: ((buildpacks-docker-user.password))
+    #@ end
+
 - name: #@ builder.name + "-platform-api-" + version + "-rc-image"
   type: registry-image
   source:
@@ -327,6 +337,10 @@ jobs:
         TAGS: #@ generate_tags(builder, version)
         STACK: #@ builder.name
     - put: #@ builder.name + "-platform-api-" + version + "-builder-image"
+      params:
+        additional_tags: tags/tags
+        image: #@ builder.name + "-platform-api-" + version + "-rc-image/image.tar"
+    - put: #@ builder.name + "-platform-api-" + version + "-cloudfoundry-builder-image"
       params:
         additional_tags: tags/tags
         image: #@ builder.name + "-platform-api-" + version + "-rc-image/image.tar"

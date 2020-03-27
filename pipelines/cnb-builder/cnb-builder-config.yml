@@ -1,10 +1,10 @@
 #@data/values
 ---
 concourse_url: https://buildpacks.ci.cf-app.com
-cnb_builder_uri: git@github.com:cloudfoundry/cnb-builder
+cnb_builder_uri: git@github.com:paketo-buildpacks/cnb-builder
 cnb_builder_private_key: ((cnb-builder-deploy-key.private_key))
-destination_registry_username: ((buildpacks-docker-user.username))
-destination_registry_password: ((buildpacks-docker-user.password))
+destination_registry_username: ((paketo-docker-user.username))
+destination_registry_password: ((paketo-docker-user.password))
 supported_lifecycle_versions:
   - latest
   - n-1
@@ -23,7 +23,7 @@ builders:
 - name: tiny
   stack: tiny
   version_key: tiny
-  repository: cloudfoundry/cnb
+  repository: paketobuildpacks/builder
   latest: false
   builder_image_params:
   - name: REPO
@@ -39,7 +39,7 @@ builders:
 - name: bionic
   stack: bionic
   version_key: bionic
-  repository: cloudfoundry/cnb
+  repository: paketobuildpacks/builder
   latest: false
   builder_image_params:
   - name: REPO
@@ -55,7 +55,7 @@ builders:
 - name: cflinuxfs3
   stack: cflinuxfs3
   version_key: cflinuxfs3
-  repository: cloudfoundry/cnb
+  repository: paketobuildpacks/builder
   latest: true
   builder_image_params:
   - name: REPO
