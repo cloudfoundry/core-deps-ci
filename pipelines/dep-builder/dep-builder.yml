@@ -30,12 +30,6 @@ resources:
   source:
     uri: https://github.com/cloudfoundry/binary-builder.git
     branch: master
-- name: builds
-  type: git
-  source:
-    uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots.git
-    branch: master
-    paths: [ binary-builds-new/ ]
 
 #@ for dependency in data.values.dependencies:
 - name: #@ dependency.name + "-source"
@@ -70,7 +64,6 @@ jobs:
     - get: bre-ci
     - get: buildpacks-ci
     - get: binary-builder
-    - get: builds
     #@ for required_dependency in dependency.requires:
     - get:  #@ required_dependency + "-dependency-resource"
       resource: #@ required_dependency + "-dependency-resource"
@@ -92,6 +85,7 @@ jobs:
           dep-metadata: #@ stack + "-metadata"
         params:
           STACK: #@ stack
+          SKIP_COMMIT: true
       - task: #@ "run-tests-" + stack
         file: bre-ci/tasks/test-dependency/task.yml
         input_mapping:
