@@ -145,7 +145,7 @@ resources:
     username: #@ data.values.destination_registry_username
     password: #@ data.values.destination_registry_password
 
-    #@ if builder.repository == "paketobuildpacks/builder":
+    #@ if builder.repository == "gcr.io/paketo-buildpacks/builder":
 - name: #@ builder.name + "-platform-api-" + version + "-cloudfoundry-builder-image"
   type: registry-image
   source:
