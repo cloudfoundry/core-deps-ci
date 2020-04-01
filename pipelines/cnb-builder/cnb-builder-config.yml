@@ -73,11 +73,6 @@ cnbs:
   git_repo: "https://github.com/cloudfoundry/nodejs-cnb"
   skip_stack:
     - "tiny"
-- name: python
-  git_repo: "https://github.com/cloudfoundry/python-cnb"
-  skip_stack:
-    - "bionic"
-    - "tiny"
 - name: go
   git_repo: "https://github.com/cloudfoundry/go-cnb"
   skip_stack: []
