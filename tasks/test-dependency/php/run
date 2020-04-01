@@ -1,0 +1,46 @@
+#!/bin/bash
+
+set -euo pipefail
+
+parent_dir="$(cd "$(dirname "$0")" && pwd)"
+
+extract_tarball() {
+  rm -rf php
+  mkdir php
+  tar -xf dependency/*.tgz -C php
+}
+
+check_version() {
+  expected_version="$1"
+  actual_version="$(./php/bin/php --version | head -1 | cut -d' ' -f2)"
+  if [[ "${actual_version}" != "${expected_version}" ]]; then
+    echo "Version ${actual_version} does not match expected version ${expected_version}"
+    exit 1
+  fi
+}
+
+check_server() {
+  set +e
+
+  ./php/bin/php -f "${parent_dir}/fixtures/hello.php" > output.html
+
+  diff "${parent_dir}/fixtures/hello.html" output.html > /dev/null
+  succeeded="$?"
+
+  if [[ ! "${succeeded}" ]]; then
+    echo "Failed to parse php file"
+    exit 1
+  fi
+
+  set -e
+}
+
+main() {
+  extract_tarball
+  check_version "$1"
+  check_server
+
+  echo "All tests passed!"
+}
+
+main "$@"

@@ -16,3 +16,7 @@ dependencies:
   stacks: #@ build_stacks
   source_type: go
   requires: []
+- name: php
+  stacks: #@ build_stacks
+  source_type: php
+  requires: []
