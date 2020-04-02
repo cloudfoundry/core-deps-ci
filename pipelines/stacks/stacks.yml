@@ -1,0 +1,250 @@
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+resources:
+#! Github Repos
+- name: buildpacks-ci
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/buildpacks-ci
+    branch: master
+
+- name: new-cves
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+    branch: master
+    paths: [ new-cve-notifications/ubuntu18.04-tiny.yml ]
+    private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
+
+- name: cflinuxfs3-image
+  type: docker-image
+  source:
+    repository: cloudfoundry/cflinuxfs3
+    username: ((buildpacks-docker-user.username))
+    password: ((buildpacks-docker-user.password))
+    email: cf-buildpacks-eng@pivotal.io
+
+- name: bionic-image
+  type: docker-image
+  source:
+    repository: ubuntu
+    tag: bionic
+
+#! CNB stack images
+#@ for stack in data.values.stacks:
+  #@ for image in stack.images:
+- name: #@ "{}-{}-base-image".format(stack.name, image)
+  type: docker-image
+  source:
+    repository: #@ "cloudfoundry/" + image
+    tag: #@ stack.tag
+    username: ((buildpacks-docker-user.username))
+    password: ((buildpacks-docker-user.password))
+    email: cf-buildpacks-eng@pivotal.io
+
+- name: #@ "{}-{}-cnb-image".format(stack.name, image)
+  type: docker-image
+  source:
+    repository: #@ "cloudfoundry/" + image
+    tag: #@ stack.tag + "-cnb"
+    username: ((buildpacks-docker-user.username))
+    password: ((buildpacks-docker-user.password))
+    email: cf-buildpacks-eng@pivotal.io
+
+#! Dockerfiles
+- name: #@ "{}-{}-cnb-dockerfile".format(stack.name, image)
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/stacks
+    branch: master
+    paths: #@ [ "{}/cnb/{}/**".format(stack.name, image) ]
+
+  #@ if stack.build_base:
+- name: #@ "{}-{}-base-dockerfile".format(stack.name, image)
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/stacks
+    branch: master
+    paths: #@ [ "{}/dockerfile/{}/**".format(stack.tag, image) ]
+  #@ end
+
+#! Versions
+- name: #@ "{}-{}-cnb-version".format(stack.name, image)
+  type: semver
+  source:
+    initial_version: 0.0.1
+    bucket: cnb-versions
+    key: #@ "builder/{}-{}-cnb".format(stack.name, image)
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+
+- name: #@ "{}-{}-base-version".format(stack.name, image)
+  type: semver
+  source:
+    initial_version: 0.0.1
+    bucket: cnb-versions
+    key: #@ "builder/{}-{}-base".format(stack.name, image)
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+  #@ end
+#@ end
+
+#! Tiny's build image is a re-tagged version of the bionic image (and not built from a dockerfile)
+#! so it is a special case
+- name: tiny-build-cnb-image
+  type: docker-image
+  source:
+    repository: cloudfoundry/build
+    tag: tiny-cnb
+    email: ((buildpacks-docker-user-email))
+    username: ((buildpacks-docker-user.username))
+    password: ((buildpacks-docker-user.password))
+
+- name: tiny-build-cnb-version
+  type: semver
+  source:
+    initial_version: 0.0.1
+    bucket: cnb-versions
+    key: builder/tiny-build-cnb
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+
+jobs:
+- name: test-tiny
+  plan:
+    - get: tiny-run-base-dockerfile
+      trigger: true
+    - get: buildpacks-ci
+    - get: new-cves
+      trigger: true
+    - task: integration-test
+      privileged: true
+      file: buildpacks-ci/tasks/test-tiny-docker-image/task.yml
+
+- name: update-tiny-build-cnb-image
+  public: true
+  plan:
+    - get: bionic-build-cnb-dockerfile
+      trigger: true
+    - get: bionic-build-base-image
+      trigger: true
+      passed:
+        - update-bionic-build-base-image
+    - get: version
+      resource: tiny-build-cnb-version
+      params:
+        pre: tiny-cnb
+        pre_without_version: true
+    - put: tiny-build-cnb-image
+      attempts: 2
+      params:
+        additional_tags: version/version
+        build: bionic-build-cnb-dockerfile/base/cnb/build
+        build_args:
+          base_image: "cloudfoundry/build:base"
+          stack_id: "org.cloudfoundry.stacks.tiny"
+          squash: squash
+    - put: version
+      resource: tiny-build-cnb-version
+      params:
+        bump: patch
+
+#@ for stack in data.values.stacks:
+  #@ for image in stack.images:
+- name: #@ "update-{}-{}-base-image".format(stack.name, image)
+  public: true
+  plan:
+    #@ if stack.name != "cflinuxfs3":
+    - get: #@ "{}-{}-base-dockerfile".format(stack.name, image)
+      trigger: true
+      #@ if stack.name == "tiny":
+      passed: [test-tiny]
+    - get: new-cves
+      passed: [test-tiny]
+      trigger: true
+      #@ end
+    #@ else:
+    - get: #@ stack.name + "-image"
+      trigger: true
+      params:
+        save: true
+    #@ end
+    - get: bionic-image
+      trigger: true
+    - get: version
+      resource: #@ "{}-{}-base-version".format(stack.name, image)
+      params:
+        pre: #@ stack.tag
+        pre_without_version: true
+    - put: #@ "{}-{}-base-image".format(stack.name, image)
+      attempts: 2
+      params:
+        additional_tags: version/version
+        #@ if stack.name != "cflinuxfs3":
+        build: #@ "{}-{}-base-dockerfile/{}/dockerfile/{}".format(stack.name, image, stack.tag, image)
+        build_args:
+          squash: squash
+        #@ else:
+        load: #@ stack.name + "-image"
+        #@ end
+    - put: version
+      resource: #@ "{}-{}-base-version".format(stack.name, image)
+      params:
+        bump: patch
+
+- name: #@ "update-{}-{}-cnb-image".format(stack.name, image)
+  public: true
+  plan:
+    - get: #@ "{}-{}-cnb-dockerfile".format(stack.name, image)
+      trigger: true
+    - get: #@ "{}-{}-base-image".format(stack.name, image)
+      trigger: true
+      passed: #@ [ "update-{}-{}-base-image".format(stack.name, image) ]
+    - get: version
+      resource: #@ "{}-{}-cnb-version".format(stack.name, image)
+      params:
+        pre: #@ stack.tag + "-cnb"
+        pre_without_version: true
+    - put: #@ "{}-{}-cnb-image".format(stack.name, image)
+      attempts: 2
+      params:
+        additional_tags: version/version
+        build: #@ "{}-{}-cnb-dockerfile/{}/cnb/{}".format(stack.name, image, stack.tag, image)
+        build_args:
+          base_image: #@ "cloudfoundry/{}:{}".format(image, stack.tag)
+          squash: squash
+        #@ if stack.latest:
+        tag_as_latest: true
+        #@ end
+    - put: version
+      resource: #@ "{}-{}-cnb-version".format(stack.name, image)
+      params:
+        bump: patch
+  #@ end
+#@ end
+
+groups:
+- name: all
+  jobs:
+    - test-tiny
+    - update-tiny-build-cnb-image
+#@ for stack in data.values.stacks:
+  #@ for image in stack.images:
+    - #@ "update-{}-{}-base-image".format(stack.name, image)
+    - #@ "update-{}-{}-cnb-image".format(stack.name, image)
+  #@ end
+#@ end
+
+#@ for stack in data.values.stacks:
+- name: #@ stack.name
+  jobs:
+    #@ if stack.name == "tiny":
+    - test-tiny
+    - update-tiny-build-cnb-image
+    #@ end
+  #@ for image in stack.images:
+    - #@ "update-{}-{}-base-image".format(stack.name, image)
+    - #@ "update-{}-{}-cnb-image".format(stack.name, image)
+  #@ end
+#@ end

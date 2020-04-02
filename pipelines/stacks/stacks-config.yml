@@ -1,0 +1,23 @@
+#@data/values
+---
+stacks:
+- name: cflinuxfs3
+  images:
+    - build
+    - run
+  build_base: false
+  tag: full
+  latest: false
+- name: bionic
+  images:
+    - build
+    - run
+  build_base: true
+  tag: base
+  latest: true
+- name: tiny
+  images:
+    - run
+  build_base: true
+  tag: tiny
+  latest: false
