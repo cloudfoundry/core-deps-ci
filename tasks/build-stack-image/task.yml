@@ -1,0 +1,18 @@
+---
+platform: linux
+image_resource:
+  type: registry-image
+  source:
+    repository: vito/oci-build-task
+inputs:
+  - name: stacks
+run:
+  path: build
+
+outputs:
+  - name: image
+
+params:
+  CONTEXT:
+  BUILD_ARG_base_image:
+  BUILD_ARG_stack_id:
