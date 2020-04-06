@@ -9,6 +9,7 @@ ARG BOSH_VERSION=6.2.1
 ARG BBL_VERSION=8.4.0
 ARG CREDHUB_VERSION=2.7.0
 ARG OM_VERSION=4.6.0
+ARG PACK_VERSION=0.9.0
 
 RUN apt-get -qqy update \
   && apt-get -qqy install \
@@ -51,6 +52,19 @@ RUN curl -sL https://github.com/cloudfoundry-incubator/credhub-cli/releases/down
 
 RUN curl -sL -o /usr/local/bin/om https://github.com/pivotal-cf/om/releases/download/${OM_VERSION}/om-linux-${OM_VERSION} \
   && chmod +x /usr/local/bin/om
+
+RUN curl -sL https://github.com/buildpacks/pack/releases/download/v${PACK_VERSION}/pack-v${PACK_VERSION}-linux.tgz \
+  | tar -C /usr/local/bin -xz
+
+RUN curl -sSL https://get.docker.com/ | sh
+
+# # when docker container starts, ensure login scripts run
+# COPY build/*.sh /etc/profile.d/
+
+# Create testuser
+RUN mkdir -p /home/testuser && \
+  groupadd -r testuser -g 433 && \
+  useradd -u 431 -r -g testuser -d /home/testuser -s /usr/sbin/nologin -c "Docker image test user" testuser
 
 RUN curl -sL "https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key" | apt-key add - \
   && echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list
