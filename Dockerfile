@@ -58,9 +58,6 @@ RUN curl -sL https://github.com/buildpacks/pack/releases/download/v${PACK_VERSIO
 
 RUN curl -sSL https://get.docker.com/ | sh
 
-# # when docker container starts, ensure login scripts run
-# COPY build/*.sh /etc/profile.d/
-
 # Create testuser
 RUN mkdir -p /home/testuser && \
   groupadd -r testuser -g 433 && \
