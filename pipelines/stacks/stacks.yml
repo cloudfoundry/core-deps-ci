@@ -269,12 +269,19 @@ jobs:
       params:
         CONTEXT: #@ "stacks/{}/dockerfile/{}".format(stack.tag, image)
     #@ end
+    #@ if stack.name == "cflinuxfs3":
+    - task: write-tags-list
+      file: bre-ci/tasks/write-tags-list/task.yml
+      params:
+        ADD_CF_SUFFIX: true
+    #@ end
     - put: #@ "{}-{}-base-image".format(stack.name, image)
       params:
-        additional_tags: version/version
         #@ if stack.name != "cflinuxfs3":
+        additional_tags: version/version
         image: image/image.tar
         #@ else:
+        additional_tags: tags/tags-cf
         image: #@ stack.name + "-image/image"
         #@ end
     - put: #@ "{}-{}-cloudfoundry-base-image".format(stack.name, image)
