@@ -215,6 +215,7 @@ jobs:
       file: bre-ci/tasks/test-stack/task.yml
       params:
         STACK_ID: org.cloudfoundry.stacks.tiny
+        STACK_TAG: tiny
         IMAGE_TYPE: build
         IMAGE: gcr.io/cf-buildpacks-releng/build-rc:tiny-cnb
         GCP_SERVICE_ACCOUNT_KEY: ((releng-gcp-service-account-key))
@@ -330,8 +331,9 @@ jobs:
       file: bre-ci/tasks/test-stack/task.yml
       params:
         STACK_ID: #@ stack.id
+        STACK_TAG: #@ stack.tag
         IMAGE_TYPE: #@ image
-        IMAGE: #@ "gcr.io/cf-buildpacks-releng/{}-rc:{}-cnb".format(image, stack.name)
+        IMAGE: #@ "gcr.io/cf-buildpacks-releng/{}-rc:{}-cnb".format(image, stack.tag)
         GCP_SERVICE_ACCOUNT_KEY: ((releng-gcp-service-account-key))
     - put: #@ "{}-{}-cnb-image".format(stack.name, image)
       params:

@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-stack=
-
 start_docker() {
   #shellcheck source=../../scripts/start-docker
   source "./bre-ci/scripts/start-docker"
@@ -12,8 +10,8 @@ start_docker() {
 }
 
 create_builder() {
-  build_image="cloudfoundry/build:${stack}-cnb"
-  run_image="cloudfoundry/run:${stack}-cnb"
+  build_image="cloudfoundry/build:${STACK_TAG}-cnb"
+  run_image="cloudfoundry/run:${STACK_TAG}-cnb"
 
   if [[ "${IMAGE_TYPE}" == "build" ]]; then
     build_image="${IMAGE}"
@@ -61,8 +59,6 @@ build_and_run_test_app() {
 }
 
 main() {
-  stack="$(echo "${STACK_ID}" | rev | cut -d'.' -f1 | rev)"
-
   start_docker
 
   pushd bre-ci/tasks/test-stack > /dev/null
