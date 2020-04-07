@@ -14,5 +14,4 @@ outputs:
 
 params:
   CONTEXT:
-  BUILD_ARG_base_image:
-  BUILD_ARG_stack_id:
+  BUILD_ARGS_FILE:

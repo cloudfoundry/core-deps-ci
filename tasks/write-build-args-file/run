@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -euo pipefail
+
+if [[ "${BASE_IMAGE}" != "" ]]; then
+  echo "base_image=${BASE_IMAGE}" >> build-args/args
+fi
+
+if [[ "${STACK_ID}" != "" ]]; then
+  echo "stack_id=${STACK_ID}" >> build-args/args
+fi
