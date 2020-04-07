@@ -10,8 +10,8 @@ start_docker() {
 }
 
 create_builder() {
-  build_image="cloudfoundry/build:${STACK_TAG}-cnb"
-  run_image="cloudfoundry/run:${STACK_TAG}-cnb"
+  build_image="cloudfoundry/build:${TAG}"
+  run_image="cloudfoundry/run:${TAG}"
 
   if [[ "${IMAGE_TYPE}" == "build" ]]; then
     build_image="${IMAGE}"

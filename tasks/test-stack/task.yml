@@ -12,7 +12,7 @@ run:
 
 params:
   STACK_ID:
-  STACK_TAG:
+  TAG:
   IMAGE_TYPE:
   IMAGE:
   GCP_SERVICE_ACCOUNT_KEY:
