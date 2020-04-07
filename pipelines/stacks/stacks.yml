@@ -194,7 +194,7 @@ jobs:
         pre: tiny-cnb
         pre_without_version: true
     - task: write-build-args-file
-      file: bre-ci/write-build-args-file/task.yml
+      file: bre-ci/tasks/write-build-args-file/task.yml
       params:
         BASE_IMAGE: "cloudfoundry/build:base"
         STACK_ID: "org.cloudfoundry.stacks.tiny"
@@ -304,7 +304,7 @@ jobs:
         pre: #@ stack.tag + "-cnb"
         pre_without_version: true
     - task: write-build-args-file
-      file: bre-ci/write-build-args-file/task.yml
+      file: bre-ci/tasks/write-build-args-file/task.yml
       params:
         BASE_IMAGE: #@ "cloudfoundry/{}:{}".format(image, stack.tag)
     - task: #@ "build-{}-{}-cnb-image".format(stack.name, image)
