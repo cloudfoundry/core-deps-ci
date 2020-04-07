@@ -7,6 +7,7 @@ image_resource:
 inputs:
   - name: stacks
   - name: build-args
+    optional: true
 run:
   path: build
 
