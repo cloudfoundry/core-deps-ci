@@ -20,3 +20,7 @@ dependencies:
   stacks: #@ build_stacks
   source_type: php
   requires: []
+- name: nginx
+  stacks: #@ build_stacks
+  source_type: nginx
+  requires: []
