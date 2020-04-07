@@ -20,3 +20,4 @@ run:
 params:
   TAGS:
   STACK:
+  ADD_CF_SUFFIX: false

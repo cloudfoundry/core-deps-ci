@@ -17,3 +17,8 @@ if [[ -d "version" ]]; then
 fi
 
 echo "${TAGS}" >> tags/tags
+
+if [[ "${ADD_CF_SUFFIX}" == 'true' ]]; then
+  echo "${version}-cf " >> tags/tags-cf
+  echo "${TAGS}" >> tags/tags-cf
+fi

@@ -322,9 +322,12 @@ jobs:
         #@ if stack.latest:
         TAGS: latest
         #@ end
+        #@ if stack.tag == "full":
+        ADD_CF_SUFFIX: true
+        #@ end
     - put: #@ "{}-{}-cnb-image-rc".format(stack.name, image)
       params:
-        additional_tags: version/version
+        additional_tags: tags/tags
         image: image/image.tar
     - task: #@ "test-{}-{}-cnb-image-rc".format(stack.name, image)
       privileged: true
@@ -342,7 +345,11 @@ jobs:
         GCP_SERVICE_ACCOUNT_KEY: ((releng-gcp-service-account-key))
     - put: #@ "{}-{}-cnb-image".format(stack.name, image)
       params:
+        #@ if stack.tag != "full":
         additional_tags: tags/tags
+        #@ else:
+        additional_tags: tags/tags-cf
+        #@ end
         image: image/image.tar
     - put: #@ "{}-{}-cloudfoundry-cnb-image".format(stack.name, image)
       params:
