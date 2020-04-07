@@ -27,15 +27,13 @@ builders:
   latest: false
   builder_image_params:
   - name: REPO
-    value: cloudfoundry/cnb
+    value: paketo-buildpacks/builder
   - name: STACK
     value: "org.cloudfoundry.stacks.tiny"
   - name: BUILD_IMAGE
-    value: "cloudfoundry/build:tiny-cnb"
+    value: "gcr.io/paketo-buildpacks/build:tiny-cnb"
   - name: RUN_IMAGE
-    value: "cloudfoundry/run:tiny-cnb"
-  - name: HOST
-    value: "hub.docker.com"
+    value: "gcr.io/paketo-buildpacks/run:tiny-cnb"
 - name: bionic
   stack: bionic
   version_key: bionic
@@ -43,15 +41,13 @@ builders:
   latest: false
   builder_image_params:
   - name: REPO
-    value: cloudfoundry/cnb
+    value: paketo-buildpacks/builder
   - name: STACK
     value: "io.buildpacks.stacks.bionic"
   - name: BUILD_IMAGE
-    value: "cloudfoundry/build:base-cnb"
+    value: "gcr.io/paketo-buildpacks/build:base-cnb"
   - name: RUN_IMAGE
-    value: "cloudfoundry/run:base-cnb"
-  - name: HOST
-    value: "hub.docker.com"
+    value: "gcr.io/paketo-buildpacks/run:base-cnb"
 - name: cflinuxfs3
   stack: cflinuxfs3
   version_key: cflinuxfs3
@@ -59,15 +55,13 @@ builders:
   latest: true
   builder_image_params:
   - name: REPO
-    value: cloudfoundry/cnb
+    value: paketo-buildpacks/builder
   - name: STACK
     value: "org.cloudfoundry.stacks.cflinuxfs3"
   - name: BUILD_IMAGE
-    value: "cloudfoundry/build:full-cnb"
+    value: "gcr.io/paketo-buildpacks/build:full-cnb-cf"
   - name: RUN_IMAGE
-    value: "cloudfoundry/run:full-cnb"
-  - name: HOST
-    value: "hub.docker.com"
+    value: "gcr.io/paketo-buildpacks/run:full-cnb-cf"
 cnbs:
 - name: nodejs
   git_repo: "https://github.com/cloudfoundry/nodejs-cnb"

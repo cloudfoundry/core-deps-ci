@@ -25,6 +25,17 @@
 #@   return params_dict
 #@ end
 
+#@ def is_enterprise_builder(builder):
+#@   for param in builder.builder_image_params:
+#@     if param.name == "ENTERPRISE":
+#@       if param.value == True:
+#@         return True
+#@       end
+#@     end
+#@   end
+#@   return False
+#@ end
+
 #@ def cnbs_for_builder(builder):
 #@   cnbs = []
 #@   for cnb in data.values.cnbs:
@@ -340,10 +351,12 @@ jobs:
       params:
         additional_tags: tags/tags
         image: #@ builder.name + "-platform-api-" + version + "-rc-image/image.tar"
+    #@ if not is_enterprise_builder(builder):
     - put: #@ builder.name + "-platform-api-" + version + "-cloudfoundry-builder-image"
       params:
         additional_tags: tags/tags
         image: #@ builder.name + "-platform-api-" + version + "-rc-image/image.tar"
+    #@ end
     - put: version
       resource: #@ builder.version_key + "-version"
       params:
