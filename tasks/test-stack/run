@@ -10,8 +10,8 @@ start_docker() {
 }
 
 create_builder() {
-  build_image="cloudfoundry/build:${TAG}"
-  run_image="cloudfoundry/run:${TAG}"
+  build_image="gcr.io/paketo-buildpacks/build:${TAG}"
+  run_image="gcr.io/paketo-buildpacks/run:${TAG}"
 
   if [[ "${IMAGE_TYPE}" == "build" ]]; then
     build_image="${IMAGE}"

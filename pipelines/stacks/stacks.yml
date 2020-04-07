@@ -333,11 +333,12 @@ jobs:
         STACK_ID: #@ stack.id
         #@ if stack.tag != "full":
         TAG: #@ stack.tag + "-cnb"
+        IMAGE: #@ "gcr.io/cf-buildpacks-releng/{}-rc:{}-cnb".format(image, stack.tag)
         #@ else:
         TAG: full-cnb-cf
+        IMAGE: #@ "gcr.io/cf-buildpacks-releng/{}-rc:{}-cnb-cf".format(image, stack.tag)
         #@ end
         IMAGE_TYPE: #@ image
-        IMAGE: #@ "gcr.io/cf-buildpacks-releng/{}-rc:{}-cnb".format(image, stack.tag)
         GCP_SERVICE_ACCOUNT_KEY: ((releng-gcp-service-account-key))
     - put: #@ "{}-{}-cnb-image".format(stack.name, image)
       params:
