@@ -181,10 +181,14 @@ resources:
 - name: #@ "{}-{}-cnb-image".format(stack.name, image)
   type: registry-image
   source:
-    repository: #@ "cloudfoundry/" + image
+    repository: #@ "gcr.io/paketo-buildpacks/" + image
+    #@ if stack.tag != "full":
     tag: #@ stack.tag + "-cnb"
-    username: ((buildpacks-docker-user.username))
-    password: ((buildpacks-docker-user.password))
+    #@ else:
+    tag: #@ stack.tag + "-cnb-cf"
+    #@ end
+    username: _json_key
+    password: ((paketo-gcr-service-account-key))
   #@ end
 #@ end
 
