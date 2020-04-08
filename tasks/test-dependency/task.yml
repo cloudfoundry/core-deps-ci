@@ -10,5 +10,7 @@ inputs:
   - name: dependency
   - name: required_dependency_1
     optional: true
+  - name: required_dependency_2
+    optional: true
 run:
   path: bre-ci/tasks/test-dependency/run

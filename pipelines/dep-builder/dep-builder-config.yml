@@ -3,20 +3,28 @@
 #@ build_stacks = ['cflinuxfs3']
 build_stacks: #@ build_stacks
 dependencies:
-- name: node
+- name: CAAPM
+  source_type: caapm
   stacks: #@ build_stacks
-  source_type: node
-- name: yarn
-  stacks: #@ build_stacks
-  source_type: yarn
   requires:
-    - node
+  - name: php
+    version_constraint: 7.2.x
+  - name: php
+    version_constraint: 7.3.x
 - name: go
-  stacks: #@ build_stacks
   source_type: go
-- name: php
   stacks: #@ build_stacks
-  source_type: php
 - name: nginx
-  stacks: #@ build_stacks
   source_type: nginx
+  stacks: #@ build_stacks
+- name: node
+  source_type: node
+  stacks: #@ build_stacks
+- name: php
+  source_type: php
+  stacks: #@ build_stacks
+- name: yarn
+  source_type: yarn
+  stacks: #@ build_stacks
+  requires:
+  - name: node

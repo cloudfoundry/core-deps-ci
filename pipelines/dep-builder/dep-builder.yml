@@ -2,6 +2,14 @@
 #@ load("@ytt:struct", "struct")
 #@yaml/text-templated-strings
 
+#@ def required_dependency_resource_name(required_dependency):
+#@   name = required_dependency.name + "-dependency-resource"
+#@   if struct.decode(required_dependency).get("version_constraint"):
+#@     name = name+"-"+required_dependency.version_constraint
+#@   end
+#@   return name
+#@ end
+
 ---
 resource_types:
 - name: dependency-resource
@@ -49,6 +57,23 @@ resources:
     dependency_name: #@ dependency.name
 #@ end
 
+#@ for dependency in data.values.dependencies:
+  #@ for required_dependency in struct.encode(struct.decode(dependency).get('requires', [])):
+    #@ if struct.decode(required_dependency).get("version_constraint"):
+- name: #@ required_dependency_resource_name(required_dependency)
+  type: dependency-resource
+  source:
+    bucket: pivotal-buildpacks
+    access_key_id: ((pivotal-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-buildpacks-s3-secret-key))
+    region_name: "us-east-1"
+    s3_prefix: #@ "deps/" + required_dependency.name
+    dependency_name: #@ required_dependency.name
+    version_constraint: #@ required_dependency.version_constraint
+    #@ end
+  #@ end
+#@ end
+
 #@ for stack in data.values.build_stacks:
 - name: #@ stack + "-image"
   type: docker-image
@@ -64,18 +89,17 @@ jobs:
     - get: bre-ci
     - get: buildpacks-ci
     - get: binary-builder
-    #@ for required_dependency in struct.decode(dependency).get('requires', []):
-    - get:  #@ required_dependency + "-dependency-resource"
-      resource: #@ required_dependency + "-dependency-resource"
-    #@ end
+  #@ for required_dependency in struct.encode(struct.decode(dependency).get('requires', [])):
+    - get: #@ required_dependency_resource_name(required_dependency)
+  #@ end
     - get: source
       resource: #@ dependency.name + "-source"
       trigger: true
-    #@ for stack in dependency.stacks:
+  #@ for stack in dependency.stacks:
     - get: #@ stack + "-image"
-    #@ end
+  #@ end
   - in_parallel:
-    #@ for stack in dependency.stacks:
+  #@ for stack in dependency.stacks:
     - do:
       - task: #@ "build-binary-" + stack
         image: #@ stack + "-image"
@@ -90,14 +114,14 @@ jobs:
         file: bre-ci/tasks/test-dependency/task.yml
         input_mapping:
           dependency: #@ stack + "-dependency"
-          #@ for index in range(len(struct.decode(dependency).get('requires', []))):
-          required_dependency_1: #@ "{}-dependency-resource".format(dependency.requires[index])
-          #@ end
+    #@ for index in range(len(struct.decode(dependency).get('requires', []))):
+          required_dependency_(@= str(index+1) @): #@ required_dependency_resource_name(dependency.requires[index])
+    #@ end
       - in_parallel:
         - put: #@ "{}-{}-dependency-resource".format(dependency.name, stack)
           resource: #@ dependency.name + "-dependency-resource"
           params:
             dependency_file: #@ stack + "-dependency/*"
             metadata_file: #@ stack + "-metadata/*.json"
-    #@ end
+  #@ end
 #@ end
