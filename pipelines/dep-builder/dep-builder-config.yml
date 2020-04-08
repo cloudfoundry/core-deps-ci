@@ -4,7 +4,7 @@
 build_stacks: #@ build_stacks
 dependencies:
 - name: CAAPM
-  source_type: caapm
+  source_type: CAAPM
   stacks: #@ build_stacks
   requires:
   - name: php
