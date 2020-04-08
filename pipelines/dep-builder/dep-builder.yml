@@ -64,7 +64,7 @@ jobs:
     - get: bre-ci
     - get: buildpacks-ci
     - get: binary-builder
-    #@ for required_dependency in dependency.requires:
+    #@ for required_dependency in struct.decode(dependency).get('requires', []):
     - get:  #@ required_dependency + "-dependency-resource"
       resource: #@ required_dependency + "-dependency-resource"
     #@ end
@@ -90,7 +90,7 @@ jobs:
         file: bre-ci/tasks/test-dependency/task.yml
         input_mapping:
           dependency: #@ stack + "-dependency"
-          #@ for index in range(len(dependency.requires)):
+          #@ for index in range(len(struct.decode(dependency).get('requires', []))):
           required_dependency_1: #@ "{}-dependency-resource".format(dependency.requires[index])
           #@ end
       - in_parallel:

@@ -6,7 +6,6 @@ dependencies:
 - name: node
   stacks: #@ build_stacks
   source_type: node
-  requires: []
 - name: yarn
   stacks: #@ build_stacks
   source_type: yarn
@@ -15,12 +14,9 @@ dependencies:
 - name: go
   stacks: #@ build_stacks
   source_type: go
-  requires: []
 - name: php
   stacks: #@ build_stacks
   source_type: php
-  requires: []
 - name: nginx
   stacks: #@ build_stacks
   source_type: nginx
-  requires: []
