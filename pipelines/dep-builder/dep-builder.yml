@@ -53,7 +53,7 @@ resources:
     access_key_id: ((pivotal-buildpacks-s3-access-key))
     secret_access_key: ((pivotal-buildpacks-s3-secret-key))
     region_name: "us-east-1"
-    s3_prefix: #@ "deps/" + dependency.name
+    s3_prefix: deps
     dependency_name: #@ dependency.name
 #@ end
 
@@ -67,7 +67,7 @@ resources:
     access_key_id: ((pivotal-buildpacks-s3-access-key))
     secret_access_key: ((pivotal-buildpacks-s3-secret-key))
     region_name: "us-east-1"
-    s3_prefix: #@ "deps/" + required_dependency.name
+    s3_prefix: deps
     dependency_name: #@ required_dependency.name
     version_constraint: #@ required_dependency.version_constraint
     #@ end
