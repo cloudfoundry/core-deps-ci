@@ -117,11 +117,13 @@ jobs:
     #@ for index in range(len(struct.decode(dependency).get('requires', []))):
           required_dependency_(@= str(index+1) @): #@ required_dependency_resource_name(dependency.requires[index])
     #@ end
-      - in_parallel:
-        - put: #@ "{}-{}-dependency-resource".format(dependency.name, stack)
-          resource: #@ dependency.name + "-dependency-resource"
-          params:
-            dependency_file: #@ stack + "-dependency/*"
-            metadata_file: #@ stack + "-metadata/*.json"
+  #@ end
+  - in_parallel:
+  #@ for stack in dependency.stacks:
+    - put: #@ "{}-{}-dependency-resource".format(dependency.name, stack)
+      resource: #@ dependency.name + "-dependency-resource"
+      params:
+        dependency_file: #@ stack + "-dependency/*"
+        metadata_file: #@ stack + "-metadata/*.json"
   #@ end
 #@ end
