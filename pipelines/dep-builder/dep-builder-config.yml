@@ -6,7 +6,7 @@ dependencies:
 - name: CAAPM
   source_type: CAAPM
   stacks: #@ build_stacks
-  skip_build: true
+  skip_test: true
 - name: go
   source_type: go
   stacks: #@ build_stacks

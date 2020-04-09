@@ -100,13 +100,6 @@ jobs:
   #@ end
   - in_parallel:
   #@ for stack in dependency.stacks:
-    #@ if struct.decode(dependency).get('skip_build', False):
-    - task: #@ "split-dependency-and-metadata-" + stack
-      file: bre-ci/tasks/split-dependency-and-metadata/task.yml
-      output_mapping:
-        dependency: #@ stack + "-dependency"
-        metadata: #@ stack + "-metadata"
-    #@ else:
     - do:
       - task: #@ "build-binary-" + stack
         image: #@ stack + "-image"
@@ -117,6 +110,7 @@ jobs:
         params:
           STACK: #@ stack
           SKIP_COMMIT: true
+    #@ if not struct.decode(dependency).get('skip_test', False):
       - task: #@ "run-tests-" + stack
         file: bre-ci/tasks/test-dependency/task.yml
         input_mapping:
