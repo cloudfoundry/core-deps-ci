@@ -5,6 +5,7 @@ image_resource:
   source:
     repository: cfbuildpacks/bre-ci
 inputs:
+- name: bre-ci
 - name: source
 outputs:
 - name: dependency
