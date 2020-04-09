@@ -100,6 +100,13 @@ jobs:
   #@ end
   - in_parallel:
   #@ for stack in dependency.stacks:
+    #@ if struct.decode(dependency).get('skip_build', False):
+    - task: #@ "split-dependency-and-metadata-" + stack
+      file: bre-ci/tasks/split-dependency-and-metadata/task.yml
+      output_mapping:
+        dependency: #@ stack + "-dependency"
+        metadata: #@ stack + "-metadata"
+    #@ else:
     - do:
       - task: #@ "build-binary-" + stack
         image: #@ stack + "-image"
@@ -114,8 +121,9 @@ jobs:
         file: bre-ci/tasks/test-dependency/task.yml
         input_mapping:
           dependency: #@ stack + "-dependency"
-    #@ for index in range(len(struct.decode(dependency).get('requires', []))):
+      #@ for index in range(len(struct.decode(dependency).get('requires', []))):
           required_dependency_(@= str(index+1) @): #@ required_dependency_resource_name(dependency.requires[index])
+      #@ end
     #@ end
   #@ end
   - in_parallel:

@@ -6,11 +6,7 @@ dependencies:
 - name: CAAPM
   source_type: CAAPM
   stacks: #@ build_stacks
-  requires:
-  - name: php
-    version_constraint: 7.2.x
-  - name: php
-    version_constraint: 7.3.x
+  skip_build: true
 - name: go
   source_type: go
   stacks: #@ build_stacks

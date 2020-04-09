@@ -1,0 +1,13 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/bre-ci
+inputs:
+- name: source
+outputs:
+- name: dependency
+- name: metadata
+run:
+  path: bre-ci/tasks/split-dependency-and-metadata/run
