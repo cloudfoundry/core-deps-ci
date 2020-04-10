@@ -69,6 +69,7 @@ create_release() {
 commit_changes() {
   local version=$1
 
+  git -C release add config/blobs.yml
   git -C release add releases/**/*-"${version}".yml
   git -C release add releases/**/index.yml
   git -C release add .final_builds/**/index.yml
