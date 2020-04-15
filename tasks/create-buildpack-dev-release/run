@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+shopt -s inherit_errexit
+
+get_version() {
+  local versions
+  for version_file in buildpack-*/version; do
+    local version
+    version="$(sed 's/[#+].*$//' "${version_file}" | sed 's/Java Buildpack //')"
+    versions+="${version}\n"
+  done
+
+  version="$(echo -e "${versions}" | grep -v '^$' | sort -u)"
+  if [[ "$(echo -e "${version}" | wc -l)" -gt 1 ]]; then
+    >&2 echo -e "versions do not match:\n${version}"
+    exit 1
+  fi
+
+  echo "${version}"
+}
+
+remove_old_blobs() {
+  bosh blobs --dir release --json \
+    | jq -r '.Tables[0].Rows[].path' \
+    | grep buildpack \
+    | xargs -I {} bosh remove-blob --dir release {}
+}
+
+add_new_blobs() {
+  for buildpack_file in buildpack-*/"${LANGUAGE}"*.zip; do
+    local blob_name
+    blob_name="$(basename "${buildpack_file}" | sed 's/+.*\.zip/.zip/')"
+    bosh add-blob --dir release "${buildpack_file}" "${LANGUAGE}-buildpack/${blob_name}"
+  done
+}
+
+create_release_tarball() {
+  local version=$1
+
+  dev_release_version="${version}-$(date +%s)"
+
+  bosh create-release \
+    --dir release \
+    --force \
+    --version "${dev_release_version}" \
+    --name "${LANGUAGE}-buildpack" \
+    --tarball "release-tarball/${LANGUAGE}-buildpack-release-${dev_release_version}.tgz"
+}
+
+main() {
+  local version
+  version="$(get_version)"
+  remove_old_blobs
+  add_new_blobs
+  create_release_tarball "${version}"
+}
+
+main "$@"

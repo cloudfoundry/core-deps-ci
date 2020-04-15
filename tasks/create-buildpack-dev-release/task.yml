@@ -1,0 +1,25 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/bre-ci
+inputs:
+- name: bre-ci
+- name: release
+- name: buildpack-stack0
+  optional: true
+- name: buildpack-stack1
+  optional: true
+- name: buildpack-stack2
+  optional: true
+- name: buildpack-stack3
+  optional: true
+- name: buildpack-stack4
+  optional: true
+outputs:
+- name: release-tarball
+params:
+  LANGUAGE:
+run:
+  path: bre-ci/tasks/create-buildpack-dev-release/run

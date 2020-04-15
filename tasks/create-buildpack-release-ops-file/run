@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+buildpack_name="${LANGUAGE}-buildpack"
+version="$(basename buildpack-release-tarball/*.tgz | sed "s/${buildpack_name}-release-\(.*\).tgz/\1/")"
+
+cat >>"ops-file/bump-${buildpack_name}.yml" <<-EOF
+- path: /releases/name=${buildpack_name}
+  type: replace
+  value:
+    name: "${buildpack_name}"
+    version: "${version}"
+EOF
