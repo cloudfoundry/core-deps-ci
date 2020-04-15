@@ -64,84 +64,76 @@ builders:
     value: "gcr.io/paketo-buildpacks/run:full-cnb-cf"
 cnbs:
 - name: nodejs
-  git_repo: "https://github.com/cloudfoundry/nodejs-cnb"
+  git_repo: "https://github.com/paketo-buildpacks/nodejs"
   skip_stack:
     - "tiny"
 - name: go
-  git_repo: "https://github.com/cloudfoundry/go-cnb"
+  git_repo: "https://github.com/paketo-buildpacks/go"
   skip_stack: []
 - name: httpd
-  git_repo: "https://github.com/cloudfoundry/httpd-cnb"
+  git_repo: "https://github.com/paketo-buildpacks/httpd"
   skip_stack:
     - "bionic"
     - "tiny"
 - name: nginx
-  git_repo: "https://github.com/cloudfoundry/nginx-cnb"
+  git_repo: "https://github.com/paketo-buildpacks/nginx"
   skip_stack:
     - "bionic"
     - "tiny"
 - name: php
-  git_repo: "https://github.com/cloudfoundry/php-cnb"
+  git_repo: "https://github.com/paketo-buildpacks/php"
   skip_stack:
     - "bionic"
     - "tiny"
-- name: openjdk
-  git_repo: "https://github.com/cloudfoundry/openjdk-cnb"
+- name: bellsoft-liberica
+  git_repo: "https://github.com/paketo-buildpacks/bellsoft-liberica"
   skip_stack:
     - "tiny"
-- name: buildsystem
-  git_repo: "https://github.com/cloudfoundry/build-system-cnb"
+- name: build-system
+  git_repo: "https://github.com/paketo-buildpacks/build-system"
   skip_stack:
     - "tiny"
-- name: jvmapplication
-  git_repo: "https://github.com/cloudfoundry/jvm-application-cnb"
+- name: executable-jar
+  git_repo: "https://github.com/paketo-buildpacks/executable-jar"
   skip_stack:
     - "tiny"
-- name: azureapplicationinsights
-  git_repo: "https://github.com/cloudfoundry/azure-application-insights-cnb"
+- name: azure-application-insights
+  git_repo: "https://github.com/paketo-buildpacks/azure-application-insights"
   skip_stack:
     - "tiny"
 - name: debug
-  git_repo: "https://github.com/cloudfoundry/debug-cnb"
+  git_repo: "https://github.com/paketo-buildpacks/debug"
   skip_stack:
     - "tiny"
-- name: googlestackdriver
-  git_repo: "https://github.com/cloudfoundry/google-stackdriver-cnb"
+- name: google-stackdriver
+  git_repo: "https://github.com/paketo-buildpacks/google-stackdriver"
   skip_stack:
     - "tiny"
 - name: jmx
-  git_repo: "https://github.com/cloudfoundry/jmx-cnb"
+  git_repo: "https://github.com/paketo-buildpacks/jmx"
   skip_stack:
     - "tiny"
 - name: procfile
-  git_repo: "https://github.com/cloudfoundry/procfile-cnb"
+  git_repo: "https://github.com/paketo-buildpacks/procfile"
   skip_stack:
     - "tiny"
 - name: dotnet-core
-  git_repo: "https://github.com/cloudfoundry/dotnet-core-cnb"
+  git_repo: "https://github.com/paketo-buildpacks/dotnet-core"
   skip_stack:
     - "tiny"
-- name: archiveexpanding
-  git_repo: "https://github.com/cloudfoundry/archive-expanding-cnb"
+- name: apache-tomcat
+  git_repo: "https://github.com/paketo-buildpacks/apache-tomcat"
   skip_stack:
     - "tiny"
-- name: tomcat
-  git_repo: "https://github.com/cloudfoundry/tomcat-cnb"
-  skip_stack:
-    - "tiny"
-- name: jdbc
-  git_repo: "https://github.com/cloudfoundry/jdbc-cnb"
-  skip_stack:
-    - "tiny"
-- name: springautoreconfiguration
-  git_repo: "https://github.com/cloudfoundry/spring-auto-reconfiguration-cnb"
-  skip_stack:
-    - "tiny"
-- name: springboot
-  git_repo: "https://github.com/cloudfoundry/spring-boot-cnb"
+- name: spring-boot
+  git_repo: "https://github.com/paketo-buildpacks/spring-boot"
   skip_stack:
     - "tiny"
 - name: distzip
-  git_repo: "https://github.com/cloudfoundry/dist-zip-cnb"
+  git_repo: "https://github.com/paketo-buildpacks/dist-zip"
+  skip_stack:
+    - "tiny"
+- name: encrypt-at-rest
+  git_repo: "https://github.com/paketo-buildpacks/encrypt-at-rest"
   skip_stack:
     - "tiny"
