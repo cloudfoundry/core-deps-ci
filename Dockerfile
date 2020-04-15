@@ -58,6 +58,11 @@ RUN curl -sL https://github.com/buildpacks/pack/releases/download/v${PACK_VERSIO
 
 RUN curl -sSL https://get.docker.com/ | sh
 
+RUN curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o /tmp/awscliv2.zip \
+  && unzip -d /tmp /tmp/awscliv2.zip \
+  && /tmp/aws/install \
+  && rm -rf /tmp/aws /tmp/awscliv2.zip
+
 # Create testuser
 RUN mkdir -p /home/testuser && \
   groupadd -r testuser -g 433 && \
