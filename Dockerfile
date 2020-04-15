@@ -14,14 +14,19 @@ ARG PACK_VERSION=0.9.0
 RUN apt-get -qqy update \
   && apt-get -qqy install \
     build-essential \
-    curl \
+    curl
+
+RUN curl -sL "https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key" | apt-key add - \
+  && echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+
+RUN apt-get -qqy update \
+  && apt-get -qqy install \
+    cf-cli \
     git \
     jq \
     unzip \
     vim \
-    zip \
-  && apt-get -qqy clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    zip
 
 RUN git config --global user.email "buildpacks-releng@pivotal.io"
 RUN git config --global user.name "Buildpacks Releng CI"
@@ -68,11 +73,5 @@ RUN mkdir -p /home/testuser && \
   groupadd -r testuser -g 433 && \
   useradd -u 431 -r -g testuser -d /home/testuser -s /usr/sbin/nologin -c "Docker image test user" testuser
 
-RUN curl -sL "https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key" | apt-key add - \
-  && echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list
-
-RUN apt-get -qqy update \
-  && apt-get -qqy install \
-    cf-cli \
-  && apt-get -qqy clean \
+RUN apt-get -qqy clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
