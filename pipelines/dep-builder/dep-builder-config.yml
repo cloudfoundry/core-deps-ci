@@ -3,6 +3,10 @@
 #@ build_stacks = ['cflinuxfs3']
 build_stacks: #@ build_stacks
 dependencies:
+- name: appdynamics
+  source_type: appdynamics
+  stacks: #@ build_stacks
+  skip_test: true
 - name: CAAPM
   source_type: CAAPM
   stacks: #@ build_stacks
