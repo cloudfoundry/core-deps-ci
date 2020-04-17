@@ -18,8 +18,11 @@ inputs:
 - name: buildpack-stack4
   optional: true
 outputs:
+- name: release
 - name: release-tarball
 params:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
   LANGUAGE:
 run:
   path: bre-ci/tasks/create-buildpack-dev-release/run

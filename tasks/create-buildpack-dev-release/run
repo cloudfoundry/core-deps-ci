@@ -48,11 +48,53 @@ create_release_tarball() {
     --tarball "release-tarball/${LANGUAGE}-buildpack-release-${dev_release_version}.tgz"
 }
 
+buildpack_blob_is_latest() {
+  local new_version=$1
+
+  local existing_version
+  if [[ "$(bosh blobs --dir release --column=path)" =~ v?([0-9\.]+).zip ]]; then
+    existing_version="${BASH_REMATCH[1]}"
+  else
+    echo "Could not determine version of existing buildpack blob"
+    exit 1
+  fi
+
+  [[ "${existing_version}" == "${new_version}" ]] && return 0 || return 1
+}
+
+write_private_yml() {
+  cat >release/config/private.yml <<-EOF
+---
+blobstore:
+  options:
+    access_key_id: ${AWS_ACCESS_KEY_ID}
+    secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+EOF
+}
+
+upload_blobs() {
+  bosh upload-blobs --dir release
+}
+
+commit_blobs() {
+  local version=$1
+
+  git -C release add config/blobs.yml
+  git -C release commit -m "bump ${LANGUAGE}-buildpack to ${version}"
+}
+
 main() {
   local version
   version="$(get_version)"
-  remove_old_blobs
-  add_new_blobs
+
+  if ! buildpack_blob_is_latest "${version}"; then
+    remove_old_blobs
+    add_new_blobs
+    write_private_yml
+    upload_blobs
+    commit_blobs "${version}"
+  fi
+
   create_release_tarball "${version}"
 }
 
