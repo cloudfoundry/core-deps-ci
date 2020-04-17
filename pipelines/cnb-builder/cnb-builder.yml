@@ -36,6 +36,23 @@
 #@   return False
 #@ end
 
+#@ def published_cnbs_for_builder(builder):
+#@   published_cnbs = []
+#@   for published_cnb in data.values.published_cnbs:
+#@     include_cnb = True
+#@     for stack in published_cnb.skip_stack:
+#@       if stack == builder.stack:
+#@         include_cnb = False
+#@       end
+#@     end
+#@     if include_cnb:
+#@       published_cnbs.append(published_cnb)
+#@     end
+#@   end
+#@   return published_cnbs
+#@ end
+
+
 #@ def cnbs_for_builder(builder):
 #@   cnbs = []
 #@   for cnb in data.values.cnbs:
@@ -96,6 +113,13 @@ resources:
   check_every: 15m #! to avoid thundering herd of cnb autobumping
   source: #@ get_cnb_source_config(cnb)
 #@ end
+
+#@ for published_cnbs in data.values.published_cnbs:
+- name: #@ published_cnbs.name
+  type: docker-image
+  source:
+    repository: #@ "gcr.io/paketo-buildpacks/" + published_cnbs.name
+  #@ end
 
 - name: packager
   type: git
@@ -252,6 +276,11 @@ jobs:
         resource: #@ cnb.name + "-cnb-release"
         trigger: true
     #@ end
+    #@ for published_cnbs in published_cnbs_for_builder(builder):
+      - get: #@ published_cnbs.name + "-cnb"
+        resource: #@ published_cnbs.name
+        trigger: true
+    #@ end
       - get: cnb-builder
       - get: version
         resource: #@ builder.version_key + "-version"
@@ -272,6 +301,23 @@ jobs:
           args:
             - -cl
             - cp -r *-cnb sources/
+    #@ if len(published_cnbs_for_builder(builder)) > 0 :
+    - task: get-published-cnb
+      image: ci-image
+      config:
+        platform: linux
+        inputs:
+        #@ for published_cnb in published_cnbs_for_builder(builder):
+          - name: #@ published_cnb.name + "-cnb"
+        #@ end
+        outputs:
+          - name: published-sources
+        run:
+          path: bash
+          args:
+            - -cl
+            - cp -r *-cnb published-sources/
+    #@ end
     - task: create-builder-image
       image: ci-image
       file: buildpacks-ci/tasks/create-builder/task.yml

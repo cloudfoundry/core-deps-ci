@@ -85,55 +85,44 @@ cnbs:
   skip_stack:
     - "bionic"
     - "tiny"
-- name: bellsoft-liberica
-  git_repo: "https://github.com/paketo-buildpacks/bellsoft-liberica"
-  skip_stack:
-    - "tiny"
-- name: build-system
-  git_repo: "https://github.com/paketo-buildpacks/build-system"
-  skip_stack:
-    - "tiny"
-- name: executable-jar
-  git_repo: "https://github.com/paketo-buildpacks/executable-jar"
-  skip_stack:
-    - "tiny"
-- name: azure-application-insights
-  git_repo: "https://github.com/paketo-buildpacks/azure-application-insights"
-  skip_stack:
-    - "tiny"
-- name: debug
-  git_repo: "https://github.com/paketo-buildpacks/debug"
-  skip_stack:
-    - "tiny"
-- name: google-stackdriver
-  git_repo: "https://github.com/paketo-buildpacks/google-stackdriver"
-  skip_stack:
-    - "tiny"
-- name: jmx
-  git_repo: "https://github.com/paketo-buildpacks/jmx"
-  skip_stack:
-    - "tiny"
-- name: procfile
-  git_repo: "https://github.com/paketo-buildpacks/procfile"
-  skip_stack:
-    - "tiny"
 - name: dotnet-core
   git_repo: "https://github.com/paketo-buildpacks/dotnet-core"
   skip_stack:
     - "tiny"
+published_cnbs:
+- name: bellsoft-liberica
+  skip_stack:
+    - "tiny"
+- name: build-system
+  skip_stack:
+    - "tiny"
+- name: executable-jar
+  skip_stack:
+    - "tiny"
+- name: azure-application-insights
+  skip_stack:
+    - "tiny"
+- name: debug
+  skip_stack:
+    - "tiny"
+- name: google-stackdriver
+  skip_stack:
+    - "tiny"
+- name: jmx
+  skip_stack:
+    - "tiny"
+- name: procfile
+  skip_stack:
+    - "tiny"
 - name: apache-tomcat
-  git_repo: "https://github.com/paketo-buildpacks/apache-tomcat"
   skip_stack:
     - "tiny"
 - name: spring-boot
-  git_repo: "https://github.com/paketo-buildpacks/spring-boot"
   skip_stack:
     - "tiny"
-- name: distzip
-  git_repo: "https://github.com/paketo-buildpacks/dist-zip"
+- name: dist-zip
   skip_stack:
     - "tiny"
 - name: encrypt-at-rest
-  git_repo: "https://github.com/paketo-buildpacks/encrypt-at-rest"
   skip_stack:
     - "tiny"
