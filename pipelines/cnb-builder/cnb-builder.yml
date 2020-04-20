@@ -8,7 +8,7 @@
 #@   tags = builder.stack
 #@   for stack in data.values.stacks:
 #@     if stack.name == builder.stack:
-#@       tags += " " + stack.tag
+#@       tags += " " + builder.name
 #@     end
 #@   end
 #@   if builder.latest:

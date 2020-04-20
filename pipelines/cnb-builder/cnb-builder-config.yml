@@ -34,9 +34,9 @@ builders:
     value: "gcr.io/paketo-buildpacks/build:tiny-cnb"
   - name: RUN_IMAGE
     value: "gcr.io/paketo-buildpacks/run:tiny-cnb"
-- name: bionic
+- name: base
   stack: bionic
-  version_key: bionic
+  version_key: base
   repository: gcr.io/paketo-buildpacks/builder
   latest: false
   builder_image_params:
@@ -48,9 +48,9 @@ builders:
     value: "gcr.io/paketo-buildpacks/build:base-cnb"
   - name: RUN_IMAGE
     value: "gcr.io/paketo-buildpacks/run:base-cnb"
-- name: cflinuxfs3
+- name: full-cf
   stack: cflinuxfs3
-  version_key: cflinuxfs3
+  version_key: full-cf
   repository: gcr.io/paketo-buildpacks/builder
   latest: true
   builder_image_params:
