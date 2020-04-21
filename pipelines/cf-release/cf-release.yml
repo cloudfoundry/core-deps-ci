@@ -165,8 +165,8 @@ jobs:
   - task: create-buildpack-dev-release
     file: bre-ci/tasks/create-buildpack-dev-release/task.yml
     params:
-      AWS_ACCESS_KEY_ID: ((pivotal-offline-buildpacks-s3-access-key))
-      AWS_SECRET_ACCESS_KEY: ((pivotal-offline-buildpacks-s3-secret-key))
+      AWS_ACCESS_KEY_ID: ((pivotal-buildpacks-s3-access-key))
+      AWS_SECRET_ACCESS_KEY: ((pivotal-buildpacks-s3-secret-key))
       LANGUAGE: #@ language.name
   - put: #@ language.name + "-buildpack-release"
     params:
