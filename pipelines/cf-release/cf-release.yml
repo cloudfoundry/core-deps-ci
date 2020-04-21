@@ -357,6 +357,7 @@ jobs:
       LANGUAGE: #@ language.name
 
 - name: #@ "publish-" + language.name + "-buildpack-release"
+  old_name: #@ "update-" + language.name + "-buildpack-bosh-release"
   serial: true
   plan:
   - in_parallel:
