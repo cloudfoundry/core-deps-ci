@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-buildpack_name="${LANGUAGE}-buildpack"
-version="$(basename buildpack-release-tarball/*.tgz | sed "s/${buildpack_name}-release-\(.*\).tgz/\1/")"
+buildpack_name="$(tar -xf buildpack-release-tarball/*.tgz -O release.MF | yj -yj | jq -r .name)"
+version="$(tar -xf buildpack-release-tarball/*.tgz -O release.MF | yj -yj | jq -r .version)"
 
 cat >>"ops-file/bump-${buildpack_name}.yml" <<-EOF
 - path: /releases/name=${buildpack_name}

@@ -95,7 +95,7 @@ resources:
   type: s3
   source:
     bucket: buildpack-release-triggers
-    versioned_file: #@ language.name
+    versioned_file: #@ language.name + "-buildpack"
     access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
     secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
 #@ end
@@ -167,7 +167,6 @@ jobs:
     params:
       AWS_ACCESS_KEY_ID: ((pivotal-buildpacks-s3-access-key))
       AWS_SECRET_ACCESS_KEY: ((pivotal-buildpacks-s3-secret-key))
-      LANGUAGE: #@ language.name
   - put: #@ language.name + "-buildpack-release"
     params:
       repository: release
@@ -201,8 +200,6 @@ jobs:
 #@ for language in data.values.supported_languages:
     - task: #@ "create-" + language.name + "-buildpack-release-ops-file"
       file: bre-ci/tasks/create-buildpack-release-ops-file/task.yml
-      params:
-        LANGUAGE: #@ language.name
       input_mapping:
         buildpack-release-tarball: #@ language.name + "-buildpack-release-rc"
       output_mapping:
@@ -354,7 +351,7 @@ jobs:
     params:
       AWS_ACCESS_KEY_ID: ((pivotal-offline-buildpacks-s3-access-key))
       AWS_SECRET_ACCESS_KEY: ((pivotal-offline-buildpacks-s3-secret-key))
-      LANGUAGE: #@ language.name
+      BUCKET: buildpack-release-triggers
 
 - name: #@ "publish-" + language.name + "-buildpack-release"
   old_name: #@ "update-" + language.name + "-buildpack-bosh-release"

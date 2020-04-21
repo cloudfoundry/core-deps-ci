@@ -3,6 +3,14 @@
 set -euo pipefail
 shopt -s inherit_errexit
 
+buildpack_name() {
+  buildpack_release_name | sed 's/-offline//'
+}
+
+buildpack_release_name() {
+  yj -yj < release/config/final.yml | jq -r .final_name
+}
+
 get_version() {
   local versions
   for version_file in buildpack-*/version; do
@@ -20,34 +28,6 @@ get_version() {
   echo "${version}"
 }
 
-remove_old_blobs() {
-  bosh blobs --dir release --json \
-    | jq -r '.Tables[0].Rows[].path' \
-    | grep buildpack \
-    | xargs -I {} bosh remove-blob --dir release {}
-}
-
-add_new_blobs() {
-  for buildpack_file in buildpack-*/"${LANGUAGE}"*.zip; do
-    local blob_name
-    blob_name="$(basename "${buildpack_file}" | sed 's/+.*\.zip/.zip/')"
-    bosh add-blob --dir release "${buildpack_file}" "${LANGUAGE}-buildpack/${blob_name}"
-  done
-}
-
-create_release_tarball() {
-  local version=$1
-
-  dev_release_version="${version}-$(date +%s)"
-
-  bosh create-release \
-    --dir release \
-    --force \
-    --version "${dev_release_version}" \
-    --name "${LANGUAGE}-buildpack" \
-    --tarball "release-tarball/${LANGUAGE}-buildpack-release-${dev_release_version}.tgz"
-}
-
 buildpack_blob_is_latest() {
   local new_version=$1
 
@@ -60,6 +40,21 @@ buildpack_blob_is_latest() {
   fi
 
   [[ "${existing_version}" == "${new_version}" ]] && return 0 || return 1
+}
+
+remove_old_blobs() {
+  bosh blobs --dir release --json \
+    | jq -r '.Tables[0].Rows[].path' \
+    | grep buildpack \
+    | xargs -I {} bosh remove-blob --dir release {}
+}
+
+add_new_blobs() {
+  for buildpack_file in buildpack-*/*.zip; do
+    local blob_name
+    blob_name="$(basename "${buildpack_file}" | sed 's/+.*\.zip/.zip/')"
+    bosh add-blob --dir release "${buildpack_file}" "$(buildpack_name)/${blob_name}"
+  done
 }
 
 write_private_yml() {
@@ -80,17 +75,31 @@ commit_blobs() {
   local version=$1
 
   git -C release add config/blobs.yml
-  git -C release commit -m "bump ${LANGUAGE}-buildpack to ${version}"
+  git -C release commit -m "Updating blobs for $(buildpack_name) at ${version}"
+}
+
+create_release_tarball() {
+  local version=$1
+
+  dev_release_version="${version}-$(date +%s)"
+
+  bosh create-release \
+    --dir release \
+    --force \
+    --version "${dev_release_version}" \
+    --name "$(buildpack_release_name)" \
+    --tarball "release-tarball/$(buildpack_release_name)-release-${dev_release_version}.tgz"
 }
 
 main() {
   local version
   version="$(get_version)"
 
+  write_private_yml
+
   if ! buildpack_blob_is_latest "${version}"; then
     remove_old_blobs
     add_new_blobs
-    write_private_yml
     upload_blobs
     commit_blobs "${version}"
   fi

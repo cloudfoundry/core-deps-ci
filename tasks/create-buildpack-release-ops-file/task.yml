@@ -9,7 +9,5 @@ inputs:
 - name: buildpack-release-tarball
 outputs:
 - name: ops-file
-params:
-  LANGUAGE:
 run:
   path: bre-ci/tasks/create-buildpack-release-ops-file/run
