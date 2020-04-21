@@ -10,6 +10,7 @@ inputs:
 - name: buildpack-release-tarball
 outputs:
 - name: release
+- name: release-tarball
 - name: version
 params:
   AWS_ACCESS_KEY_ID:

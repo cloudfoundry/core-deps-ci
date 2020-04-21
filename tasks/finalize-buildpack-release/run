@@ -10,7 +10,7 @@ get_version() {
 
 
 get_name() {
-  tar -xf buildpack-release-tarball/*.tgz -O release.MF | yj -yj | jq -r .name | cut -d'-' -f1
+  tar -xf buildpack-release-tarball/*.tgz -O release.MF | yj -yj | jq -r .name
 }
 
 release_version_exists() {
@@ -51,6 +51,13 @@ commit_changes() {
   git -C release commit -m "Final release for ${name} at ${version}"
 }
 
+create_final_tarball() {
+  local name=$1
+  local version=$2
+
+  bosh cr "release/releases/${name}/${name}-${version}.yml" --dir release --tarball "release-tarball/${name}-${version}.tgz"
+}
+
 main() {
   local name
   local version
@@ -64,6 +71,8 @@ main() {
     finalize_release "${version}"
     commit_changes "${name}" "${version}"
   fi
+
+  create_final_tarball "${name}" "${version}"
 }
 
 main "$@"
