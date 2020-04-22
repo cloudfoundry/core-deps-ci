@@ -4,7 +4,7 @@ set -euo pipefail
 shopt -s inherit_errexit
 
 get_buildpack_name() {
-  buildpack_release_name | sed 's/-offline//'
+  get_buildpack_release_name | sed 's/-offline//'
 }
 
 get_buildpack_release_name() {
