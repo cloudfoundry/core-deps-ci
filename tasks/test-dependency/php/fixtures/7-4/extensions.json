@@ -1,0 +1,42 @@
+{
+  "extensions": [
+    "apcu",
+    "enchant",
+    "gd",
+    "geoip",
+    "gnupg",
+    "igbinary",
+    "imagick",
+    "lua",
+    "lzf",
+    "mailparse",
+    "maxminddb",
+    "mbstring",
+    "memcached",
+    "mongodb",
+    "msgpack",
+    "oauth",
+    "odbc",
+    "pdo",
+    "pdo_firebird",
+    "pdo_odbc",
+    "pdo_sqlsrv",
+    "phpiredis",
+    "protobuf",
+    "rdkafka",
+    "readline",
+    "redis",
+    "solr",
+    "sqlsrv",
+    "ssh2",
+    "stomp",
+    "tideways_xhprof",
+    "tidy",
+    "xmlrpc",
+    "yaml",
+    "zip"
+  ],
+  "zend_extensions": [
+    "xdebug"
+  ]
+}
