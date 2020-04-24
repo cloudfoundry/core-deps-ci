@@ -14,7 +14,7 @@ images:
   - run
 stacks:
 - name: cflinuxfs3
-  tag: full
+  tag: full-cf
 - name: bionic
   tag: base
 - name: tiny

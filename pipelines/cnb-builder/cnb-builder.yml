@@ -8,7 +8,7 @@
 #@   tags = builder.stack
 #@   for stack in data.values.stacks:
 #@     if stack.name == builder.stack:
-#@       tags += " " + builder.name
+#@       tags += " " + stack.tag
 #@     end
 #@   end
 #@   if builder.latest:
@@ -206,10 +206,10 @@ resources:
   type: registry-image
   source:
     repository: #@ "gcr.io/paketo-buildpacks/" + image
-    #@ if stack.tag != "full":
+    #@ if stack.tag != "full-cf":
     tag: #@ stack.tag + "-cnb"
     #@ else:
-    tag: #@ stack.tag + "-cnb-cf"
+    tag: #@ "full-cnb-cf"
     #@ end
     username: _json_key
     password: ((paketo-gcr-service-account-key))
