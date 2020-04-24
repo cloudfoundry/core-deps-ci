@@ -40,9 +40,11 @@
 #@   published_cnbs = []
 #@   for published_cnb in data.values.published_cnbs:
 #@     include_cnb = True
-#@     for stack in published_cnb.skip_stack:
-#@       if stack == builder.stack:
-#@         include_cnb = False
+#@     if hasattr(published_cnb, "skip_stack"):
+#@       for stack in published_cnb.skip_stack:
+#@         if stack == builder.stack:
+#@           include_cnb = False
+#@         end
 #@       end
 #@     end
 #@     if include_cnb:
@@ -57,9 +59,11 @@
 #@   cnbs = []
 #@   for cnb in data.values.cnbs:
 #@     include_cnb = True
-#@     for stack in cnb.skip_stack:
-#@       if stack == builder.stack:
-#@         include_cnb = False
+#@     if hasattr(cnb, "skip_stack"):
+#@       for stack in cnb.skip_stack:
+#@         if stack == builder.stack:
+#@           include_cnb = False
+#@         end
 #@       end
 #@     end
 #@     if include_cnb:
@@ -114,12 +118,12 @@ resources:
   source: #@ get_cnb_source_config(cnb)
 #@ end
 
-#@ for published_cnbs in data.values.published_cnbs:
-- name: #@ published_cnbs.name
+#@ for published_cnb in data.values.published_cnbs:
+- name: #@ published_cnb.name
   type: docker-image
   source:
-    repository: #@ "gcr.io/paketo-buildpacks/" + published_cnbs.name
-  #@ end
+    repository: #@ published_cnb.repo
+#@ end
 
 - name: packager
   type: git
