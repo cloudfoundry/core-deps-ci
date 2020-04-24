@@ -54,7 +54,6 @@
 #@   return published_cnbs
 #@ end
 
-
 #@ def cnbs_for_builder(builder):
 #@   cnbs = []
 #@   for cnb in data.values.cnbs:
@@ -79,6 +78,14 @@
 #@     config.update({"private_key": cnb.private_key})
 #@   else:
 #@     config.update({"private_key": "((cf-buildpacks-eng-github-ssh-key.private_key))"})
+#@   end
+#@   return config
+#@ end
+
+#@ def get_published_cnb_source_config(cnb):
+#@   config = {"repository": cnb.repo}
+#@   if hasattr(cnb, "private_key"):
+#@     config.update({"username": "_json_key", "private_key": cnb.private_key})
 #@   end
 #@   return config
 #@ end
@@ -120,9 +127,8 @@ resources:
 
 #@ for published_cnb in data.values.published_cnbs:
 - name: #@ published_cnb.name
-  type: docker-image
-  source:
-    repository: #@ published_cnb.repo
+  type: registry-image
+  source: #@ get_published_cnb_source_config(published_cnb)
 #@ end
 
 - name: packager
