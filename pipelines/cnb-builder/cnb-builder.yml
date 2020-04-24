@@ -85,7 +85,7 @@
 #@ def get_published_cnb_source_config(cnb):
 #@   config = {"repository": cnb.repo}
 #@   if hasattr(cnb, "private_key"):
-#@     config.update({"username": "_json_key", "private_key": cnb.private_key})
+#@     config.update({"username": "_json_key", "password": cnb.private_key})
 #@   end
 #@   return config
 #@ end
