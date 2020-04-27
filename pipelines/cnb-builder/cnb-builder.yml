@@ -256,6 +256,7 @@ jobs:
       CONCOURSE_USERNAME: ((concourse_user.username))
       CONCOURSE_PASSWORD: ((concourse_user.password))
       CONCOURSE_TEAM: releng
+      PIPELINE_NAME: #@ data.values.pipeline_name
   - put: lifecycle-metadata-file
     params:
       file: lifecycle-metadata-file/lifecycle-metadata.json

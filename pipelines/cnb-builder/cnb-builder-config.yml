@@ -3,6 +3,7 @@
 concourse_url: https://buildpacks.ci.cf-app.com
 cnb_builder_uri: git@github.com:paketo-buildpacks/builder
 cnb_builder_private_key: ((builder-deploy-key.private_key))
+pipeline_name: cnb-builder
 destination_registry_username: _json_key
 destination_registry_password: ((paketo-gcr-service-account-key))
 supported_lifecycle_versions:
