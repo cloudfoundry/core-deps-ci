@@ -11,7 +11,7 @@ dependencies:
   source_type: CAAPM
   stacks: #@ build_stacks
   skip_test: true
- - name: composer
+- name: composer
   source_type: composer
   stacks: #@ build_stacks
   skip_test: true
