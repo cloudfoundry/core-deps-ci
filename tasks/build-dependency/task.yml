@@ -1,0 +1,17 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: gcr.io/paketo-buildpacks/build
+    tag: base
+inputs:
+- name: bre-ci
+- name: source
+outputs:
+- name: built-dependency
+- name: metadata
+params:
+  STACK:
+run:
+  path: bre-ci/tasks/build-dependency/run

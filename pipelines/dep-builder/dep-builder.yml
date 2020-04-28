@@ -2,10 +2,10 @@
 #@ load("@ytt:struct", "struct")
 #@yaml/text-templated-strings
 
-#@ def required_dependency_resource_name(required_dependency):
-#@   name = required_dependency.name + "-dependency-resource"
+#@ def required_dependency_resource_name(required_dependency, stack):
+#@   name = required_dependency.name + "-dependency-resource-" + stack
 #@   if struct.decode(required_dependency).get("version_constraint"):
-#@     name = name+"-"+required_dependency.version_constraint
+#@     name = name + "-" + required_dependency.version_constraint
 #@   end
 #@   return name
 #@ end
@@ -46,7 +46,8 @@ resources:
     type: #@ dependency.source_type
     github_access_token: ((buildpacks-github-token))
 
-- name: #@ dependency.name + "-dependency-resource"
+  #@ for stack in dependency.stacks:
+- name: #@ dependency.name + "-dependency-resource-" + stack
   type: dependency-resource
   source:
     bucket: pivotal-buildpacks
@@ -55,12 +56,15 @@ resources:
     region_name: "us-east-1"
     s3_prefix: deps
     dependency_name: #@ dependency.name
+    stack: #@ stack
+  #@ end
 #@ end
 
 #@ for dependency in data.values.dependencies:
   #@ for required_dependency in struct.encode(struct.decode(dependency).get('requires', [])):
     #@ if struct.decode(required_dependency).get("version_constraint"):
-- name: #@ required_dependency_resource_name(required_dependency)
+      #@ for stack in dependency.stacks:
+- name: #@ required_dependency_resource_name(required_dependency, stack)
   type: dependency-resource
   source:
     bucket: pivotal-buildpacks
@@ -70,15 +74,18 @@ resources:
     s3_prefix: deps
     dependency_name: #@ required_dependency.name
     version_constraint: #@ required_dependency.version_constraint
+    stack: #@ stack
+      #@ end
     #@ end
   #@ end
 #@ end
 
 #@ for stack in data.values.build_stacks:
-- name: #@ stack + "-image"
+- name: #@ stack.name + "-image"
   type: docker-image
   source:
-    repository: #@ "cloudfoundry/" + stack
+    repository: #@ stack.image
+    tag: #@ stack.image_tag
 #@ end
 
 jobs:
@@ -90,7 +97,9 @@ jobs:
     - get: buildpacks-ci
     - get: binary-builder
   #@ for required_dependency in struct.encode(struct.decode(dependency).get('requires', [])):
-    - get: #@ required_dependency_resource_name(required_dependency)
+    #@ for stack in dependency.stacks:
+    - get: #@ required_dependency_resource_name(required_dependency, stack)
+    #@ end
   #@ end
     - get: source
       resource: #@ dependency.name + "-source"
@@ -101,6 +110,16 @@ jobs:
   - in_parallel:
   #@ for stack in dependency.stacks:
     - do:
+    #@ if stack == "bionic":
+      - task: #@ "build-dependency-" + stack
+        image: #@ stack + "-image"
+        file: bre-ci/tasks/build-dependency/task.yml
+        output_mapping:
+          built-dependency: #@ stack + "-dependency"
+          metadata: #@ stack + "-metadata"
+        params:
+          STACK: #@ stack
+    #@ else:
       - task: #@ "build-binary-" + stack
         image: #@ stack + "-image"
         file: buildpacks-ci/tasks/build-binary-new/build.yml
@@ -110,20 +129,21 @@ jobs:
         params:
           STACK: #@ stack
           SKIP_COMMIT: true
+    #@ end
     #@ if not struct.decode(dependency).get('skip_test', False):
       - task: #@ "run-tests-" + stack
+        image: #@ stack + "-image"
         file: bre-ci/tasks/test-dependency/task.yml
         input_mapping:
           dependency: #@ stack + "-dependency"
       #@ for index in range(len(struct.decode(dependency).get('requires', []))):
-          required_dependency_(@= str(index+1) @): #@ required_dependency_resource_name(dependency.requires[index])
+          required_dependency_(@= str(index+1) @): #@ required_dependency_resource_name(dependency.requires[index], stack)
       #@ end
     #@ end
   #@ end
   - in_parallel:
   #@ for stack in dependency.stacks:
-    - put: #@ "{}-{}-dependency-resource".format(dependency.name, stack)
-      resource: #@ dependency.name + "-dependency-resource"
+    - put: #@ dependency.name + "-dependency-resource-" + stack
       params:
         dependency_file: #@ stack + "-dependency/*"
         metadata_file: #@ stack + "-metadata/*.json"

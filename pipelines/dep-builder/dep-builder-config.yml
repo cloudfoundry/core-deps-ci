@@ -1,38 +1,44 @@
 #@data/values
 ---
-#@ build_stacks = ['cflinuxfs3']
-build_stacks: #@ build_stacks
+build_stacks:
+- name: bionic
+  image: gcr.io/paketo-buildpacks/build
+  image_tag: base
+- name: cflinuxfs3
+  image: cloudfoundry/cflinuxfs3
+  image_tag: latest
+
 dependencies:
 - name: appdynamics
   source_type: appdynamics
-  stacks: #@ build_stacks
+  stacks: [cflinuxfs3]
   skip_test: true
 - name: CAAPM
   source_type: CAAPM
-  stacks: #@ build_stacks
+  stacks: [cflinuxfs3]
   skip_test: true
 - name: composer
   source_type: composer
-  stacks: #@ build_stacks
+  stacks: [cflinuxfs3]
   skip_test: true
 - name: go
   source_type: go
-  stacks: #@ build_stacks
+  stacks: [bionic, cflinuxfs3]
 - name: httpd
   source_type: httpd
-  stacks: #@ build_stacks
+  stacks: [cflinuxfs3]
   skip_test: true
 - name: nginx
   source_type: nginx
-  stacks: #@ build_stacks
+  stacks: [cflinuxfs3]
 - name: node
   source_type: node
-  stacks: #@ build_stacks
+  stacks: [bionic, cflinuxfs3]
 - name: php
   source_type: php
-  stacks: #@ build_stacks
+  stacks: [cflinuxfs3]
 - name: yarn
   source_type: yarn
-  stacks: #@ build_stacks
+  stacks: [cflinuxfs3]
   requires:
   - name: node
