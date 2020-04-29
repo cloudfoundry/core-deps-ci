@@ -343,6 +343,9 @@ jobs:
       params:
         TAGS: #@ generate_tags(builder, version)
         STACK: #@ builder.name
+        #@ if version == "latest":
+        LATEST_PLATFORM_API: true
+        #@ end
     - put: #@ builder.name + "-platform-api-" + version + "-rc-image"
       params:
         additional_tags: tags/tags
@@ -410,6 +413,9 @@ jobs:
       params:
         TAGS: #@ generate_tags(builder, version)
         STACK: #@ builder.name
+        #@ if version == "latest":
+        LATEST_PLATFORM_API: true
+        #@ end
     - put: #@ builder.name + "-platform-api-" + version + "-builder-image"
       params:
         additional_tags: tags/tags

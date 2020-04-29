@@ -21,3 +21,4 @@ params:
   TAGS:
   STACK:
   ADD_CF_SUFFIX: false
+  LATEST_PLATFORM_API: false

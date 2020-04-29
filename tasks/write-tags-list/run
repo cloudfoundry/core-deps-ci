@@ -2,23 +2,55 @@
 
 set -euo pipefail
 
-if [[ -d "platform-api-version" ]]; then
-  platform_api_version="$(cat platform-api-version/version)"
+add_version_tag() {
+  version=$1
+  echo "${version} " >> tags/tags
+}
+
+write_builder_tags() {
+  version=$1
+  platform_api_version=$2
+
   if [[ "${STACK}" == "" ]]; then
     echo "error: must set STACK param in pipeline config with platform-api-version"
     exit 1
   fi
-  echo "${STACK}-platform-api-${platform_api_version} " > tags/tags
-fi
+  echo "${STACK}-platform-api-${platform_api_version} " >> tags/tags
 
-if [[ -d "version" ]]; then
-  version="$(cat version/version)"
-  echo "${version} " >> tags/tags
-fi
+  if [[ "${version}" != "" ]]; then
+    echo "${version}-platform-api-${platform_api_version} " >> tags/tags
+  fi
 
-echo "${TAGS}" >> tags/tags
+  if [[ "${PLATFORM_API_LATEST}" == 'true' ]]; then
+    add_version_tag "${version}"
+  fi
+}
 
-if [[ "${ADD_CF_SUFFIX}" == 'true' ]]; then
+write_tags_with_cf_suffix() {
+  version=$1
   echo "${version}-cf " >> tags/tags-cf
   echo "${TAGS}" >> tags/tags-cf
-fi
+}
+
+main() {
+  local version
+  if [[ -d "version" ]]; then
+    version="$(cat version/version)"
+  fi
+
+  if [[ -d "platform-api-version" ]]; then
+    local platform_api_version
+    platform_api_version="$(cat platform-api-version/version)"
+    write_builder_tags "${version}" "${platform_api_version}"
+  elif [[ "${version}" != '' ]]; then
+    add_version_tag "${version}"
+  fi
+
+  echo "${TAGS}" >> tags/tags
+
+  if [[ "${ADD_CF_SUFFIX}" == 'true' ]]; then
+    write_tags_with_cf_suffix "${version}"
+  fi
+}
+
+main "$@"
