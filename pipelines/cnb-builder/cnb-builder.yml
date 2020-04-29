@@ -289,6 +289,8 @@ jobs:
     #@ end
     #@ for published_cnbs in published_cnbs_for_builder(builder):
       - get: #@ published_cnbs.name + "-cnb"
+        params:
+          format: oci
         resource: #@ published_cnbs.name
         trigger: true
     #@ end
