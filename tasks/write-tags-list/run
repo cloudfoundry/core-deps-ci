@@ -21,7 +21,7 @@ write_builder_tags() {
     echo "${version}-platform-api-${platform_api_version} " >> tags/tags
   fi
 
-  if [[ "${PLATFORM_API_LATEST}" == 'true' ]]; then
+  if [[ "${LATEST_PLATFORM_API}" == 'true' ]]; then
     add_version_tag "${version}"
   fi
 }
