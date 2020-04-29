@@ -90,51 +90,7 @@ cnbs:
   skip_stack:
     - "tiny"
 published_cnbs:
-- name: bellsoft-liberica
-  repo: "gcr.io/paketo-buildpacks/bellsoft-liberica"
-  skip_stack:
-    - "tiny"
-- name: build-system
-  repo: "gcr.io/paketo-buildpacks/build-system"
-  skip_stack:
-    - "tiny"
-- name: executable-jar
-  repo: "gcr.io/paketo-buildpacks/executable-jar"
-  skip_stack:
-    - "tiny"
-- name: azure-application-insights
-  repo: "gcr.io/paketo-buildpacks/azure-application-insights"
-  skip_stack:
-    - "tiny"
-- name: debug
-  repo: "gcr.io/paketo-buildpacks/debug"
-  skip_stack:
-    - "tiny"
-- name: google-stackdriver
-  repo: "gcr.io/paketo-buildpacks/google-stackdriver"
-  skip_stack:
-    - "tiny"
-- name: jmx
-  repo: "gcr.io/paketo-buildpacks/jmx"
-  skip_stack:
-    - "tiny"
-- name: procfile
-  repo: "gcr.io/paketo-buildpacks/procfile"
-  skip_stack:
-    - "tiny"
-- name: apache-tomcat
-  repo: "gcr.io/paketo-buildpacks/apache-tomcat"
-  skip_stack:
-    - "tiny"
-- name: spring-boot
-  repo: "gcr.io/paketo-buildpacks/spring-boot"
-  skip_stack:
-    - "tiny"
-- name: dist-zip
-  repo: "gcr.io/paketo-buildpacks/dist-zip"
-  skip_stack:
-    - "tiny"
-- name: encrypt-at-rest
-  repo: "gcr.io/paketo-buildpacks/encrypt-at-rest"
+- name: java
+  repo: "gcr.io/paketo-buildpacks/java"
   skip_stack:
     - "tiny"
