@@ -14,13 +14,14 @@ build_go() {
   curl -sL -o "${bootstrap_go_dir}/go.tgz" "${go_1_4_3_url}"
 
   local actual_sha
-  actual_sha="$(sha256sum "${bootstrap_go_dir/go.tgz}" | awk '{ print $1 }')"
+  actual_sha="$(sha256sum "${bootstrap_go_dir}/go.tgz" | awk '{ print $1 }')"
   if [[ "${actual_sha}" != "${go_1_4_3_sha}" ]]; then
     echo "Incorrect sha for go 1.4.3 tarball: expected '${go_1_4_3_sha}' but got '${actual_sha}'"
     exit 1
   fi
 
   tar -C "${bootstrap_go_dir}" -xf "${bootstrap_go_dir}/go.tgz"
+  rm "${bootstrap_go_dir}/go.tgz"
 
   export GOROOT_BOOTSTRAP="${bootstrap_go_dir}/go"
 
