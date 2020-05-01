@@ -81,7 +81,7 @@ rename_built_dependency() {
 
   local version shortened_sha extension
   version="$(jq -r .version source/data.json)"
-  shortened_sha="$(sha256sum built-dependency/node.tgz | cut -c1-8)"
+  shortened_sha="$(sha256sum built-dependency/*.tgz | cut -c1-8)"
   extension="${path#*.}"
 
   mv "${path}" "built-dependency/${name}_${version}_${os}_${arch}_${STACK}_${shortened_sha}.${extension}"
