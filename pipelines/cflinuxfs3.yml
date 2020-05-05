@@ -180,10 +180,10 @@ resources:
     password: ((cfbuildpacksproductionbot-docker-user.password))
     email: cf-buildpacks-eng@pivotal.io
 
-- name: cflinuxfs3-github-release-drafts
+- name: cflinuxfs3-github-release
   type: github-release
   source:
-    drafts: true
+    drafts: false
     user: cloudfoundry
     repository: cflinuxfs3
     access_token: ((buildpacks-github-token))
@@ -604,7 +604,7 @@ jobs:
       file: buildpacks-ci/tasks/generate-rootfs-release-notes/task.yml
       params:
         STACK: cflinuxfs3
-    - put: cflinuxfs3-github-release-drafts
+    - put: cflinuxfs3-github-release
       params:
         name: version/number
         tag: version/number
