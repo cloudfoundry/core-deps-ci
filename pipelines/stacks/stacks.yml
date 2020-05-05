@@ -85,6 +85,18 @@ resources:
     username: _json_key
     password: ((paketo-gcr-service-account-key))
 
+- name: #@ "{}-{}-dockerhub-cnb-image".format(stack.name, image)
+  type: registry-image
+  source:
+    repository: #@ "paketobuildpacks/" + image
+    #@ if stack.tag != "full":
+    tag: #@ stack.tag + "-cnb"
+    #@ else:
+    tag: full-cnb-cf
+    #@ end
+    username: ((paketo-docker-user.username))
+    password: ((paketo-docker-user.password))
+
 - name: #@ "{}-{}-cloudfoundry-cnb-image".format(stack.name, image)
   type: registry-image
   source:
@@ -148,6 +160,14 @@ resources:
     tag: tiny-cnb
     username: _json_key
     password: ((paketo-gcr-service-account-key))
+
+- name: tiny-build-dockerhub-cnb-image
+  type: registry-image
+  source:
+    repository: paketobuildpacks/build
+    tag: tiny-cnb
+    username: ((paketo-docker-user.username))
+    password: ((paketo-docker-user.password))
 
 - name: tiny-build-cloudfoundry-cnb-image
   type: registry-image
@@ -220,6 +240,10 @@ jobs:
         IMAGE: gcr.io/cf-buildpacks-releng/build-rc:tiny-cnb
         GCP_SERVICE_ACCOUNT_KEY: ((releng-gcp-service-account-key))
     - put: tiny-build-cnb-image
+      params:
+        additional_tags: version/version
+        image: image/image.tar
+    - put: tiny-build-dockerhub-cnb-image
       params:
         additional_tags: version/version
         image: image/image.tar
@@ -351,6 +375,14 @@ jobs:
         IMAGE_TYPE: #@ image
         GCP_SERVICE_ACCOUNT_KEY: ((releng-gcp-service-account-key))
     - put: #@ "{}-{}-cnb-image".format(stack.name, image)
+      params:
+        #@ if stack.tag != "full":
+        additional_tags: tags/tags
+        #@ else:
+        additional_tags: tags/tags-cf
+        #@ end
+        image: image/image.tar
+    - put: #@ "{}-{}-dockerhub-cnb-image".format(stack.name, image)
       params:
         #@ if stack.tag != "full":
         additional_tags: tags/tags
