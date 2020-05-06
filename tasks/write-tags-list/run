@@ -26,9 +26,9 @@ write_builder_tags() {
   fi
 }
 
-write_tags_with_cf_suffix() {
+write_tags_without_cf_suffix() {
   version=$1
-  echo "${version}-cf " >> tags/tags-cf
+  echo "${version%-cf} " >> tags/tags-cf
   echo "${TAGS}" >> tags/tags-cf
 }
 
@@ -48,8 +48,8 @@ main() {
 
   echo "${TAGS}" >> tags/tags
 
-  if [[ "${ADD_CF_SUFFIX}" == 'true' ]]; then
-    write_tags_with_cf_suffix "${version}"
+  if [[ "${REMOVE_CF_SUFFIX}" == 'true' ]]; then
+    write_tags_without_cf_suffix "${version}"
   fi
 }
 
