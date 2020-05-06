@@ -310,6 +310,7 @@ jobs:
     tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
 
 - name: ship-it
+  public: true
   serial: true
   plan:
   - get: bre-ci
@@ -320,6 +321,7 @@ jobs:
       file: buildpack-release-trigger-file/file
 
 - name: ship-it-java
+  public: true
   serial: true
   plan:
   - get: bre-ci
@@ -331,6 +333,7 @@ jobs:
 
 #@ for language in data.values.supported_languages:
 - name: #@ "update-" + language.name + "-buildpack-release-trigger"
+  public: true
   serial: true
   plan:
   - in_parallel:
@@ -356,6 +359,7 @@ jobs:
 
 - name: #@ "publish-" + language.name + "-buildpack-release"
   old_name: #@ "update-" + language.name + "-buildpack-bosh-release"
+  public: true
   serial: true
   plan:
   - in_parallel:
