@@ -1,26 +1,23 @@
 #@data/values
 ---
 stacks:
-- name: cflinuxfs3
+- name: full-cf
   id: org.cloudfoundry.stacks.cflinuxfs3
   images:
     - build
     - run
   build_base: false
-  tag: full
   latest: false
-- name: bionic
+- name: base
   id: io.buildpacks.stacks.bionic
   images:
     - build
     - run
   build_base: true
-  tag: base
   latest: true
 - name: tiny
   id: org.cloudfoundry.stacks.tiny
   images:
     - run
   build_base: true
-  tag: tiny
   latest: false

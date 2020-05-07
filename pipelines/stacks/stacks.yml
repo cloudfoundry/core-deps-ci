@@ -45,11 +45,7 @@ resources:
   type: registry-image
   source:
     repository: #@ "gcr.io/paketo-buildpacks/" + image
-    #@ if stack.tag != "full":
-    tag: #@ stack.tag
-    #@ else:
-    tag: full-cf
-    #@ end
+    tag: #@ stack.name
     username: _json_key
     password: ((paketo-gcr-service-account-key))
 
@@ -57,7 +53,11 @@ resources:
   type: registry-image
   source:
     repository: #@ "cloudfoundry/" + image
-    tag: #@ stack.tag
+    #@ if stack.name != "full-cf":
+    tag: #@ stack.name
+    #@ else:
+    tag: full
+    #@ end
     username: ((buildpacks-docker-user.username))
     password: ((buildpacks-docker-user.password))
 
@@ -65,8 +65,8 @@ resources:
   type: registry-image
   source:
     repository: #@ "gcr.io/cf-buildpacks-releng/{}-rc".format(image)
-    #@ if stack.tag != "full":
-    tag: #@ stack.tag + "-cnb"
+    #@ if stack.name != "full-cf":
+    tag: #@ stack.name + "-cnb"
     #@ else:
     tag: full-cnb-cf
     #@ end
@@ -77,8 +77,8 @@ resources:
   type: registry-image
   source:
     repository: #@ "gcr.io/paketo-buildpacks/" + image
-    #@ if stack.tag != "full":
-    tag: #@ stack.tag + "-cnb"
+    #@ if stack.name != "full-cf":
+    tag: #@ stack.name + "-cnb"
     #@ else:
     tag: full-cnb-cf
     #@ end
@@ -89,8 +89,8 @@ resources:
   type: registry-image
   source:
     repository: #@ "paketobuildpacks/" + image
-    #@ if stack.tag != "full":
-    tag: #@ stack.tag + "-cnb"
+    #@ if stack.name != "full-cf":
+    tag: #@ stack.name + "-cnb"
     #@ else:
     tag: full-cnb-cf
     #@ end
@@ -101,7 +101,11 @@ resources:
   type: registry-image
   source:
     repository: #@ "cloudfoundry/" + image
-    tag: #@ stack.tag + "-cnb"
+    #@ if stack.name != "full-cf":
+    tag: #@ stack.name + "-cnb"
+    #@ else:
+    tag: full-cnb
+    #@ end
     username: ((buildpacks-docker-user.username))
     password: ((buildpacks-docker-user.password))
 
@@ -111,7 +115,11 @@ resources:
   source:
     uri: https://github.com/paketo-buildpacks/stacks
     branch: master
+    #@ if stack.name != "full-cf":
     paths: #@ [ "{}/cnb/{}/**".format(stack.name, image) ]
+    #@ else:
+    paths: #@ [ "full/cnb/{}/**".format(image) ]
+    #@ end
 
   #@ if stack.build_base:
 - name: #@ "{}-{}-base-dockerfile".format(stack.name, image)
@@ -119,7 +127,7 @@ resources:
   source:
     uri: https://github.com/paketo-buildpacks/stacks
     branch: master
-    paths: #@ [ "{}/dockerfile/{}/**".format(stack.tag, image) ]
+    paths: #@ [ "{}/dockerfile/{}/**".format(stack.name, image) ]
   #@ end
 
 #! Versions
@@ -128,7 +136,7 @@ resources:
   source:
     initial_version: 0.0.1
     bucket: cnb-versions
-    key: #@ "builder/{}-{}-cnb".format(stack.name, image)
+    key: #@ "stacks/{}-{}-cnb".format(stack.name, image)
     access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
     secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
 
@@ -137,7 +145,7 @@ resources:
   source:
     initial_version: 0.0.1
     bucket: cnb-versions
-    key: #@ "builder/{}-{}-base".format(stack.name, image)
+    key: #@ "stacks/{}-{}-base".format(stack.name, image)
     access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
     secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
   #@ end
@@ -182,7 +190,7 @@ resources:
   source:
     initial_version: 0.0.1
     bucket: cnb-versions
-    key: builder/tiny-build-cnb
+    key: stacks/tiny-build-cnb
     access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
     secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
 
@@ -202,12 +210,12 @@ jobs:
   public: true
   plan:
     - get: bre-ci
-    - get: bionic-build-cnb-dockerfile
+    - get: base-build-cnb-dockerfile
       trigger: true
-    - get: bionic-build-base-image
+    - get: base-build-base-image
       trigger: true
       passed:
-        - update-bionic-build-base-image
+        - update-base-build-base-image
     - get: version
       resource: tiny-build-cnb-version
       params:
@@ -216,13 +224,13 @@ jobs:
     - task: write-build-args-file
       file: bre-ci/tasks/write-build-args-file/task.yml
       params:
-        BASE_IMAGE: "cloudfoundry/build:base"
+        BASE_IMAGE: "gcr.io/paketo-buildpacks/build:base"
         STACK_ID: "org.cloudfoundry.stacks.tiny"
     - task: build-tiny-build-cnb-image
       privileged: true
       file: bre-ci/tasks/build-stack-image/task.yml
       input_mapping:
-        stacks: bionic-build-cnb-dockerfile
+        stacks: base-build-cnb-dockerfile
       params:
         CONTEXT: stacks/base/cnb/build
         BUILD_ARGS_FILE: build-args/args
@@ -262,7 +270,7 @@ jobs:
   public: true
   plan:
     - get: bre-ci
-    #@ if stack.name != "cflinuxfs3":
+    #@ if stack.name != "full-cf":
     - get: #@ "{}-{}-base-dockerfile".format(stack.name, image)
       trigger: true
       #@ if stack.name == "tiny":
@@ -273,6 +281,9 @@ jobs:
       #@ end
     #@ else:
     - get: #@ stack.name + "-image"
+      #@ if stack.name == "full-cf":
+      resource: cflinuxfs3-image
+      #@ end
       trigger: true
       params:
         save: true
@@ -282,38 +293,42 @@ jobs:
     - get: version
       resource: #@ "{}-{}-base-version".format(stack.name, image)
       params:
-        pre: #@ stack.tag
+        pre: #@ stack.name
         pre_without_version: true
-    #@ if stack.name != "cflinuxfs3":
+    #@ if stack.name != "full-cf":
     - task: #@ "build-{}-{}-base-image".format(stack.name, image)
       privileged: true
       file: bre-ci/tasks/build-stack-image/task.yml
       input_mapping:
         stacks: #@ "{}-{}-base-dockerfile".format(stack.name, image)
       params:
-        CONTEXT: #@ "stacks/{}/dockerfile/{}".format(stack.tag, image)
+        #@ if stack.name != "full-cf":
+        CONTEXT: #@ "stacks/{}/dockerfile/{}".format(stack.name, image)
+        #@ else:
+        CONTEXT: #@ "stacks/full/dockerfile/{}".format(image)
+        #@ end
     #@ end
-    #@ if stack.name == "cflinuxfs3":
+    #@ if stack.name == "full-cf":
     - task: write-tags-list
       file: bre-ci/tasks/write-tags-list/task.yml
       params:
-        ADD_CF_SUFFIX: true
+        REMOVE_CF_SUFFIX: true
     #@ end
     - put: #@ "{}-{}-base-image".format(stack.name, image)
       params:
-        #@ if stack.name != "cflinuxfs3":
         additional_tags: version/version
+        #@ if stack.name != "full-cf":
         image: image/image.tar
         #@ else:
-        additional_tags: tags/tags-cf
         image: #@ stack.name + "-image/image"
         #@ end
     - put: #@ "{}-{}-cloudfoundry-base-image".format(stack.name, image)
       params:
+        #@ if stack.name != "full-cf":
         additional_tags: version/version
-        #@ if stack.name != "cflinuxfs3":
         image: image/image.tar
         #@ else:
+        additional_tags: tags/tags-cf
         image: #@ stack.name + "-image/image"
         #@ end
     - put: version
@@ -333,19 +348,27 @@ jobs:
     - get: version
       resource: #@ "{}-{}-cnb-version".format(stack.name, image)
       params:
-        pre: #@ stack.tag + "-cnb"
+        #@ if stack.name != "full-cf":
+        pre: #@ stack.name + "-cnb"
+        #@ else:
+        pre: full-cnb-cf
+        #@ end
         pre_without_version: true
     - task: write-build-args-file
       file: bre-ci/tasks/write-build-args-file/task.yml
       params:
-        BASE_IMAGE: #@ "cloudfoundry/{}:{}".format(image, stack.tag)
+        BASE_IMAGE: #@ "gcr.io/paketo-buildpacks/{}:{}".format(image, stack.name)
     - task: #@ "build-{}-{}-cnb-image".format(stack.name, image)
       privileged: true
       file: bre-ci/tasks/build-stack-image/task.yml
       input_mapping:
         stacks: #@ "{}-{}-cnb-dockerfile".format(stack.name, image)
       params:
-        CONTEXT: #@ "stacks/{}/cnb/{}".format(stack.tag, image)
+        #@ if stack.name != "full-cf":
+        CONTEXT: #@ "stacks/{}/cnb/{}".format(stack.name, image)
+        #@ else:
+        CONTEXT: #@ "stacks/full/cnb/{}".format(image)
+        #@ end
         BUILD_ARGS_FILE: build-args/args
     - task: write-tags-list
       file: bre-ci/tasks/write-tags-list/task.yml
@@ -353,8 +376,8 @@ jobs:
         #@ if stack.latest:
         TAGS: latest
         #@ end
-        #@ if stack.tag == "full":
-        ADD_CF_SUFFIX: true
+        #@ if stack.name == "full-cf":
+        REMOVE_CF_SUFFIX: true
         #@ end
     - put: #@ "{}-{}-cnb-image-rc".format(stack.name, image)
       params:
@@ -365,34 +388,30 @@ jobs:
       file: bre-ci/tasks/test-stack/task.yml
       params:
         STACK_ID: #@ stack.id
-        #@ if stack.tag != "full":
-        TAG: #@ stack.tag + "-cnb"
-        IMAGE: #@ "gcr.io/cf-buildpacks-releng/{}-rc:{}-cnb".format(image, stack.tag)
+        #@ if stack.name != "full-cf":
+        TAG: #@ stack.name + "-cnb"
+        IMAGE: #@ "gcr.io/cf-buildpacks-releng/{}-rc:{}-cnb".format(image, stack.name)
         #@ else:
         TAG: full-cnb-cf
-        IMAGE: #@ "gcr.io/cf-buildpacks-releng/{}-rc:{}-cnb-cf".format(image, stack.tag)
+        IMAGE: #@ "gcr.io/cf-buildpacks-releng/{}-rc:full-cnb-cf".format(image)
         #@ end
         IMAGE_TYPE: #@ image
         GCP_SERVICE_ACCOUNT_KEY: ((releng-gcp-service-account-key))
     - put: #@ "{}-{}-cnb-image".format(stack.name, image)
       params:
-        #@ if stack.tag != "full":
         additional_tags: tags/tags
-        #@ else:
-        additional_tags: tags/tags-cf
-        #@ end
         image: image/image.tar
     - put: #@ "{}-{}-dockerhub-cnb-image".format(stack.name, image)
       params:
-        #@ if stack.tag != "full":
+        additional_tags: tags/tags
+        image: image/image.tar
+    - put: #@ "{}-{}-cloudfoundry-cnb-image".format(stack.name, image)
+      params:
+        #@ if stack.name != "full-cf":
         additional_tags: tags/tags
         #@ else:
         additional_tags: tags/tags-cf
         #@ end
-        image: image/image.tar
-    - put: #@ "{}-{}-cloudfoundry-cnb-image".format(stack.name, image)
-      params:
-        additional_tags: tags/tags
         image: image/image.tar
     - put: version
       resource: #@ "{}-{}-cnb-version".format(stack.name, image)
