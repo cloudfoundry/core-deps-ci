@@ -2,20 +2,25 @@
 #@ load("@ytt:struct", "struct")
 #@yaml/text-templated-strings
 
-#@ def required_dependency_resource_name(required_dependency, stack):
-#@   name = required_dependency.name + "-dependency-resource-" + stack
+#@ def required_dependency_name(required_dependency):
+#@   name = required_dependency.name + "-dependency"
 #@   if struct.decode(required_dependency).get("version_constraint"):
 #@     name = name + "-" + required_dependency.version_constraint
 #@   end
 #@   return name
 #@ end
 
+#@ def get_mixins(dependency):
+#@   mixin_list = ""
+#@   for mixin in struct.encode(struct.decode(dependency).get('mixins', [])):
+#@     mixin_list = mixin_list + mixin + ","
+#@   end
+#@   length = len(mixin_list)
+#@   return mixin_list[0:length - 1]
+#@ end
+
 ---
 resource_types:
-- name: dependency-resource
-  type: docker-image
-  source:
-    repository: cfbuildpacks/dependency-resource
 - name: external-dependency-resource
   type: docker-image
   source:
@@ -46,46 +51,23 @@ resources:
     type: #@ dependency.source_type
     github_access_token: ((buildpacks-github-token))
 
-  #@ for stack in dependency.stacks:
-- name: #@ dependency.name + "-dependency-resource-" + stack
-  type: dependency-resource
+- name: #@ dependency.name + "-dependency"
+  type: s3
   source:
-    bucket: pivotal-buildpacks
-    access_key_id: ((pivotal-buildpacks-s3-access-key))
-    secret_access_key: ((pivotal-buildpacks-s3-secret-key))
+    bucket: test-delete-me-bp
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
     region_name: "us-east-1"
-    s3_prefix: deps
-    dependency_name: #@ dependency.name
-    stack: #@ stack
-  #@ end
-#@ end
+    regexp: #@ "deps/" + dependency.name + "/(.*)"
 
-#@ for dependency in data.values.dependencies:
-  #@ for required_dependency in struct.encode(struct.decode(dependency).get('requires', [])):
-    #@ if struct.decode(required_dependency).get("version_constraint"):
-      #@ for stack in dependency.stacks:
-- name: #@ required_dependency_resource_name(required_dependency, stack)
-  type: dependency-resource
+- name: #@ dependency.name + "-metadata"
+  type: s3
   source:
-    bucket: pivotal-buildpacks
-    access_key_id: ((pivotal-buildpacks-s3-access-key))
-    secret_access_key: ((pivotal-buildpacks-s3-secret-key))
+    bucket: test-delete-me-bp
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
     region_name: "us-east-1"
-    s3_prefix: deps
-    dependency_name: #@ required_dependency.name
-    version_constraint: #@ required_dependency.version_constraint
-    stack: #@ stack
-      #@ end
-    #@ end
-  #@ end
-#@ end
-
-#@ for stack in data.values.build_stacks:
-- name: #@ stack.name + "-image"
-  type: docker-image
-  source:
-    repository: #@ stack.image
-    tag: #@ stack.image_tag
+    regexp: #@ "metadata/" + dependency.name + "/(.*)"
 #@ end
 
 jobs:
@@ -93,59 +75,93 @@ jobs:
 - name: #@ "build-" + dependency.name
   plan:
   - in_parallel:
-    - get: bre-ci
     - get: buildpacks-ci
     - get: binary-builder
-  #@ for required_dependency in struct.encode(struct.decode(dependency).get('requires', [])):
-    #@ for stack in dependency.stacks:
-    - get: #@ required_dependency_resource_name(required_dependency, stack)
-    #@ end
-  #@ end
     - get: source
       resource: #@ dependency.name + "-source"
       trigger: true
-  #@ for stack in dependency.stacks:
-    - get: #@ stack + "-image"
-  #@ end
-  - in_parallel:
-  #@ for stack in dependency.stacks:
-    - do:
-    #@ if stack == "bionic":
-      - task: #@ "build-dependency-" + stack
-        image: #@ stack + "-image"
-        file: bre-ci/tasks/build-dependency/task.yml
-        output_mapping:
-          built-dependency: #@ stack + "-dependency"
-          metadata: #@ stack + "-metadata"
-        params:
-          STACK: #@ stack
-    #@ else:
-      - task: #@ "build-binary-" + stack
-        image: #@ stack + "-image"
-        file: buildpacks-ci/tasks/build-binary-new/build.yml
-        output_mapping:
-          artifacts: #@ stack + "-dependency"
-          dep-metadata: #@ stack + "-metadata"
-        params:
-          STACK: #@ stack
-          SKIP_COMMIT: true
-    #@ end
-    #@ if not struct.decode(dependency).get('skip_test', False):
-      - task: #@ "run-tests-" + stack
-        image: #@ stack + "-image"
-        file: bre-ci/tasks/test-dependency/task.yml
-        input_mapping:
-          dependency: #@ stack + "-dependency"
-      #@ for index in range(len(struct.decode(dependency).get('requires', []))):
-          required_dependency_(@= str(index+1) @): #@ required_dependency_resource_name(dependency.requires[index], stack)
+  - task: build-binary
+    file: buildpacks-ci/tasks/build-binary-new/build.yml
+    output_mapping:
+      artifacts: dependency
+    params:
+      STACK: bionic
+      SKIP_COMMIT: true
+  - put: #@ dependency.name + "-dependency"
+    params:
+      file: dependency/*
+
+  #@ if not struct.decode(dependency).get('skip_test', False):
+- name: #@ "test-" + dependency.name
+  plan:
+    - in_parallel:
+      - get: dependency
+        resource: #@ dependency.name + "-dependency"
+        passed: #@ [ "build-" + dependency.name ]
+        trigger: true
+      - get: bre-ci
+      #@ for required_dependency in struct.encode(struct.decode(dependency).get('requires', [])):
+      - get: #@ required_dependency_name(required_dependency)
       #@ end
-    #@ end
-  #@ end
-  - in_parallel:
-  #@ for stack in dependency.stacks:
-    - put: #@ dependency.name + "-dependency-resource-" + stack
+      - get: source
+        resource: #@ dependency.name + "-source"
+        passed: #@ [ "build-" + dependency.name ]
+    - task: run-tests
+      file: bre-ci/tasks/test-dependency/task.yml
+      input_mapping:
+        #@ for index in range(len(struct.decode(dependency).get('requires', []))):
+        required_dependency_(@= str(index+1) @): #@ required_dependency_name(dependency.requires[index])
+        #@ end
       params:
-        dependency_file: #@ stack + "-dependency/*"
-        metadata_file: #@ stack + "-metadata/*.json"
+        MIXINS: #@ get_mixins(dependency)
   #@ end
+
+- name: #@ "upload-metadata-" + dependency.name
+  plan:
+    - in_parallel:
+      - get: dependency
+        resource: #@ dependency.name + "-dependency"
+        #@ if not struct.decode(dependency).get('skip_test', False):
+        passed: #@ [ "test-" + dependency.name ]
+        #@ else:
+        passed: #@ [ "build-" + dependency.name ]
+        #@ end
+        trigger: true
+      - get: source
+        resource: #@ dependency.name + "-source"
+        #@ if not struct.decode(dependency).get('skip_test', False):
+        passed: #@ [ "test-" + dependency.name ]
+        #@ else:
+        passed: #@ [ "build-" + dependency.name ]
+        #@ end
+      - get: bre-ci
+    - task: write-dependency-metadata
+      file: bre-ci/tasks/write-dependency-metadata/task.yml
+      params:
+        STACK_ID: io.buildpacks.stacks.bionic
+        MIXINS: #@ get_mixins(dependency)
+    - put: #@ dependency.name + "-metadata"
+      params:
+        file: metadata/*.json
+#@ end
+
+groups:
+- name: all
+  jobs:
+    #@ for dependency in data.values.dependencies:
+     - #@ "build-" + dependency.name
+      #@ if not struct.decode(dependency).get('skip_test', False):
+     - #@ "test-" + dependency.name
+      #@ end
+     - #@ "upload-metadata-" + dependency.name
+    #@ end
+
+#@ for dependency in data.values.dependencies:
+- name: #@ dependency.name
+  jobs:
+    - #@ "build-" + dependency.name
+  #@ if not struct.decode(dependency).get('skip_test', False):
+    - #@ "test-" + dependency.name
+  #@ end
+    - #@ "upload-metadata-" + dependency.name
 #@ end
