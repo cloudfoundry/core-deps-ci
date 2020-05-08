@@ -1,9 +1,10 @@
 ---
 platform: linux
 image_resource:
-  type: docker-image
+  type: registry-image
   source:
-    repository: cloudfoundry/cflinuxfs3
+    repository: gcr.io/paketo-buildpacks/build
+    tag: base
 inputs:
   - name: bre-ci
   - name: source
@@ -14,3 +15,5 @@ inputs:
     optional: true
 run:
   path: bre-ci/tasks/test-dependency/run
+params:
+  MIXINS:

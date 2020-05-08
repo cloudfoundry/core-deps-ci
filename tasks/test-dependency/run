@@ -7,4 +7,11 @@ parent_dir="$(cd "$(dirname "$0")" && pwd)"
 dependency_name="$(jq -r .name source/data.json)"
 version="$(jq -r .version source/data.json)"
 
+mixins="${MIXINS//,/ }"
+
+if [[ "${mixins}" != "" ]]; then
+  command="apt-get install ${mixins}"
+  apt-get update && eval "${command}"
+fi
+
 "${parent_dir}/${dependency_name}/run" "${version}"
