@@ -48,7 +48,7 @@ main() {
   name="$(jq -r .name source/data.json)"
   version="$(jq -r .version source/data.json)"
 
-  file="$(ls dependency/)"
+  file="$(ls dependency/ -I url -I version)"
   expected_sha="$(echo "${file}" | cut -d '_' -f6 | cut -d '.' -f1)"
   actual_sha="$(sha256sum "dependency/${file}" | cut -d ' ' -f1)"
   uri="https://pivotal-buildpacks.s3.amazonaws.com/deps/${name}/${file}"
