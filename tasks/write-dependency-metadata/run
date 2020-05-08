@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+write_metadata_file() {
+  local name version SHA uri file mixins source_uri source_sha
+  name=$1
+  version=$2
+  SHA=$3
+  uri=$4
+  file=$5
+  mixins=$6
+  source_uri=$7
+  source_sha=$8
+
+  cat > metadata/"${file}"_metadata.json << EOF
+{
+  "id": "${name}",
+  "version": "${version}",
+  "sha256": "${SHA}",
+  "uri": "${uri}",
+  "stacks": ["${STACK_ID}"],
+  "mixins": ["${mixins}"],
+  "source": "${source_uri}",
+  "source_sha256": "${source_sha}"
+}
+EOF
+}
+
+check_sha() {
+  local expected_sha actual_sha
+  expected_sha=$1
+  actual_sha=$2
+
+  if [[ "${actual_sha:0:8}" != "${expected_sha}" ]]; then
+    echo "ERROR: The actual sha did not match the expected sha"
+    exit 1
+  fi
+}
+
+main() {
+  local mixins source_uri source_sha name version file expected_sha actual_sha uri
+
+  mixins="${MIXINS//,/\",\"}"
+
+  source_uri="$(jq -r .source_uri source/data.json)"
+  source_sha="$(jq -r .source_sha source/data.json)"
+  name="$(jq -r .name source/data.json)"
+  version="$(jq -r .version source/data.json)"
+
+  file="$(ls dependency/)"
+  expected_sha="$(echo "${file}" | cut -d '_' -f6 | cut -d '.' -f1)"
+  actual_sha="$(sha256sum "dependency/${file}" | cut -d ' ' -f1)"
+  uri="https://pivotal-buildpacks.s3.amazonaws.com/deps/${name}/${file}"
+
+  check_sha "${expected_sha}" "${actual_sha}"
+
+  write_metadata_file "${name}" "${version}" "${actual_sha}" "${uri}" "${file}" "${mixins}" "${source_uri}" "${source_sha}"
+
+  echo "Metadata file written: $(cat metadata/"${file}"_metadata.json )"
+}
+
+main "$@"
