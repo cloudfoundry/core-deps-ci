@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-dpkg-query -f '${binary:Package}\n' -W > package-list/package-list
+dpkg-query -f '${Package}\n' -W > package-list/package-list

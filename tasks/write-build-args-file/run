@@ -9,3 +9,7 @@ fi
 if [[ "${STACK_ID}" != "" ]]; then
   echo "stack_id=${STACK_ID}" >> build-args/args
 fi
+
+if [[ -d mixins-label ]]; then
+  echo "mixins=$(cat mixins-label/*)" >> build-args/args
+fi

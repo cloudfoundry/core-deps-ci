@@ -382,6 +382,11 @@ jobs:
           package-list: run-image-package-list
     - task: write-mixins-labels
       file: bre-ci/tasks/write-mixins-labels/task.yml
+      input_mapping:
+        build-base-dockerfile: #@ "{}-build-cnb-dockerfile".format(stack.name)
+        run-base-dockerfile: #@ "{}-run-cnb-dockerfile".format(stack.name)
+      params:
+        STACK: #@ stack.name
     - in_parallel:
       - put: #@ stack.name + "-build-mixins"
         params:
@@ -395,25 +400,41 @@ jobs:
 - name: #@ "update-{}-{}-cnb-image".format(stack.name, image)
   public: true
   plan:
-    - get: bre-ci
-    - get: #@ "{}-{}-cnb-dockerfile".format(stack.name, image)
-      trigger: true
-    - get: #@ "{}-{}-base-image".format(stack.name, image)
-      trigger: true
-      passed: #@ [ "update-{}-{}-base-image".format(stack.name, image) ]
-    - get: version
-      resource: #@ "{}-{}-cnb-version".format(stack.name, image)
-      params:
+    - in_parallel:
+      - get: bre-ci
+      - get: #@ "{}-{}-cnb-dockerfile".format(stack.name, image)
+        trigger: true
+    #@ if stack.mixins:
+        passed: #@ [ "generate-mixins-labels-{}-cnb-image".format(stack.name) ]
+    #@ end
+      - get: #@ "{}-{}-base-image".format(stack.name, image)
+        trigger: true
+        passed:
+    #@ if stack.mixins:
+        - #@ "generate-mixins-labels-{}-cnb-image".format(stack.name)
+    #@ else:
+        - #@ "update-{}-{}-base-image".format(stack.name, image)
+    #@ end
+      - get: version
+        resource: #@ "{}-{}-cnb-version".format(stack.name, image)
+        params:
         #@ if stack.name != "full-cf":
-        pre: #@ stack.name + "-cnb"
+          pre: #@ stack.name + "-cnb"
         #@ else:
-        pre: full-cnb-cf
+          pre: full-cnb-cf
         #@ end
-        pre_without_version: true
+          pre_without_version: true
+    #@ if stack.mixins:
+      - get: #@ "{}-{}-mixins".format(stack.name, image)
+    #@ end
     - task: write-build-args-file
       file: bre-ci/tasks/write-build-args-file/task.yml
       params:
         BASE_IMAGE: #@ "gcr.io/paketo-buildpacks/{}:{}".format(image, stack.name)
+    #@ if stack.mixins:
+      input_mapping:
+        mixins-label: #@ "{}-{}-mixins".format(stack.name, image)
+    #@ end
     - task: #@ "build-{}-{}-cnb-image".format(stack.name, image)
       privileged: true
       file: bre-ci/tasks/build-stack-image/task.yml

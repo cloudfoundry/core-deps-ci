@@ -9,10 +9,14 @@ shared_packages="$(comm -12 build-image-package-list/package-list run-image-pack
 build_only_packages="$(comm -23 build-image-package-list/package-list run-image-package-list/package-list)"
 run_only_packages="$(comm -13 build-image-package-list/package-list run-image-package-list/package-list)"
 
+additional_build_mixins="$(cat "build-base-dockerfile/${STACK}/cnb/build/additional-mixins")"
+additional_run_mixins="$(cat "run-base-dockerfile/${STACK}/cnb/run/additional-mixins")"
+
 build_mixins_label="$(cat <<EOF
 ${shared_packages}
 $([[ -n "${shared_packages}" ]] && echo "${shared_packages}" | sed 's/^/build:/')
 $([[ -n "${build_only_packages}" ]] && echo "${build_only_packages}" | sed 's/^/build:/')
+$([[ -n "${additional_build_mixins}" ]] && echo "${additional_build_mixins}")
 EOF
 )"
 
@@ -20,8 +24,9 @@ run_mixins_label="$(cat <<EOF
 ${shared_packages}
 $([[ -n "${shared_packages}" ]] && echo "${shared_packages}" | sed 's/^/run:/')
 $([[ -n "${run_only_packages}" ]] && echo "${run_only_packages}" | sed 's/^/run:/')
+$([[ -n "${additional_run_mixins}" ]] && echo "${additional_run_mixins}")
 EOF
 )"
 
-echo "${build_mixins_label}" | jq -nR '[inputs | select(length>0)]' > build-mixins-label/mixins.json
-echo "${run_mixins_label}" | jq -nR '[inputs | select(length>0)]' > run-mixins-label/mixins.json
+echo "${build_mixins_label}" | jq -cnR '[inputs | select(length>0)]' > build-mixins-label/mixins.json
+echo "${run_mixins_label}" | jq -cnR '[inputs | select(length>0)]' > run-mixins-label/mixins.json

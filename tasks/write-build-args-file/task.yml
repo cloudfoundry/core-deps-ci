@@ -6,6 +6,8 @@ image_resource:
     repository: cfbuildpacks/bre-ci
 inputs:
   - name: bre-ci
+  - name: mixins-label
+    optional: true
 
 outputs:
   - name: build-args
