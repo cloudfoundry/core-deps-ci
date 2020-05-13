@@ -482,6 +482,9 @@ groups:
     - test-tiny
     - update-tiny-build-cnb-image
 #@ for stack in data.values.stacks:
+  #@ if stack.mixins:
+    - #@ "generate-mixins-labels-{}-cnb-image".format(stack.name)
+  #@ end
   #@ for image in stack.images:
     - #@ "update-{}-{}-base-image".format(stack.name, image)
     - #@ "update-{}-{}-cnb-image".format(stack.name, image)
