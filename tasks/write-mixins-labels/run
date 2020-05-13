@@ -11,15 +11,15 @@ run_only_packages="$(comm -13 build-image-package-list/package-list run-image-pa
 
 build_mixins_label="$(cat <<EOF
 ${shared_packages}
-$(echo "${shared_packages}" | sed 's/^/build:/')
-$(echo "${build_only_packages}" | sed 's/^/build:/')
+$([[ -n "${shared_packages}" ]] && echo "${shared_packages}" | sed 's/^/build:/')
+$([[ -n "${build_only_packages}" ]] && echo "${build_only_packages}" | sed 's/^/build:/')
 EOF
 )"
 
 run_mixins_label="$(cat <<EOF
 ${shared_packages}
-$(echo "${shared_packages}" | sed 's/^/run:/')
-$(echo "${run_only_packages}" | sed 's/^/run:/')
+$([[ -n "${shared_packages}" ]] && echo "${shared_packages}" | sed 's/^/run:/')
+$([[ -n "${run_only_packages}" ]] && echo "${run_only_packages}" | sed 's/^/run:/')
 EOF
 )"
 
