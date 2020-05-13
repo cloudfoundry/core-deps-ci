@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+dpkg-query -f '${binary:Package}\n' -W > package-list/package-list

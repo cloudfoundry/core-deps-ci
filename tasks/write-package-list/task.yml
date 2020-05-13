@@ -1,0 +1,11 @@
+---
+platform: linux
+
+inputs:
+- name: bre-ci
+
+outputs:
+- name: package-list
+
+run:
+  path: bre-ci/tasks/write-package-list/run

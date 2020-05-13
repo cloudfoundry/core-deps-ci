@@ -8,6 +8,7 @@ stacks:
     - run
   build_base: false
   latest: false
+  mixins: false
 - name: base
   id: io.buildpacks.stacks.bionic
   images:
@@ -15,9 +16,11 @@ stacks:
     - run
   build_base: true
   latest: true
+  mixins: true
 - name: tiny
   id: org.cloudfoundry.stacks.tiny
   images:
     - run
   build_base: true
   latest: false
+  mixins: false

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+sort -u build-image-package-list/package-list -o build-image-package-list/package-list
+sort -u run-image-package-list/package-list -o run-image-package-list/package-list
+
+shared_packages="$(comm -12 build-image-package-list/package-list run-image-package-list/package-list)"
+build_only_packages="$(comm -23 build-image-package-list/package-list run-image-package-list/package-list)"
+run_only_packages="$(comm -13 build-image-package-list/package-list run-image-package-list/package-list)"
+
+build_mixins_label="$(cat <<EOF
+${shared_packages}
+$(echo "${shared_packages}" | sed 's/^/build:/')
+$(echo "${build_only_packages}" | sed 's/^/build:/')
+EOF
+)"
+
+run_mixins_label="$(cat <<EOF
+${shared_packages}
+$(echo "${shared_packages}" | sed 's/^/run:/')
+$(echo "${run_only_packages}" | sed 's/^/run:/')
+EOF
+)"
+
+echo "${build_mixins_label}" | jq -nR '[inputs | select(length>0)]' > build-mixins-label/mixins.json
+echo "${run_mixins_label}" | jq -nR '[inputs | select(length>0)]' > run-mixins-label/mixins.json

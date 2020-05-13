@@ -121,14 +121,14 @@ resources:
     paths: #@ [ "full/cnb/{}/**".format(image) ]
     #@ end
 
-  #@ if stack.build_base:
+    #@ if stack.build_base:
 - name: #@ "{}-{}-base-dockerfile".format(stack.name, image)
   type: git
   source:
     uri: https://github.com/paketo-buildpacks/stacks
     branch: master
     paths: #@ [ "{}/dockerfile/{}/**".format(stack.name, image) ]
-  #@ end
+    #@ end
 
 #! Versions
 - name: #@ "{}-{}-cnb-version".format(stack.name, image)
@@ -146,6 +146,25 @@ resources:
     initial_version: 0.0.1
     bucket: cnb-versions
     key: #@ "stacks/{}-{}-base".format(stack.name, image)
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+  #@ end
+
+#! Mixins
+  #@ if stack.mixins:
+- name: #@ stack.name + "-build-mixins"
+  type: s3
+  source:
+    bucket: stack-mixins
+    versioned_file: #@ stack.name + "-build-mixins.json"
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+
+- name: #@ stack.name + "-run-mixins"
+  type: s3
+  source:
+    bucket: stack-mixins
+    versioned_file: #@ stack.name + "-run-mixins.json"
     access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
     secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
   #@ end
@@ -335,7 +354,44 @@ jobs:
       resource: #@ "{}-{}-base-version".format(stack.name, image)
       params:
         bump: patch
+  #@ end
 
+  #@ if stack.mixins:
+- name: #@ "generate-mixins-labels-{}-cnb-image".format(stack.name)
+  public: true
+  plan:
+    - in_parallel:
+      - get: bre-ci
+      #@ for image in stack.images:
+      - get: #@ "{}-{}-cnb-dockerfile".format(stack.name, image)
+        trigger: true
+      - get: #@ "{}-{}-base-image".format(stack.name, image)
+        trigger: true
+        passed: #@ [ "update-{}-{}-base-image".format(stack.name, image) ]
+      #@ end
+    - in_parallel:
+      - task: write-build-package-list
+        file: bre-ci/tasks/write-package-list/task.yml
+        image: #@ "{}-build-base-image".format(stack.name)
+        output_mapping:
+          package-list: build-image-package-list
+      - task: write-run-package-list
+        file: bre-ci/tasks/write-package-list/task.yml
+        image: #@ "{}-run-base-image".format(stack.name)
+        output_mapping:
+          package-list: run-image-package-list
+    - task: write-mixins-labels
+      file: bre-ci/tasks/write-mixins-labels/task.yml
+    - in_parallel:
+      - put: #@ stack.name + "-build-mixins"
+        params:
+          file: build-mixins-label/mixins.json
+      - put: #@ stack.name + "-run-mixins"
+        params:
+          file: run-mixins-label/mixins.json
+  #@ end
+
+  #@ for image in stack.images:
 - name: #@ "update-{}-{}-cnb-image".format(stack.name, image)
   public: true
   plan:
@@ -435,10 +491,13 @@ groups:
 #@ for stack in data.values.stacks:
 - name: #@ stack.name
   jobs:
-    #@ if stack.name == "tiny":
+  #@ if stack.mixins:
+    - #@ "generate-mixins-labels-{}-cnb-image".format(stack.name)
+  #@ end
+  #@ if stack.name == "tiny":
     - test-tiny
     - update-tiny-build-cnb-image
-    #@ end
+  #@ end
   #@ for image in stack.images:
     - #@ "update-{}-{}-base-image".format(stack.name, image)
     - #@ "update-{}-{}-cnb-image".format(stack.name, image)
