@@ -12,4 +12,6 @@ fi
 
 if [[ -d mixins-label ]]; then
   echo "mixins=$(cat mixins-label/*)" >> build-args/args
+else
+  echo "mixins=[]" >> build-args/args
 fi
