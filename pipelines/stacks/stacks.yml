@@ -244,7 +244,7 @@ jobs:
       file: bre-ci/tasks/write-build-args-file/task.yml
       params:
         BASE_IMAGE: "gcr.io/paketo-buildpacks/build:base"
-        STACK_ID: "org.cloudfoundry.stacks.tiny"
+        STACK_ID: "io.buildpacks.stacks.tiny"
     - task: build-tiny-build-cnb-image
       privileged: true
       file: bre-ci/tasks/build-stack-image/task.yml
@@ -261,7 +261,7 @@ jobs:
       privileged: true
       file: bre-ci/tasks/test-stack/task.yml
       params:
-        STACK_ID: org.cloudfoundry.stacks.tiny
+        STACK_ID: io.buildpacks.stacks.tiny
         TAG: tiny-cnb
         IMAGE_TYPE: build
         IMAGE: gcr.io/cf-buildpacks-releng/build-rc:tiny-cnb

@@ -30,7 +30,7 @@ builders:
   - name: REPO
     value: paketo-buildpacks/builder
   - name: STACK
-    value: "org.cloudfoundry.stacks.tiny"
+    value: "io.buildpacks.stacks.tiny"
   - name: BUILD_IMAGE
     value: "gcr.io/paketo-buildpacks/build:tiny-cnb"
   - name: RUN_IMAGE
