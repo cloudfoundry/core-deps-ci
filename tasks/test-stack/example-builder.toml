@@ -1,0 +1,23 @@
+description = "Tiny base image (bionic build image, distroless run image) with buildpacks for Golang"
+
+[[buildpacks]]
+uri = "buildpacks/go.tgz"
+
+[[buildpacks]]
+uri = "buildpacks/go-compiler.tgz"
+
+[[buildpacks]]
+uri = "buildpacks/go-mod.tgz"
+
+[[buildpacks]]
+uri = "buildpacks/dep.tgz"
+
+[[order]]
+group = [
+  { id = "org.cloudfoundry.go" },
+]
+
+[stack]
+id = "org.cloudfoundry.stacks.tiny"
+build-image = "cloudfoundry/build:tiny-cnb"
+run-image = "cloudfoundry/run:tiny-cnb"

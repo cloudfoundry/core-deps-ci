@@ -18,7 +18,7 @@ stacks:
   latest: true
   mixins: true
 - name: tiny
-  id: io.buildpacks.stacks.tiny
+  id: org.cloudfoundry.stacks.tiny
   images:
     - run
   build_base: true
