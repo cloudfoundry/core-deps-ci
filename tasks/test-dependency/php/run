@@ -50,13 +50,14 @@ check_version() {
 check_php_parsing() {
   set +e
 
-  ./php/bin/php -f "${parent_dir}/fixtures/hello.php" > output.html
+  if ! ./php/bin/php -f "${parent_dir}/fixtures/hello.php" > output.html; then
+    echo "Failed to run php"
+    exit 1
+  fi
 
-  diff "${parent_dir}/fixtures/hello.html" output.html > /dev/null
-  succeeded="$?"
-
-  if [[ ! "${succeeded}" ]]; then
-    echo "Failed to parse php file"
+  if ! diff "${parent_dir}/fixtures/hello.html" output.html > /dev/null; then
+    echo "Actual output did not match expected output:"
+    diff -u "${parent_dir}/fixtures/hello.html" output.html
     exit 1
   fi
 
@@ -66,14 +67,14 @@ check_php_parsing() {
 check_installed_modules() {
   set +e
 
-  ./php/bin/php -c "$PWD/php/etc/php.ini" -m > modules.txt
+  if ! ./php/bin/php -c "$PWD/php/etc/php.ini" -m > modules.txt; then
+    echo "Failed to run php"
+    exit 1
+  fi
 
-  diff "${parent_dir}/fixtures/${major_minor_version}/expected-modules.txt" modules.txt > diff.txt
-  succeeded="$?"
-
-  if [[ ! "${succeeded}" ]]; then
+  if ! diff "${parent_dir}/fixtures/${major_minor_version}/expected-modules.txt" modules.txt > /dev/null; then
     echo "Could not find all expected modules. Diff:"
-    printf diff.txt
+    diff -u "${parent_dir}/fixtures/${major_minor_version}/expected-modules.txt" modules.txt
     exit 1
   fi
 

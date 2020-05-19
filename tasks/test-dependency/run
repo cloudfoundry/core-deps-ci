@@ -7,11 +7,25 @@ parent_dir="$(cd "$(dirname "$0")" && pwd)"
 dependency_name="$(jq -r .name source/data.json)"
 version="$(jq -r .version source/data.json)"
 
-mixins="${MIXINS//,/ }"
+package_names=""
 
-if [[ "${mixins}" != "" ]]; then
-  command="apt-get install ${mixins}"
-  apt-get update && eval "${command}"
+for mixin in $(echo "${MIXINS}" | tr ',' "\n"); do
+  if [[ $mixin = set:* ]]; then
+    echo "This task does not support 'set:' mixins"
+    exit 1
+  elif [[ $mixin = run:* ]]; then
+    continue
+  elif [[ $mixin = build:* ]]; then
+    package_names="${package_names} ${mixin#"build:"}"
+  else
+    package_names="${package_names} ${mixin}"
+  fi
+done
+
+if [[ "${package_names}" != "" ]]; then
+  apt-get -qqy update
+  # shellcheck disable=SC2086
+  apt-get -qqy install ${package_names}
 fi
 
 "${parent_dir}/${dependency_name}/run" "${version}"

@@ -21,6 +21,14 @@ dependencies:
   source_type: node
 - name: php
   source_type: php
+  mixins:
+  - build:libargon2-0-dev
+  - build:libcurl4
+  - build:libgd-dev
+  - build:libmagickwand-dev
+  - build:libonig-dev
+  - build:libxml2-dev
+  - build:libyaml-dev
 - name: yarn
   source_type: yarn
   requires:
