@@ -22,13 +22,13 @@ dependencies:
 - name: php
   source_type: php
   mixins:
-  - build:libargon2-0-dev
-  - build:libcurl4
-  - build:libgd-dev
-  - build:libmagickwand-dev
-  - build:libonig-dev
-  - build:libxml2-dev
-  - build:libyaml-dev
+  - libargon2-0
+  - libcurl4
+  - libgd3
+  - libmagickwand-6.q16-3
+  - libonig4
+  - libxml2
+  - libyaml-0-2
 - name: yarn
   source_type: yarn
   requires:
