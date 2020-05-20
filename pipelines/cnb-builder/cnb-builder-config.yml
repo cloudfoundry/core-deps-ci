@@ -73,6 +73,7 @@ cnbs:
 - name: httpd
   git_repo: "https://github.com/paketo-buildpacks/httpd"
   skip_stack:
+    - "bionic"
     - "tiny"
 - name: nginx
   git_repo: "https://github.com/paketo-buildpacks/nginx"
