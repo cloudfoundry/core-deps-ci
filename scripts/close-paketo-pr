@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+if [[ -z $1 ]]; then
+  echo "Usage: $0 <Pull Request URL>"
+  exit 1
+fi
+
+source "$HOME/workspace/bp-envs/scripts/login_credhub_public"
+token="$(credhub get --name /concourse/main/paketo-buildpacks-github-token --quiet)"
+
+pr_url=$1
+org="$(echo "${pr_url}" | cut -d '/' -f4)"
+repo="$(echo "${pr_url}" | cut -d '/' -f5)"
+pr_number="$(echo "${pr_url}" | cut -d '/' -f7)"
+
+curl -X PATCH \
+  -H "Authorization: token ${token}" \
+  -d '{"state":"closed"}' \
+  "https://api.github.com/repos/${org}/${repo}/pulls/${pr_number}"
