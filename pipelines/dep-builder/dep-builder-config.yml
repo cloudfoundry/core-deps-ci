@@ -14,7 +14,6 @@ dependencies:
   source_type: go
 - name: httpd
   source_type: httpd
-  skip_test: true
 - name: nginx
   source_type: nginx
 - name: node
