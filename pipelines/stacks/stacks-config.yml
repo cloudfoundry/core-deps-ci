@@ -18,7 +18,7 @@ stacks:
   latest: true
   mixins: true
 - name: tiny
-  id: org.cloudfoundry.stacks.tiny
+  id: io.paketo.stacks.tiny
   images:
     - run
   build_base: true

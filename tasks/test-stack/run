@@ -27,16 +27,16 @@ create_builder() {
 description = "Test base image (bionic build image, distroless run image) with buildpacks for Golang"
 
 [[buildpacks]]
-uri = "buildpacks/go.tgz"
+uri = "buildpacks/go-0.0.7.tgz"
 
 [[buildpacks]]
-uri = "buildpacks/go-compiler.tgz"
+uri = "buildpacks/go-compiler-0.0.156.tgz"
 
 [[buildpacks]]
-uri = "buildpacks/go-mod.tgz"
+uri = "buildpacks/go-mod-0.0.126.tgz"
 
 [[buildpacks]]
-uri = "buildpacks/dep.tgz"
+uri = "buildpacks/dep-0.0.137.tgz"
 
 [[order]]
 group = [
