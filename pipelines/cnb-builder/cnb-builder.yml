@@ -54,9 +54,9 @@
 #@   return published_cnbs
 #@ end
 
-#@ def cnbs_for_builder(builder):
+#@ def git_cnbs_for_builder(builder):
 #@   cnbs = []
-#@   for cnb in data.values.cnbs:
+#@   for cnb in data.values.git_cnbs:
 #@     include_cnb = True
 #@     if hasattr(cnb, "skip_stack"):
 #@       for stack in cnb.skip_stack:
@@ -72,7 +72,25 @@
 #@   return cnbs
 #@ end
 
-#@ def get_cnb_source_config(cnb):
+#@ def github_cnbs_for_builder(builder):
+#@   cnbs = []
+#@   for cnb in data.values.github_cnbs:
+#@     include_cnb = True
+#@     if hasattr(cnb, "skip_stack"):
+#@       for stack in cnb.skip_stack:
+#@         if stack == builder.stack:
+#@           include_cnb = False
+#@         end
+#@       end
+#@     end
+#@     if include_cnb:
+#@       cnbs.append(cnb)
+#@     end
+#@   end
+#@   return cnbs
+#@ end
+
+#@ def get_git_cnb_source_config(cnb):
 #@   config = {"uri": cnb.git_repo, "tag_filter": 'v*'}
 #@   if hasattr(cnb, "private_key"):
 #@     config.update({"private_key": cnb.private_key})
@@ -118,11 +136,20 @@ resources:
     private_key: #@ data.values.cnb_builder_private_key
     branch: master
 
-#@ for cnb in data.values.cnbs:
+#@ for cnb in data.values.git_cnbs:
 - name: #@ cnb.name + "-cnb-release"
   type: git
-  check_every: 15m #! to avoid thundering herd of cnb autobumping
-  source: #@ get_cnb_source_config(cnb)
+  source: #@ get_git_cnb_source_config(cnb)
+#@ end
+
+#@ for cnb in data.values.github_cnbs:
+- name: #@ cnb.name + "-cnb-release"
+  type: github-release
+  source:
+    user: #@ cnb.org
+    repository: #@ cnb.repo
+    access_token: ((buildpacks-github-token))
+    globs: ['*.cnb']
 #@ end
 
 #@ for published_cnb in data.values.published_cnbs:
@@ -282,7 +309,12 @@ jobs:
         trigger: true
       - get: #@ builder.stack + "-run-cnb-image"
         trigger: true
-    #@ for cnb in cnbs_for_builder(builder):
+    #@ for cnb in git_cnbs_for_builder(builder):
+      - get: #@ cnb.name + "-cnb"
+        resource: #@ cnb.name + "-cnb-release"
+        trigger: true
+    #@ end
+    #@ for cnb in github_cnbs_for_builder(builder):
       - get: #@ cnb.name + "-cnb"
         resource: #@ cnb.name + "-cnb-release"
         trigger: true
@@ -299,16 +331,31 @@ jobs:
         resource: #@ builder.version_key + "-version"
         params:
           pre: rc
-    - task: get-cnb-sources
+    - task: get-git-cnb-sources
       image: ci-image
       config:
         platform: linux
         inputs:
-    #@ for cnb in cnbs_for_builder(builder):
+    #@ for cnb in git_cnbs_for_builder(builder):
           - name: #@ cnb.name + "-cnb"
     #@ end
         outputs:
-          - name: sources
+          - name: git-sources
+        run:
+          path: bash
+          args:
+            - -cl
+            - cp -r *-cnb sources/
+    - task: get-github-cnb-sources
+      image: ci-image
+      config:
+        platform: linux
+        inputs:
+    #@ for cnb in github_cnbs_for_builder(builder):
+          - name: #@ cnb.name + "-cnb"
+    #@ end
+        outputs:
+          - name: github-sources
         run:
           path: bash
           args:
