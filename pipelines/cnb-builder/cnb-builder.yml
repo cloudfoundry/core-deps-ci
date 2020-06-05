@@ -326,6 +326,7 @@ jobs:
         resource: #@ published_cnbs.name
         trigger: true
     #@ end
+      - get: cnb-builder
       - get: version
         resource: #@ builder.version_key + "-version"
         params:
