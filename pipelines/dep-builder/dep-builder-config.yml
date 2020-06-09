@@ -14,6 +14,8 @@ dependencies:
   source_type: go
 - name: httpd
   source_type: httpd
+  mixins:
+  - libexpat1
 - name: nginx
   source_type: nginx
 - name: node
