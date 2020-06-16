@@ -81,6 +81,7 @@ github_cnbs:
   org: paketo-buildpacks
   repo: httpd
   skip_stack:
+    - "bionic"
     - "tiny"
 - name: nginx
   org: paketo-buildpacks
