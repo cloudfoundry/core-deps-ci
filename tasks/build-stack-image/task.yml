@@ -8,6 +8,9 @@ inputs:
   - name: stacks
   - name: build-args
     optional: true
+  - name: docker_creds
+    optional: true
+
 run:
   path: build
 
@@ -17,3 +20,4 @@ outputs:
 params:
   CONTEXT:
   BUILD_ARGS_FILE:
+  DOCKER_CONFIG: docker_creds
