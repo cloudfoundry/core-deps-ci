@@ -462,6 +462,8 @@ jobs:
           input_mapping:
             mixins-label: #@ "{}-{}-mixins".format(stack.name, image)
           #@ end
+          output_mapping:
+            build-args: #@ image + "-build-args"
         - task: write-docker-creds
           file: bre-ci/tasks/write-docker-creds/task.yml
           params:
@@ -472,6 +474,7 @@ jobs:
           file: bre-ci/tasks/build-stack-image/task.yml
           input_mapping:
             stacks: #@ "{}-{}-cnb-dockerfile".format(base_image, image)
+            build-args: #@ image + "-build-args"
           output_mapping:
             image: #@ image + "-image"
           params:
