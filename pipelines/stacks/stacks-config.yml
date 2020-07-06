@@ -1,9 +1,12 @@
 #@data/values
 ---
+images:
+- build
+- run
 stacks:
 - name: full-cf
   id: org.cloudfoundry.stacks.cflinuxfs3
-  images:
+  base_images:
     - build
     - run
   build_base: false
@@ -11,7 +14,7 @@ stacks:
   mixins: false
 - name: base
   id: io.buildpacks.stacks.bionic
-  images:
+  base_images:
     - build
     - run
   build_base: true
@@ -19,7 +22,7 @@ stacks:
   mixins: true
 - name: tiny
   id: io.paketo.stacks.tiny
-  images:
+  base_images:
     - run
   build_base: true
   latest: false
