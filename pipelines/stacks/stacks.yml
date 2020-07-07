@@ -572,13 +572,15 @@ jobs:
         resource: #@ "{}-{}-base-image-rc".format(stack.name, image)
         trigger: true
         passed: #@ [ "test-{}-cnb-image-rcs".format(stack.name) ]
-        format: oci
+        params:
+          format: oci
         #@ end
       - get: #@ image + "-cnb-image"
         resource: #@ "{}-{}-cnb-image-rc".format(stack.name, image)
         trigger: true
         passed: #@ [ "test-{}-cnb-image-rcs".format(stack.name) ]
-        format: oci
+        params:
+          format: oci
       #@ end
       - get: base-image-tags
         resource: #@ stack.name + "-base-image-tags"
@@ -598,32 +600,32 @@ jobs:
       #@ for image in stack.base_images:
       - put: #@ "{}-{}-base-image".format(stack.name, image)
         params:
-          additional_tags: base-image-tags
+          additional_tags: #@ "base-image-tags/{}-base-image-tags".format(stack.name)
           image: #@ image + "-base-image/image.tar"
       - put: #@ "{}-{}-cloudfoundry-base-image".format(stack.name, image)
         params:
           #@ if stack.name != "full-cf":
-          additional_tags: base-image-tags
+          additional_tags: #@ "base-image-tags/{}-base-image-tags".format(stack.name)
           #@ else:
-          additional_tags: base-image-tags-cf
+          additional_tags: #@ "base-image-tags-cf/{}-base-image-tags-cf".format(stack.name)
           #@ end
           image: #@ image + "-base-image/image.tar"
       #@ end
       #@ for image in data.values.images:
       - put: #@ "{}-{}-cnb-image".format(stack.name, image)
         params:
-          additional_tags: cnb-image-tags
+          additional_tags: #@ "cnb-image-tags/{}-cnb-image-tags".format(stack.name)
           image: #@ image + "-cnb-image/image.tar"
       - put: #@ "{}-{}-dockerhub-cnb-image".format(stack.name, image)
         params:
-          additional_tags: cnb-image-tags
+          additional_tags: #@ "cnb-image-tags/{}-cnb-image-tags".format(stack.name)
           image: #@ image + "-cnb-image/image.tar"
       - put: #@ "{}-{}-cloudfoundry-cnb-image".format(stack.name, image)
         params:
           #@ if stack.name != "full-cf":
-          additional_tags: cnb-image-tags
+          additional_tags: #@ "cnb-image-tags/{}-cnb-image-tags".format(stack.name)
           #@ else:
-          additional_tags: cnb-image-tags-cf
+          additional_tags: #@ "cnb-image-tags-cf/{}-cnb-image-tags-cf".format(stack.name)
           #@ end
           image: #@ image + "-cnb-image/image.tar"
       #@ end
