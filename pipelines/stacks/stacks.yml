@@ -567,7 +567,7 @@ jobs:
           pre: #@ stack.name
           pre_without_version: true
       #@ for image in data.values.images:
-        #@ if stack.name != "tiny":
+        #@ if has_base_image(stack, image):
       - get: #@ image + "-base-image"
         resource: #@ "{}-{}-base-image-rc".format(stack.name, image)
         trigger: true
