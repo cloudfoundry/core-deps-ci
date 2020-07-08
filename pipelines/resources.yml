@@ -11,7 +11,6 @@ resources:
   source:
     uri: git@github.com:pivotal/external-dependency-resource.git
     private_key: ((external-dependency-resource-deploy-key.private_key))
-    branch: master
 
 - name: depwatcher
   type: git
