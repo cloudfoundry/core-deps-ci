@@ -31,7 +31,6 @@ resources:
   type: git
   source:
     uri: git@github.com:pivotal/bre-ci.git
-    branch: master
     private_key: ((bre-ci-deploy-key.private_key))
 - name: buildpacks-ci
   type: git

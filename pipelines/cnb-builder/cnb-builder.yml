@@ -127,7 +127,6 @@ resources:
   source:
     uri: git@github.com:pivotal/bre-ci.git
     private_key: ((bre-ci-deploy-key.private_key))
-    branch: master
 
 - name: cnb-builder
   type: git
