@@ -289,6 +289,10 @@ jobs:
         params:
           save: true
     #@ end
+    #@ if stack.name == "tiny":
+      - get: base-build-base-image-rc
+        trigger: true
+    #@ end
       - get: bionic-image
         trigger: true
       - get: version
@@ -401,19 +405,23 @@ jobs:
     #@ for image in data.values.images:
       #@ base_image = get_base_image(stack, image)
       - get: #@ "{}-{}-cnb-dockerfile".format(base_image, image)
+        #@ if has_base_image(stack, image):
         trigger: true
+        #@ end
       #@ if stack.mixins:
         passed: #@ [ "generate-mixins-labels-{}-cnb-image".format(base_image) ]
       #@ elif has_base_image(stack, image):
         passed: #@ [ "create-{}-base-image-rcs".format(base_image) ]
       #@ end
       - get: #@ "{}-{}-base-image-rc".format(base_image, image)
+        #@ if has_base_image(stack, image):
         trigger: true
+        #@ end
         passed:
       #@ if stack.mixins:
         - #@ "generate-mixins-labels-{}-cnb-image".format(base_image)
-      #@ elif has_base_image(stack, image):
-        - #@ "create-{}-base-image-rcs".format(base_image, image)
+      #@ else:
+        - #@ "create-{}-base-image-rcs".format(stack.name, image)
       #@ end
       #@ if stack.mixins:
       - get: #@ "{}-{}-mixins".format(stack.name, image)
