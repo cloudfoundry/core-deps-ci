@@ -100,7 +100,6 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/cflinuxfs3
-    branch: master
 
 - name: tiny
   type: git

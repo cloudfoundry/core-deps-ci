@@ -78,14 +78,12 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/cflinuxfs3.git
-    branch: master
     private_key: ((cflinuxfs3-deploy-key.private_key))
 
 - name: cflinuxfs3-github-tags
   type: git
   source:
     uri: git@github.com:cloudfoundry/cflinuxfs3.git
-    branch: master
     private_key: ((cflinuxfs3-deploy-key.private_key))
     tag_filter: "*"
 
@@ -93,7 +91,6 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/cflinuxfs3.git
-    branch: master
     private_key: ((cflinuxfs3-deploy-key.private_key))
     ignore_paths:
     - receipt.cflinuxfs3.x86_64
@@ -130,7 +127,6 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/cflinuxfs3-release.git
-    branch: master
     private_key: ((cflinuxfs3-release-deploy-key.private_key))
 
 - name: capi-release
