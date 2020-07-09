@@ -133,7 +133,6 @@ resources:
   source:
     uri: #@ data.values.cnb_builder_uri
     private_key: #@ data.values.cnb_builder_private_key
-    branch: master
 
 #@ for cnb in data.values.git_cnbs:
 - name: #@ cnb.name + "-cnb-release"
