@@ -103,7 +103,6 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-    branch: master
     paths: [ new-cve-notifications/ubuntu18.04.yml ]
     private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
 
@@ -111,7 +110,6 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-    branch: master
     paths: [ receipt.cflinuxfs3.x86_64 ]
     private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
     tag_filter: "newpackages_cflinuxfs3_*"
@@ -120,7 +118,6 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-    branch: master
     private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
 
 - name: cflinuxfs3-release
