@@ -1,0 +1,639 @@
+---
+resources:
+- name: bbl-state
+  source:
+    branch: master
+    private_key: ((buildpacks-envs-deploy-key.private_key))
+    uri: git@github.com:cloudfoundry/buildpacks-envs
+  type: git
+- name: bosh-deployment
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/bosh-deployment.git
+  type: git
+- name: buildpacks-ci
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/buildpacks-ci
+  type: git
+- name: cf-acceptance-tests
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/cf-acceptance-tests.git
+  type: git
+- name: cf-deployment
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/cf-deployment
+  type: git
+- name: cf-deployment-concourse-tasks
+  source:
+    branch: master
+    tag_filter: v8.*
+    uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+  type: git
+- name: cf-deployment-concourse-tasks-latest
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+  type: git
+- name: cflinuxfs2-cf-deployment
+  source:
+    deployment: cf
+    skip_check: true
+  type: bosh-deployment
+- name: cflinuxfs2-rootfs-smoke-test-deployment
+  source:
+    deployment: rootfs-smoke-test
+    skip_check: true
+  type: bosh-deployment
+- name: gcp-stemcell
+  source:
+    name: bosh-google-kvm-ubuntu-xenial-go_agent
+  type: bosh-io-stemcell
+- name: new-cves
+  source:
+    branch: main
+    paths:
+    - new-cve-notifications/ubuntu14.04.yml
+    private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
+    uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+  type: git
+- name: p-cflinuxfs2
+  source:
+    branch: master
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+    uri: git@github.com:pivotal-cf/p-cflinuxfs2.git
+  type: git
+- name: p-cflinuxfs2-build-trigger
+  source:
+    branch: master
+    ignore_paths:
+    - cflinuxfs2/cflinuxfs2_receipt
+    - README.md
+    - .gitignore
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+    uri: git@github.com:pivotal-cf/p-cflinuxfs2.git
+  type: git
+- name: p-cflinuxfs2-esm-github-release
+  source:
+    access_token: ((buildpacks-github-token))
+    owner: pivotal-cf
+    repository: p-cflinuxfs2-release
+  type: github-release
+- name: p-cflinuxfs2-github-release-drafts
+  source:
+    access_token: ((buildpacks-github-token))
+    drafts: true
+    repository: p-cflinuxfs2
+    user: pivotal-cf
+  type: github-release
+- name: p-cflinuxfs2-github-tags
+  source:
+    branch: master
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+    tag_filter: '*'
+    uri: git@github.com:pivotal-cf/p-cflinuxfs2.git
+  type: git
+- name: p-cflinuxfs2-release
+  source:
+    branch: master
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+    uri: git@github.com:pivotal-cf/p-cflinuxfs2-release.git
+  type: git
+- name: p-cflinuxfs2-release-pivnet-release
+  source:
+    api_token: ((pivnet-refresh-token))
+    endpoint: https://network.pivotal.io
+    product_slug: cflinuxfs2-esm
+  type: pivnet
+- name: public-robots
+  source:
+    branch: main
+    private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
+    uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+  type: git
+- name: receipt-diff
+  source:
+    branch: main
+    paths:
+    - receipt-diffs/cflinuxfs2-diff
+    private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
+    tag_filter: newpackages_cflinuxfs2_*
+    uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+  type: git
+- name: receipt-s3
+  source:
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    bucket: p-cflinuxfs2
+    regexp: rootfs/cflinuxfs2_receipt-(.*)
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+  type: s3
+- name: stack-s3
+  source:
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    bucket: p-cflinuxfs2
+    regexp: rootfs/cflinuxfs2-(.*).tar.gz
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+  type: s3
+- name: version
+  source:
+    access_key_id: ((pivotal-buildpacks-s3-access-key))
+    bucket: pivotal-buildpacks
+    key: versions/stack-cflinuxfs2
+    secret_access_key: ((pivotal-buildpacks-s3-secret-key))
+  type: semver
+jobs:
+- name: build-rootfs
+  plan:
+  - in_parallel:
+      steps:
+      - get: previous-cflinuxfs2-release
+        resource: p-cflinuxfs2-github-tags
+      - get: buildpacks-ci
+      - get: new-cves
+        trigger: true
+      - get: cflinuxfs2
+        resource: p-cflinuxfs2
+      - get: cflinuxfs2-build-trigger
+        resource: p-cflinuxfs2-build-trigger
+        trigger: true
+      - get: version
+        params:
+          pre: rc
+      - get: public-robots
+  - do:
+    - file: buildpacks-ci/tasks/make-rootfs-cflinuxfs2/task.yml
+      params:
+        ESM_TOKEN: ((ci-cflinuxfs2-esm-token))
+      privileged: true
+      task: make-rootfs
+    - file: buildpacks-ci/tasks/test-cflinuxfs2/task.yml
+      params:
+        STACK: cflinuxfs2
+      privileged: true
+      task: test-rootfs
+    - params:
+        file: cflinuxfs2-artifacts/cflinuxfs2-*.tar.gz
+      put: stack-s3
+    - params:
+        file: receipt-artifacts/cflinuxfs2_receipt-*
+      put: receipt-s3
+    - params:
+        file: version/number
+      put: version
+    - file: buildpacks-ci/tasks/generate-cflinuxfs2-receipt-diff/task.yml
+      params:
+        STACK: cflinuxfs2
+      task: generate-receipt-diff
+    - params:
+        rebase: true
+        repository: public-robots-artifacts
+        tag: git-tags/TAG
+      put: public-robots
+  serial: true
+  serial_groups:
+  - p-cflinuxfs2
+- name: cats
+  plan:
+  - in_parallel:
+      steps:
+      - get: bbl-state
+      - get: buildpacks-ci
+      - get: cf-deployment-concourse-tasks
+        resource: cf-deployment-concourse-tasks-latest
+      - get: cf-acceptance-tests
+      - get: new-cves
+        passed:
+        - deploy
+      - get: stack-s3
+        passed:
+        - deploy
+      - get: version
+        passed:
+        - deploy
+        trigger: true
+      - get: receipt-s3
+        passed:
+        - deploy
+      - get: cflinuxfs2
+        passed:
+        - deploy
+        resource: p-cflinuxfs2
+  - do:
+    - file: buildpacks-ci/tasks/get-cf-creds/task.yml
+      params:
+        ENV_NAME: cflinuxfs2
+      task: get-cf-creds
+    - file: buildpacks-ci/tasks/write-cats-config/task.yml
+      params:
+        APPS_DOMAIN: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
+        DIEGO_DOCKER_ON: true
+        STACKS: cflinuxfs2
+      task: write-cats-config
+    - attempts: 3
+      file: cf-deployment-concourse-tasks/run-cats/task.yml
+      params:
+        CONFIG_FILE_PATH: integration_config.json
+        FLAKE_ATTEMPTS: 3
+        NODES: 12
+      task: cats
+  serial: true
+  serial_groups:
+  - p-cflinuxfs2
+- name: reset-minor-version-to-rc
+  plan:
+  - get: version
+    params:
+      bump: minor
+      pre: rc
+    passed:
+    - release-p-cflinuxfs2
+    trigger: true
+  - params:
+      file: version/number
+    put: version
+  serial: true
+- name: finalize-security-notices
+  plan:
+  - in_parallel:
+      steps:
+      - get: buildpacks-ci
+        resource: buildpacks-ci
+      - get: version
+        passed:
+        - generate-release-notes
+        trigger: true
+  - do:
+    - attempts: 20
+      file: buildpacks-ci/tasks/finalize-security-notice-stories/task.yml
+      params:
+        STACK: cflinuxfs2
+        TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
+        TRACKER_PROJECT_ID: ((cf-buildpacks-private-tracker-id))
+        TRACKER_REQUESTER_ID: ((cf-buildpacks-requester-id))
+      task: finalize-security-notices
+  serial: true
+- name: delete-deployment
+  plan:
+  - in_parallel:
+      steps:
+      - get: version
+        passed:
+        - check-for-race-condition
+        trigger: true
+      - get: bbl-state
+      - get: buildpacks-ci
+  - file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+    params:
+      ENV_NAME: cflinuxfs2
+    task: create-deployment-source-config
+  - params:
+      delete:
+        enabled: true
+        force: true
+      source_file: deployment-source-config/source_file.yml
+    put: cflinuxfs2-rootfs-smoke-test-deployment
+  - params:
+      delete:
+        enabled: true
+        force: true
+      source_file: deployment-source-config/source_file.yml
+    put: cflinuxfs2-cf-deployment
+  serial: true
+  serial_groups:
+  - p-cflinuxfs2
+- name: bbl-up
+  plan:
+  - in_parallel:
+      steps:
+      - get: cf-deployment-concourse-tasks
+      - get: bbl-state
+      - get: bbl-config
+        resource: bbl-state
+      - get: bosh-deployment
+      - get: buildpacks-ci
+      - get: receipt-diff
+        trigger: true
+      - get: new-cves
+        passed:
+        - build-rootfs
+      - get: stack-s3
+        passed:
+        - build-rootfs
+      - get: version
+        passed:
+        - build-rootfs
+      - get: receipt-s3
+        passed:
+        - build-rootfs
+      - get: cflinuxfs2
+        passed:
+        - build-rootfs
+        resource: p-cflinuxfs2
+  - ensure:
+      params:
+        rebase: true
+        repository: updated-bbl-state
+      put: bbl-state
+    file: cf-deployment-concourse-tasks/bbl-up/task.yml
+    input_mapping:
+      ops-files: bosh-deployment
+    params:
+      BBL_ENV_NAME: cflinuxfs2
+      BBL_GCP_PROJECT_ID: cf-buildpacks
+      BBL_GCP_REGION: us-east1
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+      BBL_GCP_ZONE: us-east1-c
+      BBL_IAAS: gcp
+      BBL_LB_CERT: ((cflinuxfs2-lb-cert.certificate))
+      BBL_LB_KEY: ((cflinuxfs2-lb-cert.private_key))
+      BBL_STATE_DIR: cflinuxfs2
+      LB_DOMAIN: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
+    task: bbl-up
+  - file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
+    params:
+      ENV_NAME: cflinuxfs2
+      GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+    task: add-gcp-parent-dns-record
+  serial: true
+  serial_groups:
+  - p-cflinuxfs2
+- name: deploy
+  plan:
+  - do:
+    - in_parallel:
+        steps:
+        - get: new-cves
+          passed:
+          - bbl-up
+        - get: stack-s3
+          passed:
+          - bbl-up
+        - get: version
+          passed:
+          - bbl-up
+          trigger: true
+        - get: receipt-s3
+          passed:
+          - bbl-up
+        - get: cflinuxfs2
+          passed:
+          - bbl-up
+          resource: p-cflinuxfs2
+        - get: cflinuxfs2-release
+          resource: p-cflinuxfs2-release
+        - get: buildpacks-ci
+        - get: bbl-state
+        - get: cf-deployment
+        - get: gcp-stemcell
+        - get: bosh-deployment
+    - in_parallel:
+        steps:
+        - file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+          params:
+            ENV_NAME: cflinuxfs2
+          task: create-deployment-source-config
+        - file: buildpacks-ci/tasks/overwrite-cflinuxfs2-release/task.yml
+          params:
+            ACCESS_KEY_ID: ((pivotal-offline-buildpacks-s3-access-key))
+            ROOTFS_RELEASE: cflinuxfs2
+            SECRET_ACCESS_KEY: ((pivotal-offline-buildpacks-s3-secret-key))
+          task: overwrite-cflinuxfs2-release
+    - params:
+        manifest: cflinuxfs2-release-artifacts/manifests/manifest.yml
+        releases:
+        - cflinuxfs2-release-artifacts/dev_releases/cflinuxfs2/*.tgz
+        source_file: deployment-source-config/source_file.yml
+        stemcells:
+        - gcp-stemcell/*.tgz
+      put: cflinuxfs2-rootfs-smoke-test-deployment
+    - file: buildpacks-ci/tasks/run-rootfs-smoke-test/task.yml
+      params:
+        ENV_NAME: cflinuxfs2
+      task: run-rootfs-smoke-test
+    - params:
+        manifest: cf-deployment/cf-deployment.yml
+        ops_files:
+        - buildpacks-ci/deployments/operations/no-canaries.yml
+        - buildpacks-ci/deployments/operations/cflinuxfs2-rootfs-certs-as-list.yml
+        - cflinuxfs2-release-artifacts/use-dev-release-opsfile.yml
+        - cf-deployment/operations/use-latest-stemcell.yml
+        releases:
+        - cflinuxfs2-release-artifacts/dev_releases/cflinuxfs2/*.tgz
+        source_file: deployment-source-config/source_file.yml
+        stemcells:
+        - gcp-stemcell/*.tgz
+        vars:
+          system_domain: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
+      put: cflinuxfs2-cf-deployment
+  serial: true
+  serial_groups:
+  - p-cflinuxfs2
+- name: bbl-destroy
+  plan:
+  - in_parallel:
+      steps:
+      - get: cf-deployment-concourse-tasks
+      - get: bbl-state
+      - get: buildpacks-ci
+      - get: version
+        passed:
+        - delete-deployment
+        trigger: true
+  - file: buildpacks-ci/tasks/remove-gcp-parent-dns-record/task.yml
+    params:
+      ENV_NAME: cflinuxfs2
+      GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+    task: remove-gcp-parent-dns-record
+  - ensure:
+      params:
+        rebase: true
+        repository: updated-bbl-state
+      put: bbl-state
+    file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+    params:
+      BBL_GCP_PROJECT_ID: cf-buildpacks
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+      BBL_STATE_DIR: cflinuxfs2
+    task: bbl-destroy
+  serial: true
+  serial_groups:
+  - p-cflinuxfs2
+- name: check-for-race-condition
+  plan:
+  - in_parallel:
+      steps:
+      - get: buildpacks-ci
+      - get: version
+        passed:
+        - cats
+        trigger: true
+      - get: latest-version
+        resource: version
+  - file: buildpacks-ci/tasks/check-for-rootfs-race-condition/task.yml
+    task: check-for-rootfs-race-condition
+  serial: true
+  serial_groups:
+  - p-cflinuxfs2
+- name: release-p-cflinuxfs2
+  plan:
+  - in_parallel:
+      steps:
+      - get: buildpacks-ci
+      - get: new-cves
+        passed:
+        - cats
+      - get: stack-s3
+        passed:
+        - cats
+      - get: receipt-s3
+        passed:
+        - cats
+      - get: rootfs
+        passed:
+        - cats
+        resource: p-cflinuxfs2
+      - get: version
+        params:
+          bump: final
+        passed:
+        - bbl-destroy
+        trigger: true
+  - do:
+    - file: buildpacks-ci/tasks/update-cflinuxfs2-receipt/task.yml
+      params:
+        STACK: cflinuxfs2
+      task: update-receipt
+    - file: buildpacks-ci/tasks/update-rootfs-filename/task.yml
+      params:
+        STACK: cflinuxfs2
+      task: update-filename
+    - params:
+        rebase: true
+        repository: new-rootfs-commit
+        tag: version/number
+      put: p-cflinuxfs2
+    - params:
+        file: rootfs-archive/cflinuxfs2-*.tar.gz
+      put: stack-s3
+    - params:
+        file: version/number
+      put: version
+  serial: true
+  serial_groups:
+  - p-cflinuxfs2
+- name: generate-release-notes
+  plan:
+  - in_parallel:
+      steps:
+      - get: buildpacks-ci
+      - get: previous-cflinuxfs2-release
+        passed:
+        - build-rootfs
+        resource: p-cflinuxfs2-github-tags
+      - get: cflinuxfs2
+        passed:
+        - release-p-cflinuxfs2
+        resource: p-cflinuxfs2
+      - get: new-cves
+        passed:
+        - release-p-cflinuxfs2
+      - get: stack-s3
+        passed:
+        - release-p-cflinuxfs2
+      - get: version
+        passed:
+        - release-p-cflinuxfs2
+        trigger: true
+  - do:
+    - file: buildpacks-ci/tasks/generate-cflinuxfs2-release-notes/task.yml
+      params:
+        STACK: cflinuxfs2
+      task: generate-rootfs-release-notes
+    - params:
+        body: release-body/body
+        globs:
+        - stack-s3/cflinuxfs2-*.tar.gz
+        name: version/number
+        tag: version/number
+      put: p-cflinuxfs2-github-release-drafts
+    - params:
+        rebase: true
+        repository: new-cves-artifacts
+      put: new-cves
+  serial: true
+- name: create-cflinuxfs2-esm-release
+  plan:
+  - in_parallel:
+      steps:
+      - get: buildpacks-ci
+      - get: blob
+        passed:
+        - release-p-cflinuxfs2
+        resource: stack-s3
+        trigger: true
+      - get: version
+        passed:
+        - release-p-cflinuxfs2
+      - get: release
+        resource: p-cflinuxfs2-release
+  - do:
+    - file: buildpacks-ci/tasks/create-cflinuxfs2-release/task.yml
+      params:
+        ACCESS_KEY_ID: ((pivotal-offline-buildpacks-s3-access-key))
+        BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
+        BLOB_NAME: rootfs
+        RELEASE_NAME: cflinuxfs2
+        SECRET_ACCESS_KEY: ((pivotal-offline-buildpacks-s3-secret-key))
+      task: create-cflinuxfs2-esm-release
+    - file: buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes/task.yml
+      params:
+        ORG: pivotal-cf
+        STACK: p-cflinuxfs2
+      task: create-release-body
+    - file: buildpacks-ci/tasks/create-rootfs-bosh-release-commit/task.yml
+      task: create-release-commit
+    - params:
+        repository: release-artifacts
+      put: p-cflinuxfs2-release
+    - params:
+        body: release-body/body
+        commitish: release-commit/sha
+        globs:
+        - release-artifacts/releases/cflinuxfs2/*.tgz
+        name: version/number
+        tag: version/number
+        tag_prefix: v
+      put: p-cflinuxfs2-esm-github-release
+  serial: true
+- name: upload-cflinuxfs2-esm-to-pivnet
+  plan:
+  - in_parallel:
+      steps:
+      - get: buildpacks-ci
+      - get: p-cflinuxfs2-esm-github-release
+        params:
+          include_source_tarball: true
+        passed:
+        - create-cflinuxfs2-esm-release
+        trigger: true
+  - do:
+    - file: buildpacks-ci/tasks/write-esm-pivnet-metadata/task.yml
+      task: generate-esm-pivnet-metadata
+    - params:
+        file_glob: p-cflinuxfs2-esm-github-release/cflinuxfs2-*.tgz
+        metadata_file: pivnet-esm-metadata/esm.yml
+        s3_filepath_prefix: p-cflinuxfs2/rootfs
+      put: p-cflinuxfs2-release-pivnet-release
+  serial: true
+resource_types:
+- name: bosh-deployment
+  source:
+    repository: cloudfoundry/bosh-deployment-resource
+  type: docker-image
+- name: pivnet
+  source:
+    repository: pivotalcf/pivnet-resource
+    tag: latest-final
+  type: docker-image
