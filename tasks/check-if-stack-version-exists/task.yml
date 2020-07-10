@@ -1,0 +1,16 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/bre-ci
+
+inputs:
+- name: bre-ci
+- name: version
+
+run:
+  path: bre-ci/tasks/check-if-stack-version-exists/run
+
+params:
+  STACK:

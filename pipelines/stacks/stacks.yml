@@ -603,6 +603,10 @@ jobs:
         resource: #@ stack.name + "-cnb-image-tags-cf"
         passed: #@ [ "test-{}-cnb-image-rcs".format(stack.name) ]
       #@ end
+    - task: check-if-stack-version-exists
+      file: bre-ci/tasks/check-if-stack-version-exists
+      params:
+        STACK: #@ stack.name
     - in_parallel:
       #@ for image in stack.base_images:
       - put: #@ "{}-{}-base-image".format(stack.name, image)
