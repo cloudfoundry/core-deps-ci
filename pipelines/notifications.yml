@@ -62,6 +62,7 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+    branch: main
     paths: [ new-release-notifications/* ]
     private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
 
@@ -69,6 +70,7 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+    branch: main
     paths: [ new-cve-notifications/* ]
     private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
 
@@ -76,6 +78,7 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+    branch: main
     paths: [ new-buildpack-cve-notifications/* ]
     private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
 

@@ -41,7 +41,6 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/binary-builder.git
-    branch: master
 
 #@ for dependency in data.values.dependencies:
 - name: #@ dependency.name + "-source"
