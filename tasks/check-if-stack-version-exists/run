@@ -41,8 +41,7 @@ check_dockerhub_registry() {
 }
 
 main() {
-  version="$(cat version/version)"
-  search_tag="${version}-$STACK"
+  search_tag="$(cat version/version)"
 
   check_gcr_registry "${search_tag}"
   check_dockerhub_registry "${search_tag}"

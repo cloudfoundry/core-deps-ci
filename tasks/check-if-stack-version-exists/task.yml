@@ -11,6 +11,3 @@ inputs:
 
 run:
   path: bre-ci/tasks/check-if-stack-version-exists/run
-
-params:
-  STACK:

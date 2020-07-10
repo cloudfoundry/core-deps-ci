@@ -567,6 +567,7 @@ jobs:
   public: true
   plan:
     - in_parallel:
+      - get: bre-ci
       - get: version
         resource: #@ stack.name + "-version"
         passed: #@ [ "test-{}-cnb-image-rcs".format(stack.name) ]
@@ -604,9 +605,7 @@ jobs:
         passed: #@ [ "test-{}-cnb-image-rcs".format(stack.name) ]
       #@ end
     - task: check-if-stack-version-exists
-      file: bre-ci/tasks/check-if-stack-version-exists
-      params:
-        STACK: #@ stack.name
+      file: bre-ci/tasks/check-if-stack-version-exists/task.yml
     - in_parallel:
       #@ for image in stack.base_images:
       - put: #@ "{}-{}-base-image".format(stack.name, image)
