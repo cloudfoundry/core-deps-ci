@@ -549,7 +549,7 @@ jobs:
         resource: #@ stack.name + "-cnb-image-tags-cf"
         passed: #@ [ "create-{}-cnb-image-rcs".format(stack.name) ]
       #@ end
-    - task: #@ "test-{}-{}-cnb-image-rcs".format(stack.name, image)
+    - task: #@ "test-{}-cnb-image-rcs".format(stack.name)
       privileged: true
       file: bre-ci/tasks/test-stack/task.yml
       params:
