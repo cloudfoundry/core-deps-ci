@@ -280,7 +280,7 @@ jobs:
       CONCOURSE_URL: #@ data.values.concourse_url
       CONCOURSE_USERNAME: ((concourse_user.username))
       CONCOURSE_PASSWORD: ((concourse_user.password))
-      CONCOURSE_TEAM: releng
+      CONCOURSE_TEAM: core-deps
       PIPELINE_NAME: #@ data.values.pipeline_name
   - put: lifecycle-metadata-file
     params:

@@ -7,12 +7,12 @@ target="buildpacks"
 filter=
 
 login() {
-  fly -t "$target" login -n releng -b
+  fly -t "$target" login -n core-deps -b
 }
 
 check_login_status() {
   current_team="$(yq r ~/.flyrc targets.buildpacks.team)"
-  if [[ "${current_team}" != "releng" ]]; then
+  if [[ "${current_team}" != "core-deps" ]]; then
     login
   fi
 
