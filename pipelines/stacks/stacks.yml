@@ -139,7 +139,6 @@ resources:
   type: git
   source:
     uri: https://github.com/paketo-buildpacks/stacks
-    branch: master
     #@ if stack.name != "full-cf":
     paths: #@ [ "{}/cnb/{}/**".format(stack.name, image) ]
     #@ else:
@@ -151,7 +150,6 @@ resources:
   type: git
   source:
     uri: https://github.com/paketo-buildpacks/stacks
-    branch: master
     paths: #@ [ "{}/dockerfile/{}/**".format(stack.name, image) ]
     #@ end
   #@ end
