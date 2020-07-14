@@ -288,13 +288,14 @@ jobs:
         trigger: true
         params:
           save: true
+    #@ else:
+      - get: bionic-image
+        trigger: true
     #@ end
     #@ if stack.name == "tiny":
       - get: base-build-base-image-rc
         trigger: true
     #@ end
-      - get: bionic-image
-        trigger: true
       - get: version
         resource: #@ stack.name + "-version"
         params:
@@ -454,6 +455,15 @@ jobs:
         resource: #@ stack.name + "-base-image-tags-cf"
         passed: #@ [ "create-{}-base-image-rcs".format(stack.name) ]
         #@ end
+    - task: write-tags-list
+      file: bre-ci/tasks/write-tags-list/task.yml
+      params:
+        #@ if stack.latest:
+        TAGS: latest
+        #@ end
+        #@ if stack.name == "full-cf":
+        REMOVE_CF_SUFFIX: true
+        #@ end
     - in_parallel:
     #@ for image in data.values.images:
       #@ base_image = get_base_image(stack, image)
@@ -491,15 +501,6 @@ jobs:
             CONTEXT: #@ "stacks/full/cnb/{}".format(image)
             #@ end
             BUILD_ARGS_FILE: build-args/args
-        - task: write-tags-list
-          file: bre-ci/tasks/write-tags-list/task.yml
-          params:
-            #@ if stack.latest:
-            TAGS: latest
-            #@ end
-            #@ if stack.name == "full-cf":
-            REMOVE_CF_SUFFIX: true
-            #@ end
         - put: #@ "{}-{}-cnb-image-rc".format(stack.name, image)
           params:
             additional_tags: tags/tags
