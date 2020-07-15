@@ -106,6 +106,7 @@ resources:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
     paths: [ new-cve-notifications/ubuntu18.04.yml ]
     private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
+    branch: main
 
 - name: receipt-diff
   type: git
