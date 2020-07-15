@@ -105,7 +105,6 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/stacks
-    branch: master
 
 - name: cflinuxfs3-release
   type: github-release

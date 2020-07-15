@@ -77,6 +77,7 @@ resources:
 - name: cflinuxfs3
   type: git
   source:
+    branch: main
     uri: git@github.com:cloudfoundry/cflinuxfs3.git
     private_key: ((cflinuxfs3-deploy-key.private_key))
 
@@ -123,6 +124,7 @@ resources:
 - name: cflinuxfs3-release
   type: git
   source:
+    branch: main
     uri: git@github.com:cloudfoundry/cflinuxfs3-release.git
     private_key: ((cflinuxfs3-release-deploy-key.private_key))
 
