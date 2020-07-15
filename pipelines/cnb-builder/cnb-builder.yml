@@ -260,6 +260,7 @@ resources:
 
 jobs:
 - name: pin-cnb-lifecycle-releases
+  public: true
   plan:
   - in_parallel:
     - get: bre-ci
@@ -289,6 +290,7 @@ jobs:
 #@ for version in data.values.supported_lifecycle_versions:
   #@ for builder in data.values.builders:
 - name: #@ "create-{}-builder-rc-platform-api-{}".format(builder.name, version)
+  public: true
   plan:
     - in_parallel:
       - get: bre-ci
@@ -416,6 +418,7 @@ jobs:
         file: version/version
 
 - name: #@ "test-{}-builder-rc-platform-api-{}".format(builder.name, version)
+  public: true
   plan:
     - in_parallel:
       - get: buildpacks-ci
@@ -445,6 +448,7 @@ jobs:
         RUN_IMAGE: #@ get_params(builder).get("RUN_IMAGE")
 
 - name: #@ "ship-{}-builder-platform-api-{}".format(builder.name, version)
+  public: true
   plan:
     - in_parallel:
       - get: ci-image
