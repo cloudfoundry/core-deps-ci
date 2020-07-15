@@ -121,6 +121,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
     private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
+    branch: main
 
 - name: cflinuxfs3-release
   type: git
