@@ -321,8 +321,6 @@ jobs:
     #@ if stack.name == "tiny":
       - get: base-build-base-image-rc
         trigger: true
-      - get: #@ "base-{}-new-cves".format(image)
-        trigger: true
     #@ else:
       - get: #@ "{}-{}-new-cves".format(stack.name, image)
         trigger: true
@@ -678,12 +676,12 @@ jobs:
   plan:
   - in_parallel:
     - get: bre-ci
+    - get: buildpacks-ci
     - get: every-hour
       trigger: true
     #@ for image in data.values.images:
+    - get: #@ "{}-{}-new-cves".format(stack.name, image)
     - get: #@ "{}-{}-base-image".format(stack.name, image)
-      params:
-        format: oci
     #@ end
   - in_parallel:
     #@ for image in data.values.images:
@@ -699,6 +697,7 @@ jobs:
           STACK: #@ stack.name
           IMAGE: #@ image
         input_mapping:
+          new-cves: #@ "{}-{}-new-cves".format(stack.name, image)
           stack-image-receipt: #@ "{}-{}-stack-image-receipt".format(stack.name, image)
         output_mapping:
           new-cves: #@ "{}-{}-new-cves".format(stack.name, image)
