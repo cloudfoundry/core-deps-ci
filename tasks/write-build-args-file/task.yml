@@ -8,6 +8,8 @@ inputs:
   - name: bre-ci
   - name: mixins-label
     optional: true
+  - name: stacks
+    optional: true
 
 outputs:
   - name: build-args
@@ -18,3 +20,5 @@ run:
 params:
   BASE_IMAGE:
   STACK_ID:
+  STACK:
+  IMAGE:

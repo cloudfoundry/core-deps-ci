@@ -12,6 +12,14 @@ stacks:
   build_base: false
   latest: false
   mixins: false
+- name: full
+  id: io.buildpacks.stacks.bionic
+  base_images:
+    - build
+    - run
+  build_base: true
+  latest: false
+  mixins: true
 - name: base
   id: io.buildpacks.stacks.bionic
   base_images:

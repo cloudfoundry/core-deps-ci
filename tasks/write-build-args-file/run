@@ -15,3 +15,8 @@ if [[ -d mixins-label ]]; then
 else
   echo "mixins=[]" >> build-args/args
 fi
+
+if [[ "${STACK}" != "" && "${IMAGE}" != "" && -d stacks ]]; then
+  echo "sources=$(cat stacks/arch/x86_64/* | tr '\n' '#' | sed 's/#/\\n/g')" >> build-args/args
+  echo "packages=$(cat "stacks/packages/${STACK}/${IMAGE}" | tr '\n' ' ')" >> build-args/args
+fi

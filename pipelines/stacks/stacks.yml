@@ -3,25 +3,32 @@
 
 #@ def get_base_image(stack, image):
 #@   base_image = stack.name
-#@   if stack.name == "tiny":
-#@     if image == "build":
+#@   if stack.name == "tiny" and image == "build":
 #@       base_image = "base"
-#@     end
 #@   end
 #@
 #@   return base_image
 #@ end
 
 #@ def has_base_image(stack, image):
-#@   if stack.name == "tiny":
-#@     if image == "build":
+#@   if stack.name == "tiny" and image == "build":
 #@       return False
-#@     end
 #@   end
 #@
 #@   return True
 #@ end
 
+#@ def get_dockerfile_dir_name(name, image):
+#@   result = name
+#@
+#@   if name != "full-cf":
+#@     if image == "build" or name != "tiny":
+#@       result = "bionic"
+#@     end
+#@   end
+#@
+#@   return result
+#@ end
 ---
 resource_types:
 - name: cron
@@ -42,6 +49,11 @@ resources:
   source:
     uri: git@github.com:pivotal/bre-ci.git
     private_key: ((bre-ci-deploy-key.private_key))
+
+- name: stacks
+  type: git
+  source:
+    uri: https://github.com/paketo-buildpacks/stacks
 
 #@ for stack in data.values.stacks:
   #@ if stack.name != "tiny" and stack.name != "full-cf":
@@ -72,18 +84,45 @@ resources:
     repository: ubuntu
     tag: bionic
 
-#! CNB stack images
+#! Dockerfiles
+#@ for image in data.values.images:
+- name: #@ "bionic-{}-cnb-dockerfile".format(image)
+  type: git
+  source:
+    uri: https://github.com/paketo-buildpacks/stacks
+    paths: #@ [ "bionic/cnb/{}/**".format(image) ]
+
+- name: #@ "bionic-{}-base-dockerfile".format(image)
+  type: git
+  source:
+    uri: https://github.com/paketo-buildpacks/stacks
+    paths: #@ [ "bionic/dockerfile/{}/**".format(image) ]
+#@ end
+
 #@ for stack in data.values.stacks:
   #@ for image in stack.base_images:
+    #@ if get_dockerfile_dir_name(stack.name, image) != "bionic":
+- name: #@ "{}-{}-cnb-dockerfile".format(stack.name, image)
+  type: git
+  source:
+    uri: https://github.com/paketo-buildpacks/stacks
+    paths: #@ [ "{}/cnb/{}/**".format(stack.name, image) ]
+
+      #@ if stack.build_base:
+- name: #@ "{}-{}-base-dockerfile".format(stack.name, image)
+  type: git
+  source:
+    uri: https://github.com/paketo-buildpacks/stacks
+    paths: #@ [ "{}/dockerfile/{}/**".format(stack.name, image) ]
+      #@ end
+    #@ end
+
+#! CNB stack images
 - name: #@ "{}-{}-base-image-rc".format(stack.name, image)
   type: registry-image
   source:
     repository: #@ "gcr.io/cf-buildpacks-releng/{}-rc".format(image)
-    #@ if stack.name != "full-cf":
     tag: #@ stack.name
-    #@ else:
-    tag: full-cf
-    #@ end
     username: _json_key
     password: ((releng-gcp-service-account-key))
 
@@ -95,17 +134,19 @@ resources:
     username: _json_key
     password: ((paketo-gcr-service-account-key))
 
+    #@ if stack.name != "full":
 - name: #@ "{}-{}-cloudfoundry-base-image".format(stack.name, image)
   type: registry-image
   source:
     repository: #@ "cloudfoundry/" + image
-    #@ if stack.name != "full-cf":
+      #@ if stack.name != "full-cf":
     tag: #@ stack.name
-    #@ else:
+      #@ else:
     tag: full
-    #@ end
+      #@ end
     username: ((buildpacks-docker-user.username))
     password: ((buildpacks-docker-user.password))
+    #@ end
 
 - name: #@ "{}-{}-cnb-image-rc".format(stack.name, image)
   type: registry-image
@@ -143,35 +184,27 @@ resources:
     username: ((paketo-docker-user.username))
     password: ((paketo-docker-user.password))
 
+    #@ if stack.name != "full":
 - name: #@ "{}-{}-cloudfoundry-cnb-image".format(stack.name, image)
   type: registry-image
   source:
     repository: #@ "cloudfoundry/" + image
-    #@ if stack.name != "full-cf":
+      #@ if stack.name != "full-cf":
     tag: #@ stack.name + "-cnb"
-    #@ else:
+      #@ else:
     tag: full-cnb
-    #@ end
+      #@ end
     username: ((buildpacks-docker-user.username))
     password: ((buildpacks-docker-user.password))
-
-#! Dockerfiles
-- name: #@ "{}-{}-cnb-dockerfile".format(stack.name, image)
-  type: git
-  source:
-    uri: https://github.com/paketo-buildpacks/stacks
-    #@ if stack.name != "full-cf":
-    paths: #@ [ "{}/cnb/{}/**".format(stack.name, image) ]
-    #@ else:
-    paths: #@ [ "full/cnb/{}/**".format(image) ]
     #@ end
 
-    #@ if stack.build_base:
-- name: #@ "{}-{}-base-dockerfile".format(stack.name, image)
+#! Package lists
+    #@ if get_dockerfile_dir_name(stack.name, image) == "bionic":
+- name: #@ "{}-{}-package-list".format(stack.name, image)
   type: git
   source:
     uri: https://github.com/paketo-buildpacks/stacks
-    paths: #@ [ "{}/dockerfile/{}/**".format(stack.name, image) ]
+    paths: #@ [ "packages/{}/{}/**".format(stack.name, image) ]
     #@ end
   #@ end
 
@@ -296,27 +329,23 @@ jobs:
   serial: true
   public: true
   plan:
+  #@ dir_name = get_dockerfile_dir_name(stack.name, "")
     - in_parallel:
       - get: bre-ci
+      - get: stacks
     #@ for image in stack.base_images:
       #@ if stack.name != "full-cf":
-      - get: #@ "{}-{}-base-dockerfile".format(stack.name, image)
+      - get: #@ "{}-{}-base-dockerfile".format(dir_name, image)
         trigger: true
         #@ if stack.name == "tiny":
         passed: [test-tiny]
         #@ end
+        #@ if stack.name != "tiny":
+      - get: #@ "{}-{}-package-list".format(stack.name, image)
+        trigger: true
+        #@ end
       #@ end
-      - get: #@ "{}-{}-cnb-dockerfile".format(stack.name, image)
-        trigger: true
-    #@ end
-    #@ if stack.name == "full-cf":
-      - get: #@ stack.name + "-image"
-        resource: cflinuxfs3-image
-        trigger: true
-        params:
-          save: true
-    #@ else:
-      - get: bionic-image
+      - get: #@ "{}-{}-cnb-dockerfile".format(dir_name, image)
         trigger: true
     #@ end
     #@ if stack.name == "tiny":
@@ -324,10 +353,18 @@ jobs:
         trigger: true
     #@ end
     #@ if stack.name != "tiny" and stack.name != "full-cf":
+      - get: bionic-image
+        trigger: true
       #@ for image in stack.base_images:
       - get: #@ "{}-{}-new-cves".format(stack.name, image)
         trigger: true
       #@ end
+    #@ end
+    #@ if stack.name == "full-cf":
+      - get: cflinuxfs3-image
+        trigger: true
+        params:
+          save: true
     #@ end
       - get: version
         resource: #@ stack.name + "-version"
@@ -339,13 +376,24 @@ jobs:
     - in_parallel:
       #@ for image in stack.base_images:
       - do:
+        #@ if stack.name != "tiny":
+        - task: write-build-args-file
+          file: bre-ci/tasks/write-build-args-file/task.yml
+          params:
+            STACK: #@ stack.name
+            IMAGE: #@ image
+          output_mapping:
+            build-args: #@ image + "-build-args"
+        #@ end
         - task: #@ "build-{}-{}-base-image".format(stack.name, image)
           privileged: true
           file: bre-ci/tasks/build-stack-image/task.yml
           input_mapping:
-            stacks: #@ "{}-{}-base-dockerfile".format(stack.name, image)
+            #@ if stack.name != "tiny":
+            build-args: #@ image + "-build-args"
+            #@ end
           params:
-            CONTEXT: #@ "stacks/{}/dockerfile/{}".format(stack.name, image)
+            CONTEXT: #@ "stacks/{}/dockerfile/{}".format(dir_name, image)
         - put: #@ "{}-{}-base-image-rc".format(stack.name, image)
           params:
             additional_tags: version/version
@@ -380,11 +428,11 @@ jobs:
 - name: #@ "generate-mixins-labels-{}-cnb-image".format(stack.name)
   public: true
   plan:
+  #@ dir_name = get_dockerfile_dir_name(stack.name, "")
     - in_parallel:
       - get: bre-ci
       #@ for image in stack.base_images:
-      - get: #@ "{}-{}-cnb-dockerfile".format(stack.name, image)
-        trigger: true
+      - get: #@ "{}-{}-cnb-dockerfile".format(dir_name, image)
         passed: #@ [ "create-{}-base-image-rcs".format(stack.name) ]
       - get: #@ "{}-{}-base-image-rc".format(stack.name, image)
         trigger: true
@@ -418,10 +466,10 @@ jobs:
     - task: write-mixins-labels
       file: bre-ci/tasks/write-mixins-labels/task.yml
       input_mapping:
-        build-base-dockerfile: #@ "{}-build-cnb-dockerfile".format(stack.name)
-        run-base-dockerfile: #@ "{}-run-cnb-dockerfile".format(stack.name)
+        build-base-dockerfile: #@ "{}-build-cnb-dockerfile".format(dir_name)
+        run-base-dockerfile: #@ "{}-run-cnb-dockerfile".format(dir_name)
       params:
-        STACK: #@ stack.name
+        STACK: #@ dir_name
     - in_parallel:
       - put: #@ stack.name + "-build-mixins"
         params:
@@ -437,8 +485,9 @@ jobs:
     - in_parallel:
       - get: bre-ci
     #@ for image in data.values.images:
+      #@ dir_name = get_dockerfile_dir_name(stack.name, image)
       #@ base_image = get_base_image(stack, image)
-      - get: #@ "{}-{}-cnb-dockerfile".format(base_image, image)
+      - get: #@ "{}-{}-cnb-dockerfile".format(dir_name, image)
         #@ if has_base_image(stack, image):
         trigger: true
         #@ end
@@ -499,6 +548,7 @@ jobs:
         #@ end
     - in_parallel:
     #@ for image in data.values.images:
+      #@ dir_name = get_dockerfile_dir_name(stack.name, image)
       #@ base_image = get_base_image(stack, image)
       - do:
         - task: write-build-args-file
@@ -523,16 +573,12 @@ jobs:
           privileged: true
           file: bre-ci/tasks/build-stack-image/task.yml
           input_mapping:
-            stacks: #@ "{}-{}-cnb-dockerfile".format(base_image, image)
+            stacks: #@ "{}-{}-cnb-dockerfile".format(dir_name, image)
             build-args: #@ image + "-build-args"
           output_mapping:
             image: #@ image + "-image"
           params:
-            #@ if stack.name != "full-cf":
-            CONTEXT: #@ "stacks/{}/cnb/{}".format(base_image, image)
-            #@ else:
-            CONTEXT: #@ "stacks/full/cnb/{}".format(image)
-            #@ end
+            CONTEXT: #@ "stacks/{}/cnb/{}".format(dir_name, image)
             BUILD_ARGS_FILE: build-args/args
         - put: #@ "{}-{}-cnb-image-rc".format(stack.name, image)
           params:
@@ -646,6 +692,7 @@ jobs:
         params:
           additional_tags: #@ "base-image-tags/{}-base-image-tags".format(stack.name)
           image: #@ image + "-base-image/image.tar"
+        #@ if stack.name != "full":
       - put: #@ "{}-{}-cloudfoundry-base-image".format(stack.name, image)
         params:
           #@ if stack.name != "full-cf":
@@ -654,6 +701,7 @@ jobs:
           additional_tags: #@ "base-image-tags-cf/{}-base-image-tags-cf".format(stack.name)
           #@ end
           image: #@ image + "-base-image/image.tar"
+        #@ end
       #@ end
       #@ for image in data.values.images:
       - put: #@ "{}-{}-cnb-image".format(stack.name, image)
@@ -664,6 +712,7 @@ jobs:
         params:
           additional_tags: #@ "cnb-image-tags/{}-cnb-image-tags".format(stack.name)
           image: #@ image + "-cnb-image/image.tar"
+        #@ if stack.name != "full":
       - put: #@ "{}-{}-cloudfoundry-cnb-image".format(stack.name, image)
         params:
           #@ if stack.name != "full-cf":
@@ -672,6 +721,7 @@ jobs:
           additional_tags: #@ "cnb-image-tags-cf/{}-cnb-image-tags-cf".format(stack.name)
           #@ end
           image: #@ image + "-cnb-image/image.tar"
+        #@ end
       #@ end
 
   #@ if stack.name != "tiny" and stack.name != "full-cf":
