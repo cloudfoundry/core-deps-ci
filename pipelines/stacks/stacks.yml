@@ -23,6 +23,12 @@
 #@ end
 
 ---
+resource_types:
+- name: cron
+  type: docker-image
+  source:
+    repository: cfbuildpacks/cron-resource
+
 resources:
 #! Github Repos
 - name: buildpacks-ci
@@ -36,6 +42,21 @@ resources:
   source:
     uri: git@github.com:pivotal/bre-ci.git
     private_key: ((bre-ci-deploy-key.private_key))
+
+#@ for stack in data.values.stacks:
+  #@ if stack.name != "tiny":
+    #@ for image in data.values.images:
+- name: #@ "{}-{}-new-cves".format(stack.name, image)
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+    branch: main
+    paths:
+    - #@ "new-paketo-stack-cve-notifications/{}/{}/*".format(stack.name, image)
+    private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
+    #@ end
+  #@ end
+#@ end
 
 - name: cflinuxfs3-image
   type: docker-image
@@ -253,6 +274,13 @@ resources:
     username: ((buildpacks-docker-user.username))
     password: ((buildpacks-docker-user.password))
 
+#! Timers
+- name: every-hour
+  type: cron
+  source:
+    expression: "0 * * * *"
+    location: America/New_York
+
 jobs:
 - name: test-tiny
   plan:
@@ -292,6 +320,11 @@ jobs:
     #@ end
     #@ if stack.name == "tiny":
       - get: base-build-base-image-rc
+        trigger: true
+      - get: #@ "base-{}-new-cves".format(image)
+        trigger: true
+    #@ else:
+      - get: #@ "{}-{}-new-cves".format(stack.name, image)
         trigger: true
     #@ end
       - get: version
@@ -638,6 +671,43 @@ jobs:
           #@ end
           image: #@ image + "-cnb-image/image.tar"
       #@ end
+
+  #@ if stack.name != "tiny":
+- name: #@ "new-cves-{}".format(stack.name)
+  public: true
+  plan:
+  - in_parallel:
+    - get: bre-ci
+    - get: every-hour
+      trigger: true
+    #@ for image in data.values.images:
+    - get: #@ "{}-{}-base-image".format(stack.name, image)
+      params:
+        format: oci
+    #@ end
+  - in_parallel:
+    #@ for image in data.values.images:
+    - do:
+      - task: generate-stack-image-receipt
+        file: bre-ci/tasks/write-stack-image-receipt/task.yml
+        image: #@ "{}-{}-base-image".format(stack.name, image)
+        output_mapping:
+          stack-image-receipt: #@ "{}-{}-stack-image-receipt".format(stack.name, image)
+      - task: check-for-new-cves
+        file: buildpacks-ci/tasks/check-for-new-paketo-stack-cves/task.yml
+        params:
+          STACK: #@ stack.name
+          IMAGE: #@ image
+        input_mapping:
+          stack-image-receipt: #@ "{}-{}-stack-image-receipt".format(stack.name, image)
+        output_mapping:
+          new-cves: #@ "{}-{}-new-cves".format(stack.name, image)
+      - put: #@ "{}-{}-new-cves".format(stack.name, image)
+        params:
+          repository: #@ "{}-{}-new-cves".format(stack.name, image)
+          rebase: true
+    #@ end
+  #@ end
 #@ end
 
 groups:
@@ -652,6 +722,9 @@ groups:
     - #@ "create-{}-cnb-image-rcs".format(stack.name)
     - #@ "test-{}-cnb-image-rcs".format(stack.name)
     - #@ "upload-{}-images".format(stack.name)
+  #@ if stack.name != "tiny":
+    - #@ "new-cves-{}".format(stack.name)
+  #@ end
 #@ end
 
 #@ for stack in data.values.stacks:
@@ -667,4 +740,12 @@ groups:
     - #@ "create-{}-cnb-image-rcs".format(stack.name)
     - #@ "test-{}-cnb-image-rcs".format(stack.name)
     - #@ "upload-{}-images".format(stack.name)
+#@ end
+
+- name: new-cves
+  jobs:
+#@ for stack in data.values.stacks:
+  #@ if stack.name != "tiny":
+    - #@ "new-cves-{}".format(stack.name)
+  #@ end
 #@ end

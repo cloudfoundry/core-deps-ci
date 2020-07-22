@@ -1,0 +1,11 @@
+---
+platform: linux
+
+inputs:
+- name: bre-ci
+
+outputs:
+- name: stack-image-receipt
+
+run:
+  path: bre-ci/tasks/write-stack-image-receipt/run
