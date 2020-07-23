@@ -44,7 +44,7 @@ resources:
     private_key: ((bre-ci-deploy-key.private_key))
 
 #@ for stack in data.values.stacks:
-  #@ if stack.name != "tiny":
+  #@ if stack.name != "tiny" and stack.name != "full-cf":
     #@ for image in data.values.images:
 - name: #@ "{}-{}-new-cves".format(stack.name, image)
   type: git
@@ -321,7 +321,8 @@ jobs:
     #@ if stack.name == "tiny":
       - get: base-build-base-image-rc
         trigger: true
-    #@ else:
+    #@ end
+    #@ if stack.name != "tiny" and stack.name != "full-cf":
       #@ for image in stack.base_images:
       - get: #@ "{}-{}-new-cves".format(stack.name, image)
         trigger: true
@@ -672,7 +673,7 @@ jobs:
           image: #@ image + "-cnb-image/image.tar"
       #@ end
 
-  #@ if stack.name != "tiny":
+  #@ if stack.name != "tiny" and stack.name != "full-cf":
 - name: #@ "new-cves-{}".format(stack.name)
   public: true
   plan:
@@ -723,7 +724,7 @@ groups:
     - #@ "create-{}-cnb-image-rcs".format(stack.name)
     - #@ "test-{}-cnb-image-rcs".format(stack.name)
     - #@ "upload-{}-images".format(stack.name)
-  #@ if stack.name != "tiny":
+  #@ if stack.name != "tiny" and stack.name != "full-cf":
     - #@ "new-cves-{}".format(stack.name)
   #@ end
 #@ end
@@ -737,6 +738,9 @@ groups:
   #@ if stack.name == "tiny":
     - test-tiny
   #@ end
+  #@ if stack.name != "tiny" and stack.name != "full-cf":
+    - #@ "new-cves-{}".format(stack.name)
+  #@ end
     - #@ "create-{}-base-image-rcs".format(stack.name)
     - #@ "create-{}-cnb-image-rcs".format(stack.name)
     - #@ "test-{}-cnb-image-rcs".format(stack.name)
@@ -746,7 +750,7 @@ groups:
 - name: new-cves
   jobs:
 #@ for stack in data.values.stacks:
-  #@ if stack.name != "tiny":
+  #@ if stack.name != "tiny" and stack.name != "full-cf":
     - #@ "new-cves-{}".format(stack.name)
   #@ end
 #@ end
