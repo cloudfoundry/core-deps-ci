@@ -322,8 +322,10 @@ jobs:
       - get: base-build-base-image-rc
         trigger: true
     #@ else:
+      #@ for image in stack.base_images:
       - get: #@ "{}-{}-new-cves".format(stack.name, image)
         trigger: true
+      #@ end
     #@ end
       - get: version
         resource: #@ stack.name + "-version"
