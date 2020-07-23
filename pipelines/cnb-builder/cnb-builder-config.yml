@@ -4,8 +4,16 @@ concourse_url: https://buildpacks.ci.cf-app.com
 cnb_builder_uri: git@github.com:paketo-buildpacks/builder
 cnb_builder_private_key: ((builder-deploy-key.private_key))
 pipeline_name: cnb-builder
-destination_registry_username: _json_key
-destination_registry_password: ((paketo-gcr-service-account-key))
+registry_credentials:
+- name: index.docker.io/cloudfoundry
+  username: ((buildpacks-docker-user.username))
+  password: ((buildpacks-docker-user.password))
+- name: index.docker.io/paketobuildpacks
+  username: ((paketo-docker-user.username))
+  password: ((paketo-docker-user.password))
+- name: gcr.io/paketo-buildpacks
+  username: _json_key
+  password: ((paketo-gcr-service-account-key))
 supported_lifecycle_versions:
   - latest
   - n-1
@@ -24,7 +32,11 @@ builders:
 - name: tiny
   stack: tiny
   version_key: tiny
-  repository: gcr.io/paketo-buildpacks/builder
+  repositories:
+  - gcr.io/paketo-buildpacks/builder
+  - index.docker.io/paketobuildpacks/builder
+  - index.docker.io/cloudfoundry/cnb
+  rcs_repository: index.docker.io/paketobuildpacks/builder-rcs
   latest: false
   builder_image_params:
   - name: REPO
@@ -42,7 +54,11 @@ builders:
 - name: base
   stack: bionic
   version_key: base
-  repository: gcr.io/paketo-buildpacks/builder
+  repositories:
+  - gcr.io/paketo-buildpacks/builder
+  - index.docker.io/paketobuildpacks/builder
+  - index.docker.io/cloudfoundry/cnb
+  rcs_repository: index.docker.io/paketobuildpacks/builder-rcs
   latest: false
   builder_image_params:
   - name: REPO
@@ -60,7 +76,11 @@ builders:
 - name: full-cf
   stack: cflinuxfs3
   version_key: full-cf
-  repository: gcr.io/paketo-buildpacks/builder
+  repositories:
+  - gcr.io/paketo-buildpacks/builder
+  - index.docker.io/paketobuildpacks/builder
+  - index.docker.io/cloudfoundry/cnb
+  rcs_repository: index.docker.io/paketobuildpacks/builder-rcs
   latest: true
   builder_image_params:
   - name: REPO

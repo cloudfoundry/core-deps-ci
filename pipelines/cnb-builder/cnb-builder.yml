@@ -108,6 +108,17 @@
 #@   return config
 #@ end
 
+#@ def get_builder_image_source_config(builder, version, repository):
+#@   tag = builder.name + "-platform-api-" + version
+#@   config = {"tag": tag, "repository": repository}
+#@   for registry in data.values.registry_credentials:
+#@     if repository.startswith(registry.name):
+#@       config.update({"username": registry.username, "password": registry.password})
+#@     end
+#@   end
+#@   return config
+#@ end
+
 ---
 resource_types:
   - name: cron
@@ -207,31 +218,15 @@ resources:
 
 #! Docker Images
   #@ for version in data.values.supported_lifecycle_versions:
-- name: #@ builder.name + "-platform-api-" + version + "-builder-image"
+    #@ for repository in builder.repositories:
+- name: #@ "{}-platform-api-{}-builder-image-{}".format(builder.name, version, repository)
   type: registry-image
-  source:
-    repository: #@ builder.repository
-    tag: #@ builder.name + "-platform-api-" + version
-    username: #@ data.values.destination_registry_username
-    password: #@ data.values.destination_registry_password
-
-    #@ if builder.repository == "gcr.io/paketo-buildpacks/builder":
-- name: #@ builder.name + "-platform-api-" + version + "-cloudfoundry-builder-image"
-  type: registry-image
-  source:
-    repository: cloudfoundry/cnb
-    tag: #@ builder.name + "-platform-api-" + version
-    username: ((buildpacks-docker-user.username))
-    password: ((buildpacks-docker-user.password))
+  source: #@ get_builder_image_source_config(builder, version, repository)
     #@ end
 
 - name: #@ builder.name + "-platform-api-" + version + "-rc-image"
   type: registry-image
-  source:
-    repository: gcr.io/cf-buildpacks/builder-rcs
-    tag: #@ builder.name + "-platform-api-" + version
-    username: _json_key
-    password: ((gcp-service-account-key))
+  source: #@ get_builder_image_source_config(builder, version, builder.rcs_repository)
   #@ end
 #@ end
 
@@ -444,7 +439,7 @@ jobs:
       privileged: true
       params:
         STACK: #@ builder.name
-        REPO: gcr.io/cf-buildpacks/builder-rcs
+        REPO: #@ builder.rcs_repository
         RUN_IMAGE: #@ get_params(builder).get("RUN_IMAGE")
 
 - name: #@ "ship-{}-builder-platform-api-{}".format(builder.name, version)
@@ -480,15 +475,13 @@ jobs:
         #@ if version == "latest":
         LATEST_PLATFORM_API: true
         #@ end
-    - put: #@ builder.name + "-platform-api-" + version + "-builder-image"
-      params:
-        additional_tags: tags/tags
-        image: #@ builder.name + "-platform-api-" + version + "-rc-image/image.tar"
-    #@ if not is_enterprise_builder(builder):
-    - put: #@ builder.name + "-platform-api-" + version + "-cloudfoundry-builder-image"
-      params:
-        additional_tags: tags/tags
-        image: #@ builder.name + "-platform-api-" + version + "-rc-image/image.tar"
+    - in_parallel:
+    #@ for repository in builder.repositories:
+      - do:
+        - put: #@ "{}-platform-api-{}-builder-image-{}".format(builder.name, version, repository)
+          params:
+            additional_tags: tags/tags
+            image: #@ builder.name + "-platform-api-" + version + "-rc-image/image.tar"
     #@ end
     - put: version
       resource: #@ builder.version_key + "-version"
