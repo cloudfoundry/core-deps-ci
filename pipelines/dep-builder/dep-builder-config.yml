@@ -1,9 +1,6 @@
 #@data/values
 ---
 dependencies:
-- name: appdynamics
-  source_type: appdynamics
-  skip_test: true
 - name: CAAPM
   source_type: CAAPM
   skip_test: true
