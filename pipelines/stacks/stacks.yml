@@ -293,6 +293,7 @@ jobs:
 
 #@ for stack in data.values.stacks:
 - name: #@ "create-{}-base-image-rcs".format(stack.name)
+  serial: true
   public: true
   plan:
     - in_parallel:
