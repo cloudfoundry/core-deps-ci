@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+cat >tiny-stack-receipt/stack-receipt <<-EOF
+tiny-run-base-dockerfile-sha: $(cat tiny-run-base-dockerfile-sha/.git/ref)
+tiny-run-cnb-dockerfile-sha: $(cat tiny-run-cnb-dockerfile-sha/.git/ref)
+EOF

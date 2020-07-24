@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if ! diff receipt/* "receipt-s3/${RECEIPT_FILENAME}" >/dev/null 2>&1; then
+  aws s3 cp receipt/* "s3://${BUCKET}/${RECEIPT_FILENAME}"
+fi

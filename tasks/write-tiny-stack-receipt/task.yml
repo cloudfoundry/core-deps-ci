@@ -1,0 +1,13 @@
+---
+platform: linux
+
+inputs:
+- name: bre-ci
+- name: tiny-run-base-dockerfile
+- name: tiny-run-cnb-dockerfile
+
+outputs:
+- name: tiny-stack-receipt
+
+run:
+  path: bre-ci/tasks/write-tiny-stack-receipt/run
