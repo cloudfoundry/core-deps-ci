@@ -204,7 +204,7 @@ resources:
   type: git
   source:
     uri: https://github.com/paketo-buildpacks/stacks
-    paths: #@ [ "packages/{}/{}/**".format(stack.name, image) ]
+    paths: #@ [ "packages/{}/{}".format(stack.name, image) ]
     #@ end
   #@ end
 
