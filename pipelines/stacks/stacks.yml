@@ -714,7 +714,7 @@ jobs:
     - do:
       - task: generate-stack-image-receipt
         file: bre-ci/tasks/write-stack-image-receipt/task.yml
-        image: #@ "{}-{}-base-image".format(stack.name, image)
+        image: #@ "{}-{}-base-image-rc".format(stack.name, image)
         output_mapping:
           stack-image-receipt: #@ "{}-{}-receipt".format(stack.name, image)
     #@ end
