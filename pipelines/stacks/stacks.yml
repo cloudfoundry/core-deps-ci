@@ -206,17 +206,6 @@ resources:
     uri: https://github.com/paketo-buildpacks/stacks
     paths: #@ [ "packages/{}/{}".format(stack.name, image) ]
     #@ end
-
-#! Stack image receipts
-    #@ if stack.name != "tiny":
-- name: #@ "{}-receipt-s3".format(stack.name)
-  type: s3
-  source:
-    bucket: stack-receipts
-    versioned_file: #@ "{}-receipt".format(stack.name)
-    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
-    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
-    #@ end
   #@ end
 
 #! Versions
@@ -282,7 +271,24 @@ resources:
     access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
     secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
   #@ end
+
+#! Stack image receipts
+- name: #@ "{}-receipt-s3".format(stack.name)
+  type: s3
+  source:
+    bucket: stack-receipts
+    versioned_file: #@ "{}-receipt".format(stack.name)
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
 #@ end
+
+- name: base-build-receipt-s3
+  type: s3
+  source:
+    bucket: stack-receipts
+    versioned_file: base-build-receipt
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
 
 #! Tiny's build image is a re-tagged version of the bionic image (and not built from a dockerfile)
 #! so it is a special case
@@ -317,22 +323,6 @@ resources:
     tag: tiny-cnb
     username: ((buildpacks-docker-user.username))
     password: ((buildpacks-docker-user.password))
-
-- name: tiny-receipt-s3
-  type: s3
-  source:
-    bucket: stack-receipts
-    versioned_file: tiny-receipt
-    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
-    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
-
-- name: base-build-receipt-s3
-  type: s3
-  source:
-    bucket: stack-receipts
-    versioned_file: base-build-receipt
-    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
-    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
 
 #! Timers
 - name: every-hour
@@ -891,6 +881,7 @@ groups:
     - #@ "create-{}-cnb-image-rcs".format(stack.name)
     - #@ "test-{}-cnb-image-rcs".format(stack.name)
     - #@ "upload-{}-images".format(stack.name)
+    - #@ "check-for-{}-receipt-diff".format(stack.name)
   #@ if stack.name != "tiny" and stack.name != "full-cf":
     - #@ "new-cves-{}".format(stack.name)
   #@ end
@@ -911,6 +902,7 @@ groups:
     - #@ "create-{}-base-image-rcs".format(stack.name)
     - #@ "create-{}-cnb-image-rcs".format(stack.name)
     - #@ "test-{}-cnb-image-rcs".format(stack.name)
+    - #@ "check-for-{}-receipt-diff".format(stack.name)
     - #@ "upload-{}-images".format(stack.name)
 #@ end
 
