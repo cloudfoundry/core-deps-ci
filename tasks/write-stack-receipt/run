@@ -4,7 +4,7 @@ set -euo pipefail
 
 cat >stack-receipt/stack-receipt <<-EOF
 build image receipt:
-$(cat build-receipt)/*
+$(cat build-receipt/*)
 run image receipt:
-$(cat run-receipt)/*
+$(cat run-receipt/*)
 EOF
