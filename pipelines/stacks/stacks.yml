@@ -160,6 +160,7 @@ resources:
     username: _json_key
     password: ((releng-gcp-service-account-key))
 
+    #@ if stack.name != "full":
 - name: #@ "{}-{}-cnb-image".format(stack.name, image)
   type: registry-image
   source:
@@ -171,6 +172,7 @@ resources:
     #@ end
     username: _json_key
     password: ((paketo-gcr-service-account-key))
+    #@ end
 
 - name: #@ "{}-{}-dockerhub-cnb-image".format(stack.name, image)
   type: registry-image
@@ -810,15 +812,15 @@ jobs:
         #@ end
       #@ end
       #@ for image in data.values.images:
-      - put: #@ "{}-{}-cnb-image".format(stack.name, image)
-        params:
-          additional_tags: #@ "cnb-image-tags/{}-cnb-image-tags".format(stack.name)
-          image: #@ image + "-cnb-image/image.tar"
       - put: #@ "{}-{}-dockerhub-cnb-image".format(stack.name, image)
         params:
           additional_tags: #@ "cnb-image-tags/{}-cnb-image-tags".format(stack.name)
           image: #@ image + "-cnb-image/image.tar"
         #@ if stack.name != "full":
+      - put: #@ "{}-{}-cnb-image".format(stack.name, image)
+        params:
+          additional_tags: #@ "cnb-image-tags/{}-cnb-image-tags".format(stack.name)
+          image: #@ image + "-cnb-image/image.tar"
       - put: #@ "{}-{}-cloudfoundry-cnb-image".format(stack.name, image)
         params:
           #@ if stack.name != "full-cf":
