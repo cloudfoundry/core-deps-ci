@@ -3,7 +3,7 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: index.docker.io/paketobuildpacks/build
+    repository: paketobuildpacks/build
     tag: base
 inputs:
   - name: bre-ci
