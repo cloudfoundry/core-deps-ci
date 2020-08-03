@@ -186,6 +186,16 @@ resources:
     username: ((paketo-docker-user.username))
     password: ((paketo-docker-user.password))
 
+    #@ if stack.name != "full-cf":
+- name: #@ "{}-{}-dockerhub-image".format(stack.name, image)
+  type: registry-image
+  source:
+    repository: #@ "paketobuildpacks/" + image
+    tag: #@ stack.name
+    username: ((paketo-docker-user.username))
+    password: ((paketo-docker-user.password))
+    #@ end
+
     #@ if stack.name != "full":
 - name: #@ "{}-{}-cloudfoundry-cnb-image".format(stack.name, image)
   type: registry-image
@@ -809,6 +819,12 @@ jobs:
           additional_tags: #@ "base-image-tags-cf/{}-base-image-tags-cf".format(stack.name)
           #@ end
           image: #@ image + "-base-image/image.tar"
+        #@ end
+        #@ if stack.name != "full-cf":
+      - put: #@ "{}-{}-dockerhub-image".format(stack.name, image)
+        params:
+          additional_tags: #@ "base-image-tags/{}-base-image-tags".format(stack.name)
+          image: #@ image + "-base-image" + "/image.tar"
         #@ end
       #@ end
       #@ for image in data.values.images:

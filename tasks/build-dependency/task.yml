@@ -3,7 +3,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: gcr.io/paketo-buildpacks/build
+    repository: index.docker.io/paketobuildpacks/build
     tag: base
 inputs:
 - name: bre-ci
