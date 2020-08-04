@@ -58,13 +58,13 @@ resources:
 #@ for stack in data.values.stacks:
   #@ if stack.name != "tiny" and stack.name != "full-cf":
     #@ for image in data.values.images:
-- name: #@ "{}-{}-new-cves".format(stack.name, image)
+- name: #@ "{}-{}-new-usns".format(stack.name, image)
   type: git
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
     branch: main
     paths:
-    - #@ "new-paketo-stack-cve-notifications/{}/{}/*".format(stack.name, image)
+    - #@ "new-paketo-stack-usns/{}/{}/*".format(stack.name, image)
     private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
     #@ end
   #@ end
@@ -382,7 +382,7 @@ jobs:
     #@ end
     #@ if stack.name != "tiny" and stack.name != "full-cf":
       #@ for image in stack.base_images:
-      - get: #@ "{}-{}-new-cves".format(stack.name, image)
+      - get: #@ "{}-{}-new-usns".format(stack.name, image)
         trigger: true
       #@ end
     #@ end
@@ -852,7 +852,7 @@ jobs:
       #@ end
 
   #@ if stack.name != "tiny" and stack.name != "full-cf":
-- name: #@ "new-cves-{}".format(stack.name)
+- name: #@ "new-usns-{}".format(stack.name)
   public: true
   plan:
   - in_parallel:
@@ -861,7 +861,7 @@ jobs:
     - get: every-hour
       trigger: true
     #@ for image in data.values.images:
-    - get: #@ "{}-{}-new-cves".format(stack.name, image)
+    - get: #@ "{}-{}-new-usns".format(stack.name, image)
     - get: #@ "{}-{}-base-image".format(stack.name, image)
     #@ end
   - in_parallel:
@@ -872,19 +872,19 @@ jobs:
         image: #@ "{}-{}-base-image".format(stack.name, image)
         output_mapping:
           stack-image-receipt: #@ "{}-{}-stack-image-receipt".format(stack.name, image)
-      - task: check-for-new-cves
-        file: buildpacks-ci/tasks/check-for-new-paketo-stack-cves/task.yml
+      - task: check-for-new-usns
+        file: buildpacks-ci/tasks/check-for-new-paketo-stack-usns/task.yml
         params:
           STACK: #@ stack.name
           IMAGE: #@ image
         input_mapping:
-          new-cves: #@ "{}-{}-new-cves".format(stack.name, image)
+          new-usns: #@ "{}-{}-new-usns".format(stack.name, image)
           stack-image-receipt: #@ "{}-{}-stack-image-receipt".format(stack.name, image)
         output_mapping:
-          new-cves: #@ "{}-{}-new-cves".format(stack.name, image)
-      - put: #@ "{}-{}-new-cves".format(stack.name, image)
+          new-usns: #@ "{}-{}-new-usns".format(stack.name, image)
+      - put: #@ "{}-{}-new-usns".format(stack.name, image)
         params:
-          repository: #@ "{}-{}-new-cves".format(stack.name, image)
+          repository: #@ "{}-{}-new-usns".format(stack.name, image)
           rebase: true
     #@ end
   #@ end
@@ -904,7 +904,7 @@ groups:
     - #@ "upload-{}-images".format(stack.name)
     - #@ "check-for-{}-receipt-diff".format(stack.name)
   #@ if stack.name != "tiny" and stack.name != "full-cf":
-    - #@ "new-cves-{}".format(stack.name)
+    - #@ "new-usns-{}".format(stack.name)
   #@ end
 #@ end
 
@@ -918,7 +918,7 @@ groups:
     - test-tiny
   #@ end
   #@ if stack.name != "tiny" and stack.name != "full-cf":
-    - #@ "new-cves-{}".format(stack.name)
+    - #@ "new-usns-{}".format(stack.name)
   #@ end
     - #@ "create-{}-base-image-rcs".format(stack.name)
     - #@ "create-{}-cnb-image-rcs".format(stack.name)
@@ -927,10 +927,10 @@ groups:
     - #@ "upload-{}-images".format(stack.name)
 #@ end
 
-- name: new-cves
+- name: new-usns
   jobs:
 #@ for stack in data.values.stacks:
   #@ if stack.name != "tiny" and stack.name != "full-cf":
-    - #@ "new-cves-{}".format(stack.name)
+    - #@ "new-usns-{}".format(stack.name)
   #@ end
 #@ end
