@@ -64,7 +64,7 @@ resources:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
     branch: main
     paths:
-    - #@ "new-paketo-stack-cve-notifications/{}/{}/ubuntu18.04.yml".format(stack.name, image)
+    - #@ "new-paketo-stack-cve-notifications/{}/{}/*".format(stack.name, image)
     private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
     #@ end
   #@ end
