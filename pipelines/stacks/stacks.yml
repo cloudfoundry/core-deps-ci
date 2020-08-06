@@ -399,6 +399,8 @@ jobs:
           bump: patch
           pre: #@ stack.name
           pre_without_version: true
+      - get: every-sunday-morning
+        trigger: true
     #@ if stack.name != "full-cf":
     - in_parallel:
       #@ for image in stack.base_images:
@@ -769,8 +771,6 @@ jobs:
       - get: base-build-receipt-s3
         trigger: true
   #@ end
-      - get: every-sunday-morning
-        trigger: true
       - get: version
         resource: #@ stack.name + "-version"
         passed: #@ [ "test-{}-cnb-image-rcs".format(stack.name) ]
