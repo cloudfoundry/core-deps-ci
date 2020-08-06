@@ -58,6 +58,14 @@ resources:
 #@ for stack in data.values.stacks:
   #@ if stack.name != "tiny" and stack.name != "full-cf":
     #@ for image in data.values.images:
+- name: #@ "{}-{}-new-usns-related".format(stack.name, image)
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+    branch: main
+    paths:
+    - #@ "new-paketo-stack-usns/{}/{}/ubuntu18.04.yml".format(stack.name, image)
+    private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
 - name: #@ "{}-{}-new-usns".format(stack.name, image)
   type: git
   source:
@@ -382,7 +390,7 @@ jobs:
     #@ end
     #@ if stack.name != "tiny" and stack.name != "full-cf":
       #@ for image in stack.base_images:
-      - get: #@ "{}-{}-new-usns".format(stack.name, image)
+      - get: #@ "{}-{}-new-usns-related".format(stack.name, image)
         trigger: true
       #@ end
     #@ end
