@@ -3,9 +3,9 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: cfbuildpacks/bre-ci
+    repository: cfbuildpacks/core-deps-ci
 inputs:
-  - name: bre-ci
+  - name: core-deps-ci
   - name: platform-api-version
     optional: true
   - name: version
@@ -15,7 +15,7 @@ outputs:
   - name: tags
 
 run:
-  path: bre-ci/tasks/write-tags-list/run
+  path: core-deps-ci/tasks/write-tags-list/run
 
 params:
   TAGS:

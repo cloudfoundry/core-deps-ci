@@ -44,11 +44,11 @@ resources:
     uri: https://github.com/cloudfoundry/buildpacks-ci
     branch: master
 
-- name: bre-ci
+- name: core-deps-ci
   type: git
   source:
-    uri: git@github.com:pivotal/bre-ci.git
-    private_key: ((bre-ci-deploy-key.private_key))
+    uri: git@github.com:pivotal/core-deps-ci.git
+    private_key: ((core-deps-ci-deploy-key.private_key))
 
 - name: stacks
   type: git
@@ -367,7 +367,7 @@ jobs:
   plan:
   #@ dir_name = get_dockerfile_dir_name(stack.name, "")
     - in_parallel:
-      - get: bre-ci
+      - get: core-deps-ci
       - get: stacks
     #@ for image in stack.base_images:
       #@ if stack.name != "full-cf":
@@ -415,7 +415,7 @@ jobs:
       - do:
         #@ if stack.name != "tiny":
         - task: write-build-args-file
-          file: bre-ci/tasks/write-build-args-file/task.yml
+          file: core-deps-ci/tasks/write-build-args-file/task.yml
           params:
             STACK: #@ stack.name
             IMAGE: #@ image
@@ -424,7 +424,7 @@ jobs:
         #@ end
         - task: #@ "build-{}-{}-base-image".format(stack.name, image)
           privileged: true
-          file: bre-ci/tasks/build-stack-image/task.yml
+          file: core-deps-ci/tasks/build-stack-image/task.yml
           input_mapping:
             #@ if stack.name != "tiny":
             build-args: #@ image + "-build-args"
@@ -441,7 +441,7 @@ jobs:
       #@ end
     #@ else:
     - task: write-tags-list
-      file: bre-ci/tasks/write-tags-list/task.yml
+      file: core-deps-ci/tasks/write-tags-list/task.yml
       params:
         REMOVE_CF_SUFFIX: true
     - in_parallel:
@@ -470,7 +470,7 @@ jobs:
   plan:
   #@ dir_name = get_dockerfile_dir_name(stack.name, "")
     - in_parallel:
-      - get: bre-ci
+      - get: core-deps-ci
       #@ for image in stack.base_images:
       - get: #@ "{}-{}-cnb-dockerfile".format(dir_name, image)
         passed: #@ [ "create-{}-base-image-rcs".format(stack.name) ]
@@ -494,17 +494,17 @@ jobs:
       #@ end
     - in_parallel:
       - task: write-build-package-list
-        file: bre-ci/tasks/write-package-list/task.yml
+        file: core-deps-ci/tasks/write-package-list/task.yml
         image: #@ "{}-build-base-image-rc".format(stack.name)
         output_mapping:
           package-list: build-image-package-list
       - task: write-run-package-list
-        file: bre-ci/tasks/write-package-list/task.yml
+        file: core-deps-ci/tasks/write-package-list/task.yml
         image: #@ "{}-run-base-image-rc".format(stack.name)
         output_mapping:
           package-list: run-image-package-list
     - task: write-mixins-labels
-      file: bre-ci/tasks/write-mixins-labels/task.yml
+      file: core-deps-ci/tasks/write-mixins-labels/task.yml
       input_mapping:
         build-base-dockerfile: #@ "{}-build-cnb-dockerfile".format(dir_name)
         run-base-dockerfile: #@ "{}-run-cnb-dockerfile".format(dir_name)
@@ -523,7 +523,7 @@ jobs:
   public: true
   plan:
     - in_parallel:
-      - get: bre-ci
+      - get: core-deps-ci
     #@ if stack.name == "tiny":
       - get: tiny-run-base-dockerfile
         passed: [create-tiny-base-image-rcs]
@@ -582,7 +582,7 @@ jobs:
         passed: #@ [ "create-{}-base-image-rcs".format(stack.name) ]
         #@ end
     - task: write-tags-list
-      file: bre-ci/tasks/write-tags-list/task.yml
+      file: core-deps-ci/tasks/write-tags-list/task.yml
       params:
         #@ if stack.latest:
         TAGS: latest
@@ -596,7 +596,7 @@ jobs:
       #@ base_image = get_base_image(stack, image)
       - do:
         - task: write-build-args-file
-          file: bre-ci/tasks/write-build-args-file/task.yml
+          file: core-deps-ci/tasks/write-build-args-file/task.yml
           params:
             BASE_IMAGE: #@ "gcr.io/cf-buildpacks-releng/{}-rc:{}".format(image, base_image)
             #@ if stack.name == "tiny":
@@ -609,13 +609,13 @@ jobs:
           output_mapping:
             build-args: #@ image + "-build-args"
         - task: write-docker-creds
-          file: bre-ci/tasks/write-docker-creds/task.yml
+          file: core-deps-ci/tasks/write-docker-creds/task.yml
           params:
             USERNAME: _json_key
             PASSWORD: ((releng-gcp-service-account-key))
         - task: #@ "build-{}-{}-cnb-image-rc".format(stack.name, image)
           privileged: true
-          file: bre-ci/tasks/build-stack-image/task.yml
+          file: core-deps-ci/tasks/build-stack-image/task.yml
           input_mapping:
             stacks: #@ "{}-{}-cnb-dockerfile".format(dir_name, image)
             build-args: #@ image + "-build-args"
@@ -643,7 +643,7 @@ jobs:
   public: true
   plan:
     - in_parallel:
-      - get: bre-ci
+      - get: core-deps-ci
       - get: version
         resource: #@ stack.name + "-version"
         passed: #@ [ "create-{}-cnb-image-rcs".format(stack.name) ]
@@ -681,7 +681,7 @@ jobs:
     #@ end
     - task: #@ "test-{}-cnb-image-rcs".format(stack.name)
       privileged: true
-      file: bre-ci/tasks/test-stack/task.yml
+      file: core-deps-ci/tasks/test-stack/task.yml
       params:
         STACK_ID: #@ stack.id
         GCP_SERVICE_ACCOUNT_KEY: ((releng-gcp-service-account-key))
@@ -697,7 +697,7 @@ jobs:
   public: true
   plan:
   - in_parallel:
-    - get: bre-ci
+    - get: core-deps-ci
     - get: #@ "{}-receipt-s3".format(stack.name)
   #@ if stack.name == "base":
     - get: base-build-receipt-s3
@@ -719,9 +719,9 @@ jobs:
   #@ end
   #@ if stack.name == "tiny":
   - task: generate-stack-receipt
-    file: bre-ci/tasks/write-tiny-stack-receipt/task.yml
+    file: core-deps-ci/tasks/write-tiny-stack-receipt/task.yml
   - task: check-for-receipt-diff
-    file: bre-ci/tasks/check-for-receipt-diff/task.yml
+    file: core-deps-ci/tasks/check-for-receipt-diff/task.yml
     input_mapping:
       receipt: tiny-stack-receipt
       receipt-s3: tiny-receipt-s3
@@ -735,20 +735,20 @@ jobs:
     #@ for image in data.values.images:
     - do:
       - task: generate-stack-image-receipt
-        file: bre-ci/tasks/write-stack-image-receipt/task.yml
+        file: core-deps-ci/tasks/write-stack-image-receipt/task.yml
         image: #@ "{}-{}-base-image-rc".format(stack.name, image)
         output_mapping:
           stack-image-receipt: #@ "{}-{}-receipt".format(stack.name, image)
     #@ end
   - task: generate-stack-receipt
-    file: bre-ci/tasks/write-stack-receipt/task.yml
+    file: core-deps-ci/tasks/write-stack-receipt/task.yml
     input_mapping:
       build-receipt: #@ "{}-build-receipt".format(stack.name)
       run-receipt: #@ "{}-run-receipt".format(stack.name)
     output_mapping:
       stack-receipt: #@ "{}-receipt".format(stack.name)
   - task: check-for-receipt-diff
-    file: bre-ci/tasks/check-for-receipt-diff/task.yml
+    file: core-deps-ci/tasks/check-for-receipt-diff/task.yml
     input_mapping:
       receipt: #@ "{}-receipt".format(stack.name)
       receipt-s3: #@ "{}-receipt-s3".format(stack.name)
@@ -759,7 +759,7 @@ jobs:
       RECEIPT_FILENAME: #@ "{}-receipt".format(stack.name)
     #@ if stack.name == "base":
   - task: check-for-base-build-receipt-diff
-    file: bre-ci/tasks/check-for-receipt-diff/task.yml
+    file: core-deps-ci/tasks/check-for-receipt-diff/task.yml
     input_mapping:
       receipt: base-build-receipt
       receipt-s3: base-build-receipt-s3
@@ -775,7 +775,7 @@ jobs:
   public: true
   plan:
     - in_parallel:
-      - get: bre-ci
+      - get: core-deps-ci
       - get: #@ "{}-receipt-s3".format(stack.name)
         trigger: true
   #@ if stack.name == "tiny":
@@ -817,7 +817,7 @@ jobs:
         passed: #@ [ "test-{}-cnb-image-rcs".format(stack.name) ]
       #@ end
     - task: check-if-stack-version-exists
-      file: bre-ci/tasks/check-if-stack-version-exists/task.yml
+      file: core-deps-ci/tasks/check-if-stack-version-exists/task.yml
     - in_parallel:
       #@ for image in stack.base_images:
       - put: #@ "{}-{}-base-image".format(stack.name, image)
@@ -867,7 +867,7 @@ jobs:
   public: true
   plan:
   - in_parallel:
-    - get: bre-ci
+    - get: core-deps-ci
     - get: buildpacks-ci
     - get: every-hour
       trigger: true
@@ -879,7 +879,7 @@ jobs:
     #@ for image in data.values.images:
     - do:
       - task: generate-stack-image-receipt
-        file: bre-ci/tasks/write-stack-image-receipt/task.yml
+        file: core-deps-ci/tasks/write-stack-image-receipt/task.yml
         image: #@ "{}-{}-base-image".format(stack.name, image)
         output_mapping:
           stack-image-receipt: #@ "{}-{}-stack-image-receipt".format(stack.name, image)

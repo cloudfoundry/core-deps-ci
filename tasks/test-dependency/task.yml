@@ -6,7 +6,7 @@ image_resource:
     repository: paketobuildpacks/build
     tag: base
 inputs:
-  - name: bre-ci
+  - name: core-deps-ci
   - name: source
   - name: dependency
   - name: required_dependency_1
@@ -14,6 +14,6 @@ inputs:
   - name: required_dependency_2
     optional: true
 run:
-  path: bre-ci/tasks/test-dependency/run
+  path: core-deps-ci/tasks/test-dependency/run
 params:
   MIXINS:

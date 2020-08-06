@@ -133,11 +133,11 @@ resources:
     uri: https://github.com/cloudfoundry/buildpacks-ci
     branch: master
 
-- name: bre-ci
+- name: core-deps-ci
   type: git
   source:
-    uri: git@github.com:pivotal/bre-ci.git
-    private_key: ((bre-ci-deploy-key.private_key))
+    uri: git@github.com:pivotal/core-deps-ci.git
+    private_key: ((core-deps-ci-deploy-key.private_key))
 
 - name: cnb-builder
   type: git
@@ -258,7 +258,7 @@ jobs:
   public: true
   plan:
   - in_parallel:
-    - get: bre-ci
+    - get: core-deps-ci
     - get: lifecycle-metadata-file
     - get: lifecycle
       resource: cnb-lifecycle-release
@@ -267,11 +267,11 @@ jobs:
     - get: #@ "cnb-lifecycle-release-" + version
 #@ end
   - task: get-platform-api-version
-    file: bre-ci/tasks/get-platform-api-version/task.yml
+    file: core-deps-ci/tasks/get-platform-api-version/task.yml
   - task: update-lifecycle-metadata
-    file: bre-ci/tasks/update-lifecycle-platform-api-mappings/task.yml
+    file: core-deps-ci/tasks/update-lifecycle-platform-api-mappings/task.yml
   - task: pin-lifecycle-versions
-    file: bre-ci/tasks/pin-lifecycle-versions/task.yml
+    file: core-deps-ci/tasks/pin-lifecycle-versions/task.yml
     params:
       CONCOURSE_URL: #@ data.values.concourse_url
       CONCOURSE_USERNAME: ((concourse_user.username))
@@ -288,7 +288,7 @@ jobs:
   public: true
   plan:
     - in_parallel:
-      - get: bre-ci
+      - get: core-deps-ci
       - get: buildpacks-ci
       - get: ci-image
       - get: packager
@@ -394,9 +394,9 @@ jobs:
       privileged: true
       params: #@ get_params(builder)
     - task: get-platform-api-version
-      file: bre-ci/tasks/get-platform-api-version/task.yml
+      file: core-deps-ci/tasks/get-platform-api-version/task.yml
     - task: write-tags-list
-      file: bre-ci/tasks/write-tags-list/task.yml
+      file: core-deps-ci/tasks/write-tags-list/task.yml
       params:
         TAGS: #@ generate_tags(builder, version)
         STACK: #@ builder.name
@@ -447,7 +447,7 @@ jobs:
   plan:
     - in_parallel:
       - get: ci-image
-      - get: bre-ci
+      - get: core-deps-ci
       - get: buildpacks-ci
       - get: lifecycle
         resource: #@ "cnb-lifecycle-release-" + version
@@ -465,10 +465,10 @@ jobs:
           pre: #@ builder.name
           pre_without_version: true
     - task: get-platform-api-version
-      file: bre-ci/tasks/get-platform-api-version/task.yml
+      file: core-deps-ci/tasks/get-platform-api-version/task.yml
     - task: write-tags-list
       image: ci-image
-      file: bre-ci/tasks/write-tags-list/task.yml
+      file: core-deps-ci/tasks/write-tags-list/task.yml
       params:
         TAGS: #@ generate_tags(builder, version)
         STACK: #@ builder.name

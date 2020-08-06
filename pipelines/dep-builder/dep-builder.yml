@@ -27,11 +27,11 @@ resource_types:
     repository: cfbuildpacks/external-dependency-resource
 
 resources:
-- name: bre-ci
+- name: core-deps-ci
   type: git
   source:
-    uri: git@github.com:pivotal/bre-ci.git
-    private_key: ((bre-ci-deploy-key.private_key))
+    uri: git@github.com:pivotal/core-deps-ci.git
+    private_key: ((core-deps-ci-deploy-key.private_key))
 - name: buildpacks-ci
   type: git
   source:
@@ -97,7 +97,7 @@ jobs:
         resource: #@ dependency.name + "-dependency"
         passed: #@ [ "build-" + dependency.name ]
         trigger: true
-      - get: bre-ci
+      - get: core-deps-ci
       #@ for required_dependency in struct.encode(struct.decode(dependency).get('requires', [])):
       - get: #@ required_dependency_name(required_dependency)
       #@ end
@@ -105,7 +105,7 @@ jobs:
         resource: #@ dependency.name + "-source"
         passed: #@ [ "build-" + dependency.name ]
     - task: run-tests
-      file: bre-ci/tasks/test-dependency/task.yml
+      file: core-deps-ci/tasks/test-dependency/task.yml
       input_mapping:
         #@ for index in range(len(struct.decode(dependency).get('requires', []))):
         required_dependency_(@= str(index+1) @): #@ required_dependency_name(dependency.requires[index])
@@ -132,9 +132,9 @@ jobs:
         #@ else:
         passed: #@ [ "build-" + dependency.name ]
         #@ end
-      - get: bre-ci
+      - get: core-deps-ci
     - task: write-dependency-metadata
-      file: bre-ci/tasks/write-dependency-metadata/task.yml
+      file: core-deps-ci/tasks/write-dependency-metadata/task.yml
       params:
         STACK_ID: io.buildpacks.stacks.bionic
         MIXINS: #@ get_mixins(dependency)

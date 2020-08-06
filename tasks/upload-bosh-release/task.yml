@@ -3,11 +3,11 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: cfbuildpacks/bre-ci
+    repository: cfbuildpacks/core-deps-ci
 inputs:
-- name: bre-ci
+- name: core-deps-ci
 - name: cf-deployment-concourse-tasks
 - name: toolsmiths-env
 - name: release-tarball
 run:
-  path: bre-ci/tasks/upload-bosh-release/run
+  path: core-deps-ci/tasks/upload-bosh-release/run

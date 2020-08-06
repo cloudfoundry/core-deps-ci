@@ -4,7 +4,7 @@ set -euo pipefail
 
 start_docker() {
   #shellcheck source=../../scripts/start-docker
-  source "./bre-ci/scripts/start-docker"
+  source "./core-deps-ci/scripts/start-docker"
   util::docker::start
   trap util::docker::stop EXIT
 }
@@ -47,7 +47,7 @@ main() {
   start_docker
   pull_images
 
-  pushd bre-ci/tasks/test-stack > /dev/null
+  pushd core-deps-ci/tasks/test-stack > /dev/null
     create_builder
     build_and_run_test_app
   popd > /dev/null

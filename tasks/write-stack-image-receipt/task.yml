@@ -2,10 +2,10 @@
 platform: linux
 
 inputs:
-- name: bre-ci
+- name: core-deps-ci
 
 outputs:
 - name: stack-image-receipt
 
 run:
-  path: bre-ci/tasks/write-stack-image-receipt/run
+  path: core-deps-ci/tasks/write-stack-image-receipt/run

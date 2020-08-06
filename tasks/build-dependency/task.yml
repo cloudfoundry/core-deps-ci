@@ -6,7 +6,7 @@ image_resource:
     repository: paketobuildpacks/build
     tag: base
 inputs:
-- name: bre-ci
+- name: core-deps-ci
 - name: source
 outputs:
 - name: built-dependency
@@ -14,4 +14,4 @@ outputs:
 params:
   STACK:
 run:
-  path: bre-ci/tasks/build-dependency/run
+  path: core-deps-ci/tasks/build-dependency/run

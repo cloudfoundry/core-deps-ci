@@ -3,9 +3,9 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: cfbuildpacks/bre-ci
+    repository: cfbuildpacks/core-deps-ci
 inputs:
-  - name: bre-ci
+  - name: core-deps-ci
   - name: dependency
   - name: source
 
@@ -13,7 +13,7 @@ outputs:
   - name: metadata
 
 run:
-  path: bre-ci/tasks/write-dependency-metadata/run
+  path: core-deps-ci/tasks/write-dependency-metadata/run
 
 params:
   STACK_ID:

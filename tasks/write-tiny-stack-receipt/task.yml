@@ -3,10 +3,10 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: cfbuildpacks/bre-ci
+    repository: cfbuildpacks/core-deps-ci
 
 inputs:
-- name: bre-ci
+- name: core-deps-ci
 - name: tiny-run-base-dockerfile
 - name: tiny-run-cnb-dockerfile
 
@@ -14,4 +14,4 @@ outputs:
 - name: tiny-stack-receipt
 
 run:
-  path: bre-ci/tasks/write-tiny-stack-receipt/run
+  path: core-deps-ci/tasks/write-tiny-stack-receipt/run

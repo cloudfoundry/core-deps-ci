@@ -16,11 +16,11 @@ resource_types:
 
 
 resources:
-- name: bre-ci
+- name: core-deps-ci
   type: git
   source:
-    uri: git@github.com:pivotal/bre-ci.git
-    private_key: ((bre-ci-deploy-key.private_key))
+    uri: git@github.com:pivotal/core-deps-ci.git
+    private_key: ((core-deps-ci-deploy-key.private_key))
 
 - name: cf-deployment-concourse-tasks
   type: git
@@ -141,7 +141,7 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: bre-ci
+    - get: core-deps-ci
     - get: cf-deployment-env
       tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
       trigger: true
@@ -161,7 +161,7 @@ jobs:
     #@ end
   #@ end
   - task: create-buildpack-dev-release
-    file: bre-ci/tasks/create-buildpack-dev-release/task.yml
+    file: core-deps-ci/tasks/create-buildpack-dev-release/task.yml
     params:
       AWS_ACCESS_KEY_ID: ((pivotal-buildpacks-s3-access-key))
       AWS_SECRET_ACCESS_KEY: ((pivotal-buildpacks-s3-secret-key))
@@ -179,7 +179,7 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: bre-ci
+    - get: core-deps-ci
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
     - get: cf-deployment-env
@@ -197,13 +197,13 @@ jobs:
   - in_parallel:
 #@ for language in data.values.supported_languages:
     - task: #@ "create-" + language.name + "-buildpack-release-ops-file"
-      file: bre-ci/tasks/create-buildpack-release-ops-file/task.yml
+      file: core-deps-ci/tasks/create-buildpack-release-ops-file/task.yml
       input_mapping:
         buildpack-release-tarball: #@ language.name + "-buildpack-release-rc"
       output_mapping:
         ops-file: #@ language.name + "-buildpack-ops-file"
     - task: #@ "upload-" + language.name + "-buildpack-release"
-      file: bre-ci/tasks/upload-bosh-release/task.yml
+      file: core-deps-ci/tasks/upload-bosh-release/task.yml
       input_mapping:
         release-tarball: #@ language.name + "-buildpack-release-rc"
         toolsmiths-env: cf-deployment-env
@@ -270,7 +270,7 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: bre-ci
+    - get: core-deps-ci
     - get: cf-deployment-concourse-tasks
     - get: cf-acceptance-tests
     - get: cf-deployment-env
@@ -282,7 +282,7 @@ jobs:
       passed: [deploy]
 #@ end
   - task: create-cats-integration-config
-    file: bre-ci/tasks/create-cats-integration-config/task.yml
+    file: core-deps-ci/tasks/create-cats-integration-config/task.yml
     input_mapping:
       toolsmiths-env: cf-deployment-env
   - task: run-cats
@@ -311,9 +311,9 @@ jobs:
   public: true
   serial: true
   plan:
-  - get: bre-ci
+  - get: core-deps-ci
   - task: write-buildpack-release-trigger-file
-    file: bre-ci/tasks/write-buildpack-release-trigger-file/task.yml
+    file: core-deps-ci/tasks/write-buildpack-release-trigger-file/task.yml
   - put: shared-buildpack-release-trigger
     params:
       file: buildpack-release-trigger-file/file
@@ -322,9 +322,9 @@ jobs:
   public: true
   serial: true
   plan:
-  - get: bre-ci
+  - get: core-deps-ci
   - task: write-buildpack-release-trigger-file
-    file: bre-ci/tasks/write-buildpack-release-trigger-file/task.yml
+    file: core-deps-ci/tasks/write-buildpack-release-trigger-file/task.yml
   - put: shared-java-buildpack-release-trigger
     params:
       file: buildpack-release-trigger-file/file
@@ -335,7 +335,7 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: bre-ci
+    - get: core-deps-ci
     - get: buildpack-release-tarball
       resource: #@ language.name + "-buildpack-release-rc"
       passed: [cats]
@@ -349,7 +349,7 @@ jobs:
       trigger: true
   #@ end
   - task: update-buildpack-release-trigger
-    file: bre-ci/tasks/update-buildpack-release-trigger/task.yml
+    file: core-deps-ci/tasks/update-buildpack-release-trigger/task.yml
     params:
       AWS_ACCESS_KEY_ID: ((pivotal-offline-buildpacks-s3-access-key))
       AWS_SECRET_ACCESS_KEY: ((pivotal-offline-buildpacks-s3-secret-key))
@@ -361,7 +361,7 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: bre-ci
+    - get: core-deps-ci
     - get: release
       resource: #@ language.name + "-buildpack-release"
     - get: buildpack-release-tarball
@@ -371,7 +371,7 @@ jobs:
     - get: #@ language.name + "-buildpack-release-trigger"
       trigger: true
   - task: finalize-release
-    file: bre-ci/tasks/finalize-buildpack-release/task.yml
+    file: core-deps-ci/tasks/finalize-buildpack-release/task.yml
     params:
       AWS_ACCESS_KEY_ID: ((pivotal-buildpacks-s3-access-key))
       AWS_SECRET_ACCESS_KEY: ((pivotal-buildpacks-s3-secret-key))
