@@ -704,8 +704,10 @@ jobs:
   #@ end
   #@ if stack.name == "tiny":
     - get: tiny-run-base-dockerfile
+      trigger: true
       passed: [test-tiny-cnb-image-rcs]
     - get: tiny-run-cnb-dockerfile
+      trigger: true
       passed: [test-tiny-cnb-image-rcs]
   #@ else:
     #@ for image in data.values.images:
