@@ -1,6 +1,10 @@
 #@data/values
 ---
 dependencies:
+- name: dotnet-aspnetcore
+  source_type: dotnet-aspnetcore
+  requires:
+  - name: dotnet-sdk
 - name: dotnet-runtime
   source_type: dotnet-runtime
   requires:
