@@ -710,6 +710,7 @@ jobs:
   #@ else:
     #@ for image in data.values.images:
     - get: #@ "{}-{}-base-image-rc".format(stack.name, image)
+      trigger: true
       passed:
       - #@ "test-{}-cnb-image-rcs".format(stack.name)
     #@ end
