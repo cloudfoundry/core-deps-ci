@@ -1,6 +1,10 @@
 #@data/values
 ---
 dependencies:
+- name: dotnet-runtime
+  source_type: dotnet-runtime
+  requires:
+  - name: dotnet-sdk
 - name: dotnet-sdk
   source_type: dotnet-sdk
 - name: CAAPM
