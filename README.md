@@ -1,3 +1,3 @@
-# bre-ci
+# Core Deps CI
 
-Public CI for Buildpacks Release Engineering
+Public CI for Core Dependencies
