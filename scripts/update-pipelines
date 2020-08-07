@@ -32,14 +32,6 @@ set_pipelines() {
   done
 }
 
-warn_if_shared_with_private_ci() {
-  if [[ "cnb-builder" =~ $filter ]]; then
-    echo "#################################################################"
-    echo "# Don't forget to verify the p-cnb-builder pipeline still works #"
-    echo "#################################################################"
-  fi
-}
-
 main() {
   if [ "$#" -eq 1 ]; then
     filter="$1"
@@ -47,7 +39,6 @@ main() {
 
   check_login_status
   set_pipelines
-  warn_if_shared_with_private_ci
 }
 
 main "$@"
