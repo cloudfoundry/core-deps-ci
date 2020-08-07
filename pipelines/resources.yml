@@ -30,30 +30,30 @@ resources:
 - name: dependency-resource-image
   type: docker-image
   source:
-    repository: cfbuildpacks/dependency-resource
-    username: ((cfbuildpacks-dockerhub-user.username))
-    password: ((cfbuildpacks-dockerhub-user.password))
+    repository: coredeps/dependency-resource
+    username: ((coredeps-dockerhub-user.username))
+    password: ((coredeps-dockerhub-user.password))
 
 - name: external-dependency-resource-image
   type: docker-image
   source:
-    repository: cfbuildpacks/external-dependency-resource
-    username: ((cfbuildpacks-dockerhub-user.username))
-    password: ((cfbuildpacks-dockerhub-user.password))
+    repository: coredeps/external-dependency-resource
+    username: ((coredeps-dockerhub-user.username))
+    password: ((coredeps-dockerhub-user.password))
 
 - name: depwatcher-image
   type: docker-image
   source:
-    repository: cfbuildpacks/depwatcher
-    username: ((cfbuildpacks-dockerhub-user.username))
-    password: ((cfbuildpacks-dockerhub-user.password))
+    repository: coredeps/depwatcher
+    username: ((coredeps-dockerhub-user.username))
+    password: ((coredeps-dockerhub-user.password))
 
 - name: create-pull-request-resource-image
   type: docker-image
   source:
-    repository: cfbuildpacks/create-pull-request-resource
-    username: ((cfbuildpacks-dockerhub-user.username))
-    password: ((cfbuildpacks-dockerhub-user.password))
+    repository: coredeps/create-pull-request-resource
+    username: ((coredeps-dockerhub-user.username))
+    password: ((coredeps-dockerhub-user.password))
 
 
 jobs:
