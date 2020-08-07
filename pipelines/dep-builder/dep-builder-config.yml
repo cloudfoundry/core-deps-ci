@@ -34,6 +34,7 @@ dependencies:
   mixins:
   - libargon2-0
   - libcurl4
+  - libedit2
   - libgd3
   - libmagickwand-6.q16-3
   - libonig4
