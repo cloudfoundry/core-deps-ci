@@ -173,14 +173,14 @@ resources:
 - name: #@ "{}-{}-cnb-image".format(stack.name, image)
   type: registry-image
   source:
-    repository: #@ "gcr.io/paketo-buildpacks/" + image
+    repository: #@ "paketobuildpacks/" + image
     #@ if stack.name != "cflinuxfs3":
     tag: #@ stack.tag + "-cnb"
     #@ else:
     tag: #@ "full-cnb-cf"
     #@ end
-    username: _json_key
-    password: ((paketo-gcr-service-account-key))
+    username: ((paketo-docker-user.username))
+    password: ((paketo-docker-user.password))
   #@ end
 #@ end
 
