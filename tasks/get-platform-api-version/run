@@ -2,5 +2,5 @@
 
 set -euo pipefail
 
-tar -xf lifecycle/*.tgz lifecycle.toml
+tar -xf lifecycle/*linux*.tgz lifecycle.toml
 yj -tj < lifecycle.toml | jq -r .api.platform > platform-api-version/version
