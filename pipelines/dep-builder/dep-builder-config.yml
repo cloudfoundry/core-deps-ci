@@ -40,6 +40,16 @@ dependencies:
   - libonig4
   - libxml2
   - libyaml-0-2
+- name: python
+  source_type: python
+- name: pip
+  source_type: pip
+  requires:
+  - name: python
+- name: pipenv
+  source_type: pipenv
+  requires:
+  - name: python
 - name: yarn
   source_type: yarn
   requires:
