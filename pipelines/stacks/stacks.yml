@@ -853,7 +853,6 @@ jobs:
       #@ if stack.name != "full-cf" and image == "run":
       - put: #@ "{}-{}-acr-cnb-image".format(stack.name, image)
         params:
-          additional_tags: #@ "cnb-image-tags/{}-cnb-image-tags".format(stack.name)
           image: #@ image + "-cnb-image/image.tar"
       #@ end
       - put: #@ "{}-{}-dockerhub-cnb-image".format(stack.name, image)
