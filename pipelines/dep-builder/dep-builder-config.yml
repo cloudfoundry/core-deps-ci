@@ -1,6 +1,16 @@
 #@data/values
 ---
 dependencies:
+- name: bundler
+  source_type: bundler
+  requires:
+  - name: ruby
+- name: CAAPM
+  source_type: CAAPM
+  skip_test: true
+- name: composer
+  source_type: composer
+  skip_test: true
 - name: dotnet-aspnetcore
   source_type: dotnet-aspnetcore
   requires:
@@ -11,12 +21,6 @@ dependencies:
   - name: dotnet-sdk
 - name: dotnet-sdk
   source_type: dotnet-sdk
-- name: CAAPM
-  source_type: CAAPM
-  skip_test: true
-- name: composer
-  source_type: composer
-  skip_test: true
 - name: go
   source_type: go
 - name: httpd
@@ -40,8 +44,6 @@ dependencies:
   - libonig4
   - libxml2
   - libyaml-0-2
-- name: python
-  source_type: python
 - name: pip
   source_type: pip
   requires:
@@ -50,6 +52,10 @@ dependencies:
   source_type: pipenv
   requires:
   - name: python
+- name: python
+  source_type: python
+- name: ruby
+  source_type: ruby
 - name: yarn
   source_type: yarn
   requires:
