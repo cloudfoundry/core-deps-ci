@@ -51,6 +51,8 @@ builders:
     value: "index.docker.io/paketobuildpacks/run:tiny-cnb"
   - name: RUN_IMAGE_MIRRORS
     value: "gcr.io/paketo-buildpacks/run:tiny-cnb"
+  - name: RUN_IMAGE_MIRRORS
+    value: "paketobuildpacks.azurecr.io/run:tiny-cnb"
   - name: DESCRIPTION
     value: "Tiny base image (bionic build image, distroless run image) with buildpacks for Golang"
 - name: base
@@ -73,6 +75,8 @@ builders:
     value: "index.docker.io/paketobuildpacks/run:base-cnb"
   - name: RUN_IMAGE_MIRRORS
     value: "gcr.io/paketo-buildpacks/run:base-cnb"
+  - name: RUN_IMAGE_MIRRORS
+    value: "paketobuildpacks.azurecr.io/run:base-cnb"
   - name: DESCRIPTION
     value: "Ubuntu bionic base image with buildpacks for Java, NodeJS, Golang, and HTTPD"
 - name: full
@@ -93,6 +97,8 @@ builders:
     value: "index.docker.io/paketobuildpacks/run:full-cnb"
   - name: RUN_IMAGE_MIRRORS
     value: "gcr.io/paketo-buildpacks/run:full-cnb"
+  - name: RUN_IMAGE_MIRRORS
+    value: "paketobuildpacks.azurecr.io/run:full-cnb"
   - name: DESCRIPTION
     value: "Ubuntu bionic base image with buildpacks for Java, .NET, NodeJS, Golang, PHP, HTTPD and NGINX"
 - name: full-cf
