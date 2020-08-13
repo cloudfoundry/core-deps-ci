@@ -2,61 +2,79 @@
 ---
 dependencies:
 - name: bundler
-  source_type: bundler
   requires:
   - name: ruby
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: CAAPM
-  source_type: CAAPM
   skip_test: true
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: composer
-  source_type: composer
   skip_test: true
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: dotnet-aspnetcore
-  source_type: dotnet-aspnetcore
   requires:
   - name: dotnet-sdk
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: dotnet-runtime
-  source_type: dotnet-runtime
   requires:
   - name: dotnet-sdk
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: dotnet-sdk
-  source_type: dotnet-sdk
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: go
-  source_type: go
+  stacks:
+  - id: io.buildpacks.stacks.bionic
+  - id: io.paketo.stacks.tiny
 - name: httpd
-  source_type: httpd
-  mixins:
-  - libexpat1
+  stacks:
+  - id: io.buildpacks.stacks.bionic
+    mixins:
+    - libexpat1
 - name: icu
-  source_type: icu
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: nginx
-  source_type: nginx
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: node
-  source_type: node
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: php
-  source_type: php
-  mixins:
-  - libargon2-0
-  - libcurl4
-  - libedit2
-  - libgd3
-  - libmagickwand-6.q16-3
-  - libonig4
-  - libxml2
-  - libyaml-0-2
+  stacks:
+  - id: io.buildpacks.stacks.bionic
+    mixins:
+    - libargon2-0
+    - libcurl4
+    - libedit2
+    - libgd3
+    - libmagickwand-6.q16-3
+    - libonig4
+    - libxml2
+    - libyaml-0-2
 - name: pip
-  source_type: pip
   requires:
   - name: python
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: pipenv
-  source_type: pipenv
   requires:
   - name: python
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: python
-  source_type: python
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: ruby
-  source_type: ruby
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: yarn
-  source_type: yarn
   requires:
   - name: node
+  stacks:
+  - id: io.buildpacks.stacks.bionic

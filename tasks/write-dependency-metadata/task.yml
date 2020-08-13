@@ -8,13 +8,10 @@ inputs:
   - name: core-deps-ci
   - name: dependency
   - name: source
+  - name: metadata
 
 outputs:
   - name: metadata
 
 run:
   path: core-deps-ci/tasks/write-dependency-metadata/run
-
-params:
-  STACK_ID:
-  MIXINS:

@@ -10,10 +10,14 @@
 #@   return name
 #@ end
 
-#@ def get_mixins(dependency):
+#@ def get_bionic_mixins(dependency):
 #@   mixin_list = ""
-#@   for mixin in struct.encode(struct.decode(dependency).get('mixins', [])):
-#@     mixin_list = mixin_list + mixin + ","
+#@   for stack in dependency.stacks:
+#@     if stack.id == "io.buildpacks.stacks.bionic":
+#@       for mixin in struct.encode(struct.decode(stack).get('mixins', [])):
+#@         mixin_list = mixin_list + mixin + ","
+#@       end
+#@     end
 #@   end
 #@   length = len(mixin_list)
 #@   return mixin_list[0:length - 1]
@@ -46,7 +50,7 @@ resources:
 - name: #@ dependency.name + "-source"
   type: external-dependency-resource
   source:
-    type: #@ dependency.source_type
+    type: #@ dependency.name
     github_access_token: ((buildpacks-github-token))
 
 - name: #@ dependency.name + "-dependency"
@@ -65,7 +69,7 @@ resources:
     access_key_id: ((pivotal-buildpacks-s3-access-key))
     secret_access_key: ((pivotal-buildpacks-s3-secret-key))
     region_name: "us-east-1"
-    regexp: #@ "metadata/" + dependency.name + "/(.*)"
+    versioned_file: #@ "metadata/" + dependency.name + ".json"
 #@ end
 
 jobs:
@@ -111,10 +115,11 @@ jobs:
         required_dependency_(@= str(index+1) @): #@ required_dependency_name(dependency.requires[index])
         #@ end
       params:
-        MIXINS: #@ get_mixins(dependency)
+        MIXINS: #@ get_bionic_mixins(dependency)
   #@ end
 
 - name: #@ "upload-metadata-" + dependency.name
+  serial: true
   plan:
     - in_parallel:
       - get: dependency
@@ -133,11 +138,9 @@ jobs:
         passed: #@ [ "build-" + dependency.name ]
         #@ end
       - get: core-deps-ci
+      - get: #@ dependency.name + "-metadata"
     - task: write-dependency-metadata
       file: core-deps-ci/tasks/write-dependency-metadata/task.yml
-      params:
-        STACK_ID: io.buildpacks.stacks.bionic
-        MIXINS: #@ get_mixins(dependency)
     - put: #@ dependency.name + "-metadata"
       params:
         file: metadata/*.json
