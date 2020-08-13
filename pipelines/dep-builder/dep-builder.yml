@@ -138,7 +138,8 @@ jobs:
         passed: #@ [ "build-" + dependency.name ]
         #@ end
       - get: core-deps-ci
-      - get: #@ dependency.name + "-metadata"
+      - get: metadata
+        resource: #@ dependency.name + "-metadata"
     - task: write-dependency-metadata
       file: core-deps-ci/tasks/write-dependency-metadata/task.yml
     - put: #@ dependency.name + "-metadata"
