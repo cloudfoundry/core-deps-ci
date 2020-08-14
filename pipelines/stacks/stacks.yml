@@ -196,15 +196,6 @@ resources:
     tag: #@ stack.name
     username: ((paketo-docker-user.username))
     password: ((paketo-docker-user.password))
-     #@ if image == "run":
-- name: #@ "{}-{}-acr-cnb-image".format(stack.name, image)
-  type: registry-image
-  source:
-    repository: #@ "paketobuildpacks.azurecr.io/" + image
-    tag: #@ stack.name + "-cnb"
-    username: ((acr-run-repo-read-write-account.username))
-    password: ((acr-run-repo-read-write-account.password))
-      #@ end
     #@ end
     #@ if stack.name != "full":
 - name: #@ "{}-{}-cloudfoundry-cnb-image".format(stack.name, image)
@@ -850,11 +841,6 @@ jobs:
         #@ end
       #@ end
       #@ for image in data.values.images:
-      #@ if stack.name != "full-cf" and image == "run":
-      - put: #@ "{}-{}-acr-cnb-image".format(stack.name, image)
-        params:
-          image: #@ image + "-cnb-image/image.tar"
-      #@ end
       - put: #@ "{}-{}-dockerhub-cnb-image".format(stack.name, image)
         params:
           additional_tags: #@ "cnb-image-tags/{}-cnb-image-tags".format(stack.name)
