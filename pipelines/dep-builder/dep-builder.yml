@@ -69,7 +69,7 @@ resources:
     access_key_id: ((pivotal-buildpacks-s3-access-key))
     secret_access_key: ((pivotal-buildpacks-s3-secret-key))
     region_name: "us-east-1"
-    versioned_file: #@ "metadata/" + dependency.name + ".json"
+    versioned_file: #@ "metadata/" + dependency.name.lower() + ".json"
 #@ end
 
 jobs:
