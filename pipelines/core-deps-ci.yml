@@ -2,7 +2,7 @@ resources:
 - name: core-deps-ci-dockerfile
   type: git
   source:
-    uri: git@github.com:pivotal/core-deps-ci.git
+    uri: git@github.com:cloudfoundry/core-deps-ci.git
     private_key: ((core-deps-ci-deploy-key.private_key))
     paths: [Dockerfile]
 
