@@ -242,7 +242,7 @@ jobs:
         (@= "\n".join(buildpack_ops_file_paths) @)
   - task: open-asgs-for-credhub
     file: cf-deployment-concourse-tasks/open-asgs-for-bosh-instance-group/task.yml
-    attempts: 3
+    attempts: 10
     input_mapping:
       toolsmiths-env: cf-deployment-env
     params:
