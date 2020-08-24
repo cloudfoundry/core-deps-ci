@@ -109,7 +109,7 @@ jobs:
         resource: #@ dependency.name + "-source"
         passed: #@ [ "build-" + dependency.name ]
     - task: run-tests
-      file: core-deps-ci/tasks/test-dependency/task.yml
+      file: core-deps-ci/tasks/dep-builder/test-dependency/task.yml
       input_mapping:
         #@ for index in range(len(struct.decode(dependency).get('requires', []))):
         required_dependency_(@= str(index+1) @): #@ required_dependency_name(dependency.requires[index])
@@ -141,7 +141,7 @@ jobs:
       - get: metadata
         resource: #@ dependency.name + "-metadata"
     - task: write-dependency-metadata
-      file: core-deps-ci/tasks/write-dependency-metadata/task.yml
+      file: core-deps-ci/tasks/dep-builder/write-dependency-metadata/task.yml
     - put: #@ dependency.name + "-metadata"
       params:
         file: metadata/*.json

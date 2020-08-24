@@ -160,7 +160,7 @@ jobs:
     #@ end
   #@ end
   - task: create-buildpack-dev-release
-    file: core-deps-ci/tasks/create-buildpack-dev-release/task.yml
+    file: core-deps-ci/tasks/cf-release/create-buildpack-dev-release/task.yml
     params:
       AWS_ACCESS_KEY_ID: ((pivotal-buildpacks-s3-access-key))
       AWS_SECRET_ACCESS_KEY: ((pivotal-buildpacks-s3-secret-key))
@@ -196,13 +196,13 @@ jobs:
   - in_parallel:
 #@ for language in data.values.supported_languages:
     - task: #@ "create-" + language.name + "-buildpack-release-ops-file"
-      file: core-deps-ci/tasks/create-buildpack-release-ops-file/task.yml
+      file: core-deps-ci/tasks/cf-release/create-buildpack-release-ops-file/task.yml
       input_mapping:
         buildpack-release-tarball: #@ language.name + "-buildpack-release-rc"
       output_mapping:
         ops-file: #@ language.name + "-buildpack-ops-file"
     - task: #@ "upload-" + language.name + "-buildpack-release"
-      file: core-deps-ci/tasks/upload-bosh-release/task.yml
+      file: core-deps-ci/tasks/cf-release/upload-bosh-release/task.yml
       input_mapping:
         release-tarball: #@ language.name + "-buildpack-release-rc"
         toolsmiths-env: cf-deployment-env
@@ -281,7 +281,7 @@ jobs:
       passed: [deploy]
 #@ end
   - task: create-cats-integration-config
-    file: core-deps-ci/tasks/create-cats-integration-config/task.yml
+    file: core-deps-ci/tasks/cf-release/create-cats-integration-config/task.yml
     input_mapping:
       toolsmiths-env: cf-deployment-env
   - task: run-cats
@@ -312,7 +312,7 @@ jobs:
   plan:
   - get: core-deps-ci
   - task: write-buildpack-release-trigger-file
-    file: core-deps-ci/tasks/write-buildpack-release-trigger-file/task.yml
+    file: core-deps-ci/tasks/cf-release/write-buildpack-release-trigger-file/task.yml
   - put: shared-buildpack-release-trigger
     params:
       file: buildpack-release-trigger-file/file
@@ -323,7 +323,7 @@ jobs:
   plan:
   - get: core-deps-ci
   - task: write-buildpack-release-trigger-file
-    file: core-deps-ci/tasks/write-buildpack-release-trigger-file/task.yml
+    file: core-deps-ci/tasks/cf-release/write-buildpack-release-trigger-file/task.yml
   - put: shared-java-buildpack-release-trigger
     params:
       file: buildpack-release-trigger-file/file
@@ -348,7 +348,7 @@ jobs:
       trigger: true
   #@ end
   - task: update-buildpack-release-trigger
-    file: core-deps-ci/tasks/update-buildpack-release-trigger/task.yml
+    file: core-deps-ci/tasks/cf-release/update-buildpack-release-trigger/task.yml
     params:
       AWS_ACCESS_KEY_ID: ((pivotal-offline-buildpacks-s3-access-key))
       AWS_SECRET_ACCESS_KEY: ((pivotal-offline-buildpacks-s3-secret-key))
@@ -370,7 +370,7 @@ jobs:
     - get: #@ language.name + "-buildpack-release-trigger"
       trigger: true
   - task: finalize-release
-    file: core-deps-ci/tasks/finalize-buildpack-release/task.yml
+    file: core-deps-ci/tasks/cf-release/finalize-buildpack-release/task.yml
     params:
       AWS_ACCESS_KEY_ID: ((pivotal-buildpacks-s3-access-key))
       AWS_SECRET_ACCESS_KEY: ((pivotal-buildpacks-s3-secret-key))

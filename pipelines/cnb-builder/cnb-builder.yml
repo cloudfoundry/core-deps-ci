@@ -205,11 +205,11 @@ jobs:
     - get: #@ "cnb-lifecycle-release-" + version
 #@ end
   - task: get-platform-api-version
-    file: core-deps-ci/tasks/get-platform-api-version/task.yml
+    file: core-deps-ci/tasks/cnb-builder/get-platform-api-version/task.yml
   - task: update-lifecycle-metadata
-    file: core-deps-ci/tasks/update-lifecycle-platform-api-mappings/task.yml
+    file: core-deps-ci/tasks/cnb-builder/update-lifecycle-platform-api-mappings/task.yml
   - task: pin-lifecycle-versions
-    file: core-deps-ci/tasks/pin-lifecycle-versions/task.yml
+    file: core-deps-ci/tasks/cnb-builder/pin-lifecycle-versions/task.yml
     params:
       CONCOURSE_URL: #@ data.values.concourse_url
       CONCOURSE_USERNAME: ((concourse_user.username))
@@ -286,9 +286,9 @@ jobs:
       privileged: true
       params: #@ get_params(builder)
     - task: get-platform-api-version
-      file: core-deps-ci/tasks/get-platform-api-version/task.yml
+      file: core-deps-ci/tasks/cnb-builder/get-platform-api-version/task.yml
     - task: write-tags-list
-      file: core-deps-ci/tasks/write-tags-list/task.yml
+      file: core-deps-ci/tasks/shared/write-tags-list/task.yml
       params:
         TAGS: #@ generate_tags(builder, version)
         STACK: #@ builder.name
@@ -363,10 +363,10 @@ jobs:
           pre: #@ builder.name
           pre_without_version: true
     - task: get-platform-api-version
-      file: core-deps-ci/tasks/get-platform-api-version/task.yml
+      file: core-deps-ci/tasks/cnb-builder/get-platform-api-version/task.yml
     - task: write-tags-list
       image: ci-image
-      file: core-deps-ci/tasks/write-tags-list/task.yml
+      file: core-deps-ci/tasks/shared/write-tags-list/task.yml
       params:
         TAGS: #@ generate_tags(builder, version)
         STACK: #@ builder.name
