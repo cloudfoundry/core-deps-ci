@@ -25,7 +25,7 @@ write_metadata_file() {
   "name": "${name}",
   "version": "${version}",
   "sha256": "${sha}",
-  "uri": "https://pivotal-buildpacks.s3.amazonaws.com/deps/${name}/${dependency}",
+  "uri": "https://deps.paketo.io/${name}/${dependency}",
   "stacks": $(yj -yj < "${config_file}" | jq --arg name "${name}" -r '.dependencies[] | select(.name == $name) | .stacks'),
   "source": "$(jq -r .source_uri "${source_file}")",
   "source_sha256": "$(jq -r .source_sha "${source_file}")",
