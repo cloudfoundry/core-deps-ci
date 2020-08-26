@@ -150,3 +150,8 @@ published_cnbs:
   repo: "gcr.io/paketo-buildpacks/java-native-image"
   skip_stack:
     - "cflinuxfs3"
+- name: procfile
+  repo: "gcr.io/paketo-buildpacks/procfile"
+  skip_stack:
+    - "cflinuxfs3"
+    - "tiny"
