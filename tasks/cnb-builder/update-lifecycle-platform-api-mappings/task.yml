@@ -12,4 +12,4 @@ inputs:
 outputs:
   - name: lifecycle-metadata-file
 run:
-  path: core-deps-ci/tasks/update-lifecycle-platform-api-mappings/run
+  path: core-deps-ci/tasks/cnb-builder/update-lifecycle-platform-api-mappings/run

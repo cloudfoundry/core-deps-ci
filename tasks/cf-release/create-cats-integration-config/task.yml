@@ -11,4 +11,4 @@ inputs:
 outputs:
 - name: cats-integration-config
 run:
-  path: core-deps-ci/tasks/create-cats-integration-config/run
+  path: core-deps-ci/tasks/cf-release/create-cats-integration-config/run

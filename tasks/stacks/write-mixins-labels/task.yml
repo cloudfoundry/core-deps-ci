@@ -17,7 +17,7 @@ outputs:
 - name: run-mixins-label
 
 run:
-  path: core-deps-ci/tasks/write-mixins-labels/run
+  path: core-deps-ci/tasks/stacks/write-mixins-labels/run
 
 params:
   STACK:

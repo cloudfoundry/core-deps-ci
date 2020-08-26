@@ -10,4 +10,4 @@ inputs:
 - name: version
 
 run:
-  path: core-deps-ci/tasks/check-if-stack-version-exists/run
+  path: core-deps-ci/tasks/stacks/check-if-stack-version-exists/run

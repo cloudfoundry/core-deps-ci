@@ -47,7 +47,7 @@ main() {
   start_docker
   pull_images
 
-  pushd core-deps-ci/tasks/test-stack > /dev/null
+  pushd core-deps-ci/tasks/stacks/test-stack > /dev/null
     create_builder
     build_and_run_test_app
   popd > /dev/null

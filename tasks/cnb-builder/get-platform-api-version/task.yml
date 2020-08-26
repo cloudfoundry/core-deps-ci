@@ -10,4 +10,4 @@ inputs:
 outputs:
   - name: platform-api-version
 run:
-  path: core-deps-ci/tasks/get-platform-api-version/run
+  path: core-deps-ci/tasks/cnb-builder/get-platform-api-version/run

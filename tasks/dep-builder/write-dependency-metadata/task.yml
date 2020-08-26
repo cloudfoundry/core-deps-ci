@@ -14,4 +14,4 @@ outputs:
   - name: metadata
 
 run:
-  path: core-deps-ci/tasks/write-dependency-metadata/run
+  path: core-deps-ci/tasks/dep-builder/write-dependency-metadata/run

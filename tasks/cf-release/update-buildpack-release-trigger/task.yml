@@ -13,4 +13,4 @@ params:
   AWS_SECRET_ACCESS_KEY:
   BUCKET:
 run:
-  path: core-deps-ci/tasks/update-buildpack-release-trigger/run
+  path: core-deps-ci/tasks/cf-release/update-buildpack-release-trigger/run

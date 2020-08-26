@@ -8,4 +8,4 @@ outputs:
 - name: stack-image-receipt
 
 run:
-  path: core-deps-ci/tasks/write-stack-image-receipt/run
+  path: core-deps-ci/tasks/stacks/write-stack-image-receipt/run

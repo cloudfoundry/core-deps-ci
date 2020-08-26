@@ -14,4 +14,4 @@ outputs:
 - name: stack-receipt
 
 run:
-  path: core-deps-ci/tasks/write-stack-receipt/run
+  path: core-deps-ci/tasks/stacks/write-stack-receipt/run

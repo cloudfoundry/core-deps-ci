@@ -12,7 +12,7 @@ outputs:
 - name: docker_creds
 
 run:
-  path: core-deps-ci/tasks/write-docker-creds/run
+  path: core-deps-ci/tasks/stacks/write-docker-creds/run
 
 params:
   USERNAME:

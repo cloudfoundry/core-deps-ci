@@ -8,7 +8,7 @@ inputs:
   - name: core-deps-ci
   - name: lifecycle-metadata-file
 run:
-  path: core-deps-ci/tasks/pin-lifecycle-versions/run
+  path: core-deps-ci/tasks/cnb-builder/pin-lifecycle-versions/run
 params:
   CONCOURSE_URL:
   CONCOURSE_USERNAME:

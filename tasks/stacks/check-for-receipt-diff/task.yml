@@ -17,4 +17,4 @@ params:
   RECEIPT_FILENAME:
 
 run:
-  path: core-deps-ci/tasks/check-for-receipt-diff/run
+  path: core-deps-ci/tasks/stacks/check-for-receipt-diff/run

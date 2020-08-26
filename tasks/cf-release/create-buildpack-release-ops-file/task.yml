@@ -10,4 +10,4 @@ inputs:
 outputs:
 - name: ops-file
 run:
-  path: core-deps-ci/tasks/create-buildpack-release-ops-file/run
+  path: core-deps-ci/tasks/cf-release/create-buildpack-release-ops-file/run

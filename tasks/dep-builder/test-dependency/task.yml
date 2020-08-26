@@ -14,6 +14,6 @@ inputs:
   - name: required_dependency_2
     optional: true
 run:
-  path: core-deps-ci/tasks/test-dependency/run
+  path: core-deps-ci/tasks/dep-builder/test-dependency/run
 params:
   MIXINS:

@@ -15,7 +15,7 @@ outputs:
   - name: build-args
 
 run:
-  path: core-deps-ci/tasks/write-build-args-file/run
+  path: core-deps-ci/tasks/stacks/write-build-args-file/run
 
 params:
   BASE_IMAGE:

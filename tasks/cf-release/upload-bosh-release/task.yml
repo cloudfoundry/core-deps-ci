@@ -10,4 +10,4 @@ inputs:
 - name: toolsmiths-env
 - name: release-tarball
 run:
-  path: core-deps-ci/tasks/upload-bosh-release/run
+  path: core-deps-ci/tasks/cf-release/upload-bosh-release/run

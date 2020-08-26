@@ -8,4 +8,4 @@ outputs:
 - name: package-list
 
 run:
-  path: core-deps-ci/tasks/write-package-list/run
+  path: core-deps-ci/tasks/stacks/write-package-list/run

@@ -8,7 +8,7 @@ inputs:
   - name: core-deps-ci
 
 run:
-  path: core-deps-ci/tasks/test-stack/run
+  path: core-deps-ci/tasks/stacks/test-stack/run
 
 params:
   STACK_ID:
