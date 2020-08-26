@@ -149,5 +149,4 @@ published_cnbs:
 - name: procfile
   repo: "gcr.io/paketo-buildpacks/procfile"
   skip_stack:
-    - "cflinuxfs3"
     - "tiny"
