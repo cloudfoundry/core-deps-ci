@@ -16,8 +16,6 @@ registry_credentials:
   password: ((paketo-gcr-service-account-key))
 supported_lifecycle_versions:
   - latest
-  - n-1
-  - n-2
 images:
   - build
   - run
