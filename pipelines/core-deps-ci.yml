@@ -13,10 +13,20 @@ resources:
     username: ((coredeps-dockerhub-user.username))
     password: ((coredeps-dockerhub-user.password))
 
+- name: every-week
+  type: time
+  source:
+    days: [Saturday]
+    start: 10PM
+    stop: 11PM
+    location: America/New_York
+
 jobs:
 - name: build-core-deps-ci-image
   plan:
   - in_parallel:
+    - get: every-week
+      trigger: true
     - get: core-deps-ci-dockerfile
       trigger: true
   - put: core-deps-ci-image
