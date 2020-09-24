@@ -256,7 +256,7 @@ jobs:
         trigger: true
     #@ end
       - get: cnb-builder
-      - get: version
+      - put: version
         resource: #@ builder.version_key + "-version"
         params:
           pre: rc
@@ -299,10 +299,6 @@ jobs:
       params:
         additional_tags: tags/tags
         image: builder-image/builder.tgz
-    - put: version
-      resource: #@ builder.version_key + "-version"
-      params:
-        file: version/version
 
 - name: #@ "test-{}-builder-rc-platform-api-{}".format(builder.name, version)
   public: true
