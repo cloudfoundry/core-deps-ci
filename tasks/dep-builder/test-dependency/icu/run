@@ -15,7 +15,7 @@ set_ld_library_path() {
 check_version() {
   expected_version="${1}"
   actual_version="$(./icu/usr/local/bin/icuinfo 2>/dev/null | grep '"version"' | awk -F '[<>]' '{ print $3 }')"
-  if [[ "${actual_version}.0" != "${expected_version}" ]]; then
+  if [[ "${actual_version}" != "${expected_version}" ]]; then
     echo "Version ${actual_version} does not match expected version ${expected_version}"
     exit 1
   fi
