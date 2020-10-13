@@ -21,4 +21,5 @@ params:
   BASE_IMAGE:
   STACK_ID:
   STACK:
-  IMAGE:
+  IMAGE: 
+  WINDOWS:

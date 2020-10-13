@@ -2,12 +2,18 @@
 
 set -euo pipefail
 
-sort -u build-image-package-list/package-list -o build-image-package-list/package-list
-sort -u run-image-package-list/package-list -o run-image-package-list/package-list
+if [ -d "build-image-package-list" ] && [ -d "run-image-package-list" ]; then
+  sort -u build-image-package-list/package-list -o build-image-package-list/package-list
+  sort -u run-image-package-list/package-list -o run-image-package-list/package-list
 
-shared_packages="$(comm -12 build-image-package-list/package-list run-image-package-list/package-list)"
-build_only_packages="$(comm -23 build-image-package-list/package-list run-image-package-list/package-list)"
-run_only_packages="$(comm -13 build-image-package-list/package-list run-image-package-list/package-list)"
+  shared_packages="$(comm -12 build-image-package-list/package-list run-image-package-list/package-list)"
+  build_only_packages="$(comm -23 build-image-package-list/package-list run-image-package-list/package-list)"
+  run_only_packages="$(comm -13 build-image-package-list/package-list run-image-package-list/package-list)"
+else
+  shared_packages=""
+  build_only_packages=""
+  run_only_packages=""
+fi
 
 additional_build_mixins="$(cat "build-base-dockerfile/${STACK}/cnb/build/additional-mixins")"
 additional_run_mixins="$(cat "run-base-dockerfile/${STACK}/cnb/run/additional-mixins")"
@@ -30,3 +36,7 @@ EOF
 
 echo "${build_mixins_label}" | jq -cnR '[inputs | select(length>0)]' > build-mixins-label/mixins.json
 echo "${run_mixins_label}" | jq -cnR '[inputs | select(length>0)]' > run-mixins-label/mixins.json
+
+echo "Wrote mixins..."
+cat build-mixins-label/mixins.json
+cat run-mixins-label/mixins.json
