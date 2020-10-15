@@ -37,6 +37,7 @@ EOF
 echo "${build_mixins_label}" | jq -cnR '[inputs | select(length>0)]' > build-mixins-label/mixins.json
 echo "${run_mixins_label}" | jq -cnR '[inputs | select(length>0)]' > run-mixins-label/mixins.json
 
-echo "Wrote mixins..."
+echo "Wrote build mixins..."
 cat build-mixins-label/mixins.json
+echo "Wrote run mixins..."
 cat run-mixins-label/mixins.json
