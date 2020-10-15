@@ -22,7 +22,7 @@ if [[ "${WINDOWS}" == "" && "${STACK}" != "" && "${IMAGE}" != "" && -d stacks ]]
 fi
 
 if [[ "${WINDOWS}" != ""  && -f "stacks/${STACK}/dockerfile/${IMAGE}/windows-features" ]]; then
-  echo "windows_features=$(cat stacks/${STACK}/dockerfile/${IMAGE}/windows-features | xargs)" >> build-args/args
+  echo "windows_features=$(cat stacks/${STACK}/dockerfile/${IMAGE}/windows-features | xargs | tr ' ' ',')" >> build-args/args
 fi
 
 echo "Generated build args:"
