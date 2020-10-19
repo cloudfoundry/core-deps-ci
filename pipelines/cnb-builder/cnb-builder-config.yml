@@ -22,8 +22,6 @@ images:
 stacks:
 - name: cflinuxfs3
   tag: full-cf
-- name: full
-  tag: full
 - name: bionic
   tag: base
 - name: tiny
@@ -77,28 +75,6 @@ builders:
     value: "gcr.io/paketo-buildpacks/run:base-cnb"
   - name: DESCRIPTION
     value: "Ubuntu bionic base image with buildpacks for Java, NodeJS, Golang, and HTTPD"
-- name: full
-  stack: full
-  version_key: full
-  repositories:
-  - index.docker.io/paketobuildpacks/builder
-  rcs_repository: index.docker.io/paketobuildpacks/builder-rcs
-  latest: false
-  builder_image_params:
-  - name: REPO
-    value: paketo-buildpacks/builder
-  - name: STACK_NAME
-    value: full
-  - name: STACK
-    value: "io.buildpacks.stacks.bionic"
-  - name: BUILD_IMAGE
-    value: "index.docker.io/paketobuildpacks/build:full-cnb"
-  - name: RUN_IMAGE
-    value: "index.docker.io/paketobuildpacks/run:full-cnb"
-  - name: RUN_IMAGE_MIRRORS
-    value: "gcr.io/paketo-buildpacks/run:full-cnb"
-  - name: DESCRIPTION
-    value: "Ubuntu bionic base image with buildpacks for Java, .NET, NodeJS, Golang, PHP, HTTPD and NGINX"
 - name: full-cf
   stack: cflinuxfs3
   version_key: full-cf
