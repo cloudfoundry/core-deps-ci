@@ -59,7 +59,7 @@ builders:
   - index.docker.io/paketobuildpacks/builder
   - index.docker.io/cloudfoundry/cnb
   rcs_repository: index.docker.io/paketobuildpacks/builder-rcs
-  latest: false
+  latest: true
   builder_image_params:
   - name: REPO
     value: paketo-buildpacks/builder
@@ -83,7 +83,7 @@ builders:
   - index.docker.io/paketobuildpacks/builder
   - index.docker.io/cloudfoundry/cnb
   rcs_repository: index.docker.io/paketobuildpacks/builder-rcs
-  latest: true
+  latest: false
   builder_image_params:
   - name: REPO
     value: paketo-buildpacks/builder
