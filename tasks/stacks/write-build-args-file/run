@@ -11,12 +11,19 @@ if [[ "${STACK_ID}" != "" ]]; then
 fi
 
 if [[ -d mixins-label ]]; then
-  echo "mixins=$(cat mixins-label/*)" >> build-args/args
+  echo "mixins=$(cat mixins-label/*-mixins.json)" >> build-args/args
 else
   echo "mixins=[]" >> build-args/args
 fi
 
-if [[ "${STACK}" != "" && "${IMAGE}" != "" && -d stacks ]]; then
+if [[ "${WINDOWS}" == "" && "${STACK}" != "" && "${IMAGE}" != "" && -d stacks ]]; then
   echo "sources=$(cat stacks/arch/x86_64/* | tr '\n' '#' | sed 's/#/\\n/g')" >> build-args/args
   echo "packages=$(cat "stacks/packages/${STACK}/${IMAGE}" | tr '\n' ' ')" >> build-args/args
 fi
+
+if [[ "${WINDOWS}" != ""  && -f "stacks/${STACK}/dockerfile/${IMAGE}/windows-features" ]]; then
+  echo "windows_features=$(cat stacks/${STACK}/dockerfile/${IMAGE}/windows-features | xargs | tr ' ' ',')" >> build-args/args
+fi
+
+echo "Generated build args:"
+cat build-args/args

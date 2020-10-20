@@ -8,7 +8,9 @@ image_resource:
 inputs:
 - name: core-deps-ci
 - name: build-image-package-list
+  optional: true
 - name: run-image-package-list
+  optional: true
 - name: build-base-dockerfile
 - name: run-base-dockerfile
 
