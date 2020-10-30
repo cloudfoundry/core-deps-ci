@@ -38,6 +38,7 @@ Phar
 phpiredis
 posix
 protobuf
+psr
 rdkafka
 readline
 redis

@@ -23,6 +23,7 @@
     "pdo_sqlsrv",
     "phpiredis",
     "protobuf",
+    "psr",
     "rdkafka",
     "readline",
     "redis",

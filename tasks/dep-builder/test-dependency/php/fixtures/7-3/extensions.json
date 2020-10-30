@@ -27,6 +27,7 @@
     "phalcon",
     "phpiredis",
     "protobuf",
+    "psr",
     "rdkafka",
     "readline",
     "recode",
