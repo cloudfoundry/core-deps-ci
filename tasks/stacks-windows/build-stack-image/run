@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+build_args=$(cat "${BUILD_ARGS_FILE}" | awk '{printf " --build-arg %s", $0}')
+echo "Build args:"
+echo ${build_args}
+docker build${build_args} --no-cache -t img "${CONTEXT}"
+docker save -o image/image.tar img
