@@ -23,18 +23,18 @@ resources:
   type: git
 - name: cf-deployment
   source:
-    branch: master
+    branch: main
     uri: https://github.com/cloudfoundry/cf-deployment
   type: git
 - name: cf-deployment-concourse-tasks
   source:
-    branch: master
+    branch: main
     tag_filter: v8.*
     uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
   type: git
 - name: cf-deployment-concourse-tasks-latest
   source:
-    branch: master
+    branch: main
     uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
   type: git
 - name: cflinuxfs2-cf-deployment
