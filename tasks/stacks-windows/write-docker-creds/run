@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+AUTH="$(echo -n "${USERNAME}:${PASSWORD}" | base64 -w 0)"
+
+cat > docker_creds/config.json <<EOF
+{ "auths": { "$REGISTRY": { "auth": "$AUTH" }}}
+EOF
