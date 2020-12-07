@@ -18,7 +18,6 @@ resources:
   type: git
 - name: cf-acceptance-tests
   source:
-    branch: master
     uri: https://github.com/cloudfoundry/cf-acceptance-tests.git
   type: git
 - name: cf-deployment
