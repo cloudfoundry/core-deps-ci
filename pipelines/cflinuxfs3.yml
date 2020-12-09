@@ -133,7 +133,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/capi-release
-    branch: master
+    branch: main
 
 - name: stack-s3
   type: s3
