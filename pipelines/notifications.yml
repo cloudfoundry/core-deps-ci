@@ -269,7 +269,7 @@ jobs:
           repository: output-new-cves-tiny
           rebase: true
 
-- name: PHP Module Checker
+- name: php-module-checker
   serial: true
   public: true
   plan:

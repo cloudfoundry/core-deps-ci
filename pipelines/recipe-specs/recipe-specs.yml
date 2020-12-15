@@ -29,7 +29,7 @@ groups:
     - binary-builder-specs
     - binary-builder-specs-unit
 #@ for spec_name in data.values.integration_spec_names:
-    - #@ "binary-builder-specs-" + spec_name
+    - #@ "binary-builder-specs-" + spec_name.replace("_", "-")
 #@ end
 jobs:
   - name: binary-builder-specs
@@ -42,7 +42,7 @@ jobs:
           trigger: true
           passed:
 #@ for spec_name in data.values.integration_spec_names:
-          - #@ "binary-builder-specs-" + spec_name
+          - #@ "binary-builder-specs-" + spec_name.replace("_", "-")
 #@ end
 
   - name: binary-builder-specs-unit
@@ -65,7 +65,7 @@ jobs:
           params:
             RUBYGEM_MIRROR: https://rubygems.org
 #@ for spec_name in data.values.integration_spec_names:
-  - name: #@ "binary-builder-specs-" + spec_name
+  - name: #@ "binary-builder-specs-" + spec_name.replace("_", "-")
     serial: true
     public: true
     plan:
@@ -78,7 +78,7 @@ jobs:
           trigger: true
       - do:
         - in_parallel:
-          - task: #@ "integration-" + spec_name
+          - task: #@ "integration-" + spec_name.replace("_", "-")
             file: buildpacks-ci/tasks/run-binary-builder-integration-specs/task.yml
             params:
               SPEC_TO_RUN: #@ spec_name
