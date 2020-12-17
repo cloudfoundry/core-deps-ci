@@ -76,6 +76,9 @@ dependencies:
 - name: ruby
   stacks:
   - id: io.buildpacks.stacks.bionic
+- name: tini
+  stacks:
+  - id: io.buildpacks.stacks.bionic
 - name: yarn
   requires:
   - name: node
