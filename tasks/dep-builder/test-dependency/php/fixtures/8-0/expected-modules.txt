@@ -1,10 +1,8 @@
 [PHP Modules]
-amqp
 apcu
 bcmath
 bz2
 calendar
-cassandra
 Core
 ctype
 curl
@@ -19,19 +17,14 @@ ftp
 gd
 gettext
 gmp
-gnupg
 hash
 iconv
 igbinary
-imagick
 imap
-interbase
 intl
-ionCube Loader
 json
 ldap
 libxml
-lua
 lzf
 mailparse
 maxminddb
@@ -54,16 +47,12 @@ pdo_pgsql
 pdo_sqlite
 pdo_sqlsrv
 pgsql
-phalcon
 Phar
 phpiredis
 posix
-protobuf
 pspell
 psr
-rdkafka
 readline
-recode
 redis
 Reflection
 session
@@ -77,20 +66,15 @@ solr
 SPL
 sqlite3
 sqlsrv
-ssh2
 standard
-Stomp
 sysvmsg
 sysvsem
 sysvshm
-tideways_xhprof
 tidy
 tokenizer
-wddx
 xdebug
 xml
 xmlreader
-xmlrpc
 xmlwriter
 xsl
 yaf
@@ -102,5 +86,4 @@ zlib
 [Zend Modules]
 Xdebug
 Zend OPcache
-the ionCube PHP Loader + ionCube24
 

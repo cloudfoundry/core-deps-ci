@@ -26,12 +26,12 @@ configure_php() {
     > "$PWD/php/etc/php.ini"
 
   <"${parent_dir}/fixtures/${major_minor_version}/extensions.json" \
-    jq -r .extensions[] | \
+    jq -r '.extensions // [] | .[]' | \
     sed 's/[",\,]//g' | \
     xargs -I {} echo "extension={}" >> "$PWD/php/etc/php.ini"
 
   <"${parent_dir}/fixtures/${major_minor_version}/extensions.json" \
-    jq -r .zend_extensions[] | \
+    jq -r '.zend_extensions // [] | .[]' | \
     sed 's/[",\,]//g' | \
     xargs -I {} echo "zend_extension={}" >> "$PWD/php/etc/php.ini"
 
