@@ -58,7 +58,9 @@ dependencies:
     - libgd3
     - libmagickwand-6.q16-3
     - libonig4
+    - libpq5
     - libxml2
+    - libxslt1-dev
     - libyaml-0-2
 - name: pip
   requires:
