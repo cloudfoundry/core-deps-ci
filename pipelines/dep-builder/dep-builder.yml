@@ -81,6 +81,7 @@ jobs:
     - get: binary-builder
     - get: source
       resource: #@ dependency.name.lower() + "-source"
+      version: every
       trigger: true
   - task: build-binary
     file: buildpacks-ci/tasks/build-binary-new/build.yml
