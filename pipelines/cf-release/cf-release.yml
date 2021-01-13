@@ -45,7 +45,7 @@ resources:
     api_token: ((toolsmiths-api-token))
     hostname: environments.toolsmiths.cf-app.com
     pool_name: cf-deployment
-  tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+  tags: [nimbus-worker]
 
 - name: java-pivnet-production
   type: pivnet
@@ -132,7 +132,7 @@ jobs:
   - put: cf-deployment-env
     params:
       action: claim
-    tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+    tags: [nimbus-worker]
 
 #@ for language in data.values.supported_languages:
 - name: #@ "create-" + language.name + "-buildpack-dev-release"
@@ -142,7 +142,7 @@ jobs:
   - in_parallel:
     - get: core-deps-ci
     - get: cf-deployment-env
-      tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+      tags: [nimbus-worker]
       trigger: true
       passed: [claim-cf-deployment-env]
     - get: release
@@ -182,7 +182,7 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
     - get: cf-deployment-env
-      tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+      tags: [nimbus-worker]
       trigger: true
       passed:
 #@ for language in data.values.supported_languages:
@@ -275,7 +275,7 @@ jobs:
     - get: cf-deployment-env
       passed: [deploy]
       trigger: true
-      tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+      tags: [nimbus-worker]
 #@ for language in data.values.supported_languages:
     - get: #@ language.name + "-buildpack-release-rc"
       passed: [deploy]
@@ -299,12 +299,12 @@ jobs:
   - get: cf-deployment-env
     passed: [cats]
     trigger: true
-    tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+    tags: [nimbus-worker]
   - put: cf-deployment-env
     params:
       action: unclaim
       env_file: cf-deployment-env/metadata
-    tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+    tags: [nimbus-worker]
 
 - name: ship-it
   public: true

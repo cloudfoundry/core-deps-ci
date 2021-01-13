@@ -63,6 +63,6 @@ jobs:
         trigger: true
     - task: recreate-workers
       file: core-deps-ci/tasks/core-deps-ci/recreate-workers/task.yml
-      tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+      tags: [nimbus-worker]
       params:
         CI_INSTANCE: public
