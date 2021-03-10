@@ -1,10 +1,4 @@
 resources:
-- name: core-deps-ci
-  type: git
-  source:
-    uri: git@github.com:cloudfoundry/core-deps-ci.git
-    private_key: ((core-deps-ci-deploy-key.private_key))
-
 - name: core-deps-ci-dockerfile
   type: git
   source:
@@ -19,26 +13,12 @@ resources:
     username: ((coredeps-dockerhub-user.username))
     password: ((coredeps-dockerhub-user.password))
 
-- name: bp-envs
-  type: git
-  source:
-    uri: git@github.com:pivotal/bp-envs.git
-    private_key: ((bp-envs-deploy-key.private_key))
-
 - name: saturday-evening
   type: time
   source:
     days: [Saturday]
     start: 10PM
     stop: 11PM
-    location: America/New_York
-
-- name: saturday-morning
-  type: time
-  source:
-    days: [Saturday]
-    start: 7AM
-    stop: 8AM
     location: America/New_York
 
 jobs:
@@ -52,16 +32,3 @@ jobs:
   - put: core-deps-ci-image
     params:
       build: core-deps-ci-dockerfile
-
-- name: recreate-workers
-  serial: true
-  plan:
-    - in_parallel:
-      - get: core-deps-ci
-      - get: bp-envs
-      - get: saturday-morning
-        trigger: true
-    - task: recreate-workers
-      file: core-deps-ci/tasks/core-deps-ci/recreate-workers/task.yml
-      params:
-        CI_INSTANCE: public
