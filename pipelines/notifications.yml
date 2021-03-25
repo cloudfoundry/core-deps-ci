@@ -246,6 +246,8 @@ jobs:
       - task: check-for-new-cflinuxfs3-cves
         file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
         params:
+          SLACK_CHANNEL: '#buildpacks'
+          SLACK_WEBHOOK: ((dependency-notifier-slack-webhook))
           STACK: cflinuxfs3
         output_mapping:
           output-new-cves: output-new-cves-cflinuxfs3
