@@ -63,11 +63,11 @@ main() {
   local version
   name="$(get_name)"
   version="$(get_version)"
+  write_private_yml
 
   if release_version_exists "${version}"; then
     echo "Version ${version} is already released"
   else
-    write_private_yml
     finalize_release "${version}"
     commit_changes "${name}" "${version}"
   fi
