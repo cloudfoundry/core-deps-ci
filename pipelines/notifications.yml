@@ -30,11 +30,11 @@ resources:
     expression: 0 7 * * 1
     location: America/New_York
 
-- name: month-start
+- name: mid-month
   type: cron
   check_every: 1h
   source:
-    expression: 12 5 1 * *
+    expression: 0 0 15 * *
     location: America/New_York
 
 - name: check-interval
@@ -134,7 +134,7 @@ jobs:
   public: true
   plan:
   - in_parallel:
-    - get: month-start
+    - get: mid-month
       trigger: true
     - get: buildpacks-ci
   - task: check-for-latest-php-module-versions
