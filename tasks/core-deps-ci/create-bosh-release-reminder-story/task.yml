@@ -10,10 +10,7 @@ inputs:
   - name: core-deps-ci
 
 run:
-  path: bash
-  args:
-    - -cl
-    - core-deps-ci/tasks/create-bosh-release-reminder-story/run.sh
+  path: core-deps-ci/tasks/core-deps-ci/create-bosh-release-reminder-story/run.sh
 
 params:
   TRACKER_API_TOKEN:
