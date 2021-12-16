@@ -30,6 +30,13 @@ resources:
     expression: 0 7 * * 1
     location: America/New_York
 
+- name: first-of-month
+  type: cron
+  check_every: 1h
+  source:
+    expression: 15 0 1 * *
+    location: America/New_York
+
 - name: mid-month
   type: cron
   check_every: 1h
@@ -48,6 +55,12 @@ resources:
   source:
     uri: https://github.com/cloudfoundry/buildpacks-ci
     branch: master
+
+- name: core-deps-ci
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/core-deps-ci
+    branch: main
 
 - name: new-cves
   type: git
@@ -143,3 +156,18 @@ jobs:
         TRACKER_PROJECT_ID: 2537714
         TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
         TRACKER_REQUESTER_ID: 1431988
+
+- name: bosh-release-reminder
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+      - get: first-of-month
+        trigger: true
+      - get: core-deps-ci
+  - task: create-reminder-story
+    file: core-deps-ci/tasks/core-deps-ci/create-bosh-release-reminder-story/task.yml
+    params:
+      TRACKER_PROJECT_ID: 2537714
+      TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
+      TRACKER_RELEASE_REMINDER_MARKER_STORY: 180346921
