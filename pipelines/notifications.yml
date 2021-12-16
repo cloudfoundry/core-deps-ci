@@ -32,7 +32,7 @@ resources:
 
 - name: first-of-month
   type: cron
-  check_every: 1h
+  check_every: 15m
   source:
     expression: 15 0 1 * *
     location: America/New_York
