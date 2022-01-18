@@ -18,17 +18,11 @@ resources:
 - name: davos-cve-stories-cflinuxfs3
   type: cf-tracker-resource
   source:
-    project_id: 2398049
+    project_id: 2537714
     token: ((pivotal-tracker-api-token))
     labels:
     - cflinuxfs3
     - security-notice
-
-- name: monday-funday
-  type: cron
-  source:
-    expression: 0 7 * * 1
-    location: America/New_York
 
 - name: first-of-month
   type: cron
@@ -99,24 +93,10 @@ jobs:
     - task: categorize-security-notices-cflinuxfs3
       file: buildpacks-ci/tasks/categorize-security-notices/task.yml
       params:
-        TRACKER_PROJECT_ID: 2398049
+        TRACKER_PROJECT_ID: 2537714
         TRACKER_PROJECT_REQUESTER: 1431988
         TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
         STACK: cflinuxfs3
-
-- name: monday-funday
-  serial: true
-  public: true
-  plan:
-  - get: monday-funday
-    trigger: true
-  - get: buildpacks-ci
-  - task: create-latest-upstream-changes-story
-    file: buildpacks-ci/tasks/create-latest-upstream-changes-story/task.yml
-    params:
-      TRACKER_PROJECT_ID: 1042066
-      TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
-      TRACKER_REQUESTER_ID: 1431988
 
 - name: new-rootfs-cves
   serial: true

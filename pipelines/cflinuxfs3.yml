@@ -628,7 +628,7 @@ jobs:
       file: buildpacks-ci/tasks/finalize-security-notice-stories/task.yml
       attempts: 20
       params:
-        TRACKER_PROJECT_ID: 2398049
+        TRACKER_PROJECT_ID: 2537714
         TRACKER_REQUESTER_ID: 1431988
         TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
         STACK: cflinuxfs3
