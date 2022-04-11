@@ -32,7 +32,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/cf-deployment
-    branch: release-candidate
+    branch: main
 
 - name: cf-acceptance-tests
   type: git
