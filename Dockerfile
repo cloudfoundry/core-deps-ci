@@ -40,7 +40,7 @@ ENV GOROOT=/usr/local/go
 ENV GOPATH=/go
 ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-RUN curl -sL -o /usr/local/bin/yj https://github.com/sclevine/yj/releases/latest/download/yj-linux \
+RUN curl -sL -o /usr/local/bin/yj https://github.com/sclevine/yj/releases/latest/download/yj-linux-amd64 \
   && chmod +x /usr/local/bin/yj
 
 RUN curl -sL -o /usr/local/bin/fly "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" \
