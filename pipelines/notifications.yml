@@ -31,11 +31,11 @@ resources:
     expression: 15 0 1 * *  # 15min after buildpack release reminders
     location: America/New_York
 
-- name: mid-month
+- name: last-week-of-month
   type: cron
   check_every: 1h
   source:
-    expression: 0 0 15 * *
+    expression: 0 0 25 * *
     location: America/New_York
 
 - name: check-interval
@@ -127,7 +127,7 @@ jobs:
   public: true
   plan:
   - in_parallel:
-    - get: mid-month
+    - get: last-week-of-month
       trigger: true
     - get: buildpacks-ci
   - task: check-for-latest-php-module-versions
