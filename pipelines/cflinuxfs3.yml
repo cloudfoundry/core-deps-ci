@@ -166,7 +166,7 @@ resources:
 - name: gcp-stemcell
   type: bosh-io-stemcell
   source:
-    name: bosh-google-kvm-ubuntu-xenial-go_agent
+    name: bosh-google-kvm-ubuntu-bionic-go_agent
 
 - name: cflinuxfs3-image
   type: docker-image
