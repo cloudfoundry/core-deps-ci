@@ -166,7 +166,7 @@ resources:
 - name: gcp-stemcell
   type: bosh-io-stemcell
   source:
-    name: bosh-google-kvm-ubuntu-bionic-go_agent
+    name: bosh-google-kvm-ubuntu-xenial-go_agent
 
 - name: cflinuxfs3-image
   type: docker-image
@@ -381,6 +381,7 @@ jobs:
         - buildpacks-opsfile/use-latest-buildpack-releases.yml
         - buildpacks-ci/deployments/operations/no-canaries.yml
         - buildpacks-ci/deployments/operations/cflinuxfs3-rootfs-certs-as-list.yml
+        - buildpacks-ci/deployments/operations/use-xenial-stemcell.yml
         - rootfs-release-artifacts/use-dev-release-opsfile.yml
         - capi-release-artifacts/use-dev-release-opsfile.yml
         - capi-release-artifacts/use-rootfs-as-default-stack.yml
