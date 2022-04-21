@@ -203,6 +203,29 @@ jobs:
         release-tarball: #@ language.name + "-buildpack-release-rc"
         toolsmiths-env: cf-deployment-env
 #@ end
+  - task: checkout-same-cf-deployment-as-env
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: coredeps/core-deps-ci
+      inputs:
+      - name: cf-deployment
+      - name: cf-deployment-env
+      run:
+        dir: ""
+        path: bash
+        args:
+        - -c
+        - |
+          #!/bin/bash
+          version="$(jq -r '.["cf-deployment_version"]' < cf-deployment-env/metadata)"
+          echo "Toolsmith env is on cf-deployment version ${version}"
+          pushd cf-deployment
+            echo "Checking out cf-deployment version ${version}"
+            git checkout "${version}"
+          popd
   - task: get-cf-deployment-ops-files
     file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
     input_mapping:
