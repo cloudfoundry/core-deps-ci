@@ -213,6 +213,8 @@ jobs:
       inputs:
       - name: cf-deployment
       - name: cf-deployment-env
+      outputs:
+      - name: cf-deployment
       run:
         dir: ""
         path: bash
