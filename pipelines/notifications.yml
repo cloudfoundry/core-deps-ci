@@ -74,7 +74,7 @@ resources:
     source:
       uri: git@github.com:pivotal-cf/cflinuxfs4
       branch: main
-      private_key: ((pivotal-cf-buildpacks-ci-robots))
+      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
 
   - name: cflinuxfs3-release
     type: github-release
@@ -119,8 +119,6 @@ jobs:
           - do:
               - task: check-for-new-cflinuxfs3-cves
                 file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
-                params:
-                  STACK: cflinuxfs3
                 output_mapping:
                   output-new-cves: output-new-cves-cflinuxfs3
               - put: new-cves-cflinuxfs3
@@ -142,9 +140,7 @@ jobs:
       - in_parallel:
           - do:
               - task: check-for-new-cflinuxfs4-cves
-                file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
-                params:
-                  STACK: cflinuxfs4
+                file: buildpacks-ci/tasks/check-for-new-rootfs-cves-cflinuxfs4/task.yml
                 output_mapping:
                   output-new-cves: output-new-cves-cflinuxfs4
               - put: new-cves-cflinuxfs4
