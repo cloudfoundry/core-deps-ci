@@ -28,7 +28,7 @@ resources:
     type: cron
     check_every: 15m
     source:
-      expression: 15 0 1 * *  # 15min after buildpack release reminders
+      expression: 15 0 1 * *
       location: America/New_York
 
   - name: last-week-of-month
