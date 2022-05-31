@@ -72,7 +72,7 @@ resources:
   - name: cflinuxfs4
     type: git
     source:
-      uri: git@github.com:pivotal-cf/cflinuxfs4
+      uri: git@github.com:cf-buildpacks-eng/cflinuxfs4
       branch: main
       private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
 
