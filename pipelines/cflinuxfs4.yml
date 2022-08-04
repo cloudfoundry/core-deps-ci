@@ -444,6 +444,7 @@ jobs:
                 exit 1
               fi
 
+              sleep 10
               result=$(curl -s "gomodapp.${apps_domain}" | head -n1)
               if [ "${result}" != "go, world" ]; then
                 echo "Unexpected result: ${result}"
