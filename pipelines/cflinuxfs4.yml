@@ -156,10 +156,9 @@ resources:
 - name: cflinuxfs4-image
   type: docker-image
   source:
-    #! Later TODO: move to cloudfoundry for cosmetic purposes
-    repository: cfbuildpacks/cflinuxfs4
-    username: ((cfbuildpacks-dockerhub-user.username))
-    password: ((cfbuildpacks-dockerhub-user.password))
+    repository: cloudfoundry/cflinuxfs4
+    username: ((cfbuildpacksproductionbot-docker-user.username))
+    password: ((cfbuildpacksproductionbot-docker-user.password))
     email: cf-buildpacks-eng@pivotal.io
 
 - name: cflinuxfs4-github-release
