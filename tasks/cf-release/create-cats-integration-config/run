@@ -21,7 +21,7 @@ cat >cats-integration-config/integration-config.json <<-EOF
   "credhub_mode" : "assisted",
   "artifacts_directory": "logs",
   "skip_ssl_validation": true,
-  "timeout_scale": 1,
+  "timeout_scale": 2,
   "default_timeout": 300,
   "async_service_operation_timeout": 1200,
   "cf_push_timeout": 600,
