@@ -23,6 +23,12 @@ resources:
     branch: main
     uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks
 
+- name: cf-deployment-concourse-tasks-image
+  type: docker-image
+  source:
+    repository: cloudfoundry/cf-deployment-concourse-tasks
+    tag: v13.3.0
+
 - name: cf-deployment
   type: git
   source:
@@ -138,12 +144,14 @@ jobs:
     - get: weekday-mornings
       trigger: true
     - get: cf-deployment-concourse-tasks
+    - get: cf-deployment-concourse-tasks-image
     - get: bbl-state
     - get: bbl-config
       resource: bbl-state
     - get: bosh-deployment
     - get: buildpacks-ci
   - task: bbl-up
+    image: cf-deployment-concourse-tasks-image
     file: cf-deployment-concourse-tasks/bbl-up/task.yml
     params:
       BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
@@ -214,6 +222,7 @@ jobs:
   - in_parallel:
     - get: core-deps-ci
     - get: cf-deployment-concourse-tasks
+    - get: cf-deployment-concourse-tasks-image
     - get: cf-deployment
     - get: bbl-state
       trigger: true
@@ -243,6 +252,7 @@ jobs:
         BBL_STATE_DIR: cfrelease
 #@ end
   - task: get-cf-deployment-ops-files
+    image: cf-deployment-concourse-tasks-image
     file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
     input_mapping:
       base-ops-files: cf-deployment
@@ -252,6 +262,7 @@ jobs:
 #@ for language in data.values.supported_languages:
   - task: #@ "add-" + language.name + "-buildpack-release-ops-file"
     file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
+    image: cf-deployment-concourse-tasks-image
     input_mapping:
       base-ops-files: collected-ops-files
       new-ops-files: #@ language.name + "-buildpack-ops-file"
@@ -264,6 +275,7 @@ jobs:
 #@   buildpack_ops_file_paths.append("operations/bump-" + language.name + "-buildpack.yml")
 #@ end
   - task: bosh-deploy
+    image: cf-deployment-concourse-tasks-image
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
       bbl-state: bbl-state
@@ -278,6 +290,7 @@ jobs:
         operations/disable-dynamic-asgs.yml
         (@= "\n".join(buildpack_ops_file_paths) @)
   - task: open-asgs-for-credhub
+    image: cf-deployment-concourse-tasks-image
     file: cf-deployment-concourse-tasks/open-asgs-for-bosh-instance-group/task.yml
     attempts: 10
     input_mapping:
@@ -297,6 +310,7 @@ jobs:
       INSTANCE_GROUP_NAME: uaa
       SECURITY_GROUP_NAME: uaa
   - task: enable-docker-and-tasks
+    image: cf-deployment-concourse-tasks-image
     file: cf-deployment-concourse-tasks/set-feature-flags/task.yml
     input_mapping:
       bbl-state: bbl-state
@@ -315,6 +329,7 @@ jobs:
   - in_parallel:
     - get: core-deps-ci
     - get: cf-deployment-concourse-tasks
+    - get: cf-deployment-concourse-tasks-image
     - get: cf-acceptance-tests
     - get: buildpacks-ci
     - get: bbl-state
@@ -334,8 +349,33 @@ jobs:
       APPS_DOMAIN: cfrelease.buildpacks-gcp.ci.cf-app.com
       DIEGO_DOCKER_ON: true
       STACKS: cflinuxfs3
+  - task: increase-timeout-scale
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: cfbuildpacks/ci
+      inputs:
+      - name: integration-config
+      outputs:
+      - name: integration-config
+      run:
+        dir: ""
+        path: bash
+        args:
+        - -c
+        - |
+          #!/bin/bash
+          set -e
+          cd integration-config
+          contents="$(jq '.timeout_scale = 2' integration_config.json)"
+          echo -E "${contents}" > integration_config.json
+          echo -e "timeout_scale set to 2"
+          echo -e "integration_config.json modified to:\n $(cat integration_config.json)"
   - task: cats
     attempts: 3
+    image: cf-deployment-concourse-tasks-image
     file: cf-deployment-concourse-tasks/run-cats/task.yml
     params:
       NODES: 12
@@ -351,7 +391,9 @@ jobs:
       passed: [cats]
       trigger: true
     - get: cf-deployment-concourse-tasks
+    - get: cf-deployment-concourse-tasks-image
   - task: bosh-delete-deployment
+    image: cf-deployment-concourse-tasks-image
     file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
     input_mapping:
       bbl-state: bbl-state
@@ -367,6 +409,7 @@ jobs:
       passed: [delete-deployment]
       trigger: true
     - get: cf-deployment-concourse-tasks
+    - get: cf-deployment-concourse-tasks-image
     - get: buildpacks-ci
   - task: remove-gcp-parent-dns-record
     file: buildpacks-ci/tasks/remove-gcp-parent-dns-record/task.yml
@@ -374,6 +417,7 @@ jobs:
       GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
       ENV_NAME: cfrelease
   - task: bbl-destroy
+    image: cf-deployment-concourse-tasks-image
     file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
     params:
       BBL_STATE_DIR: cfrelease
