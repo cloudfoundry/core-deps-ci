@@ -24,6 +24,15 @@ resources:
         - cflinuxfs3
         - security-notice
 
+  - name: davos-cve-stories-cflinuxfs4
+    type: cf-tracker-resource
+    source:
+      project_id: 2537714
+      token: ((pivotal-tracker-api-token))
+      labels:
+        - cflinuxfs4
+        - security-notice
+
   - name: first-of-month
     type: cron
     check_every: 15m
@@ -69,18 +78,23 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/cflinuxfs3
 
-  - name: cflinuxfs4
-    type: git
-    source:
-      uri: git@github.com:cf-buildpacks-eng/cflinuxfs4
-      branch: main
-      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-
   - name: cflinuxfs3-release
     type: github-release
     source:
       owner: cloudfoundry
       repository: cflinuxfs3
+      access_token: ((buildpacks-github-token))
+
+  - name: cflinuxfs4
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cflinuxfs4
+
+  - name: cflinuxfs4-release
+    type: github-release
+    source:
+      owner: cloudfoundry
+      repository: cflinuxfs4
       access_token: ((buildpacks-github-token))
 
 jobs:
@@ -126,6 +140,27 @@ jobs:
                 params:
                   repository: output-new-cves-cflinuxfs3
                   rebase: true
+
+  - name: categorize-security-notices-cflinuxfs4
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+          - get: davos-cve-stories
+            resource: davos-cve-stories-cflinuxfs4
+            trigger: true
+          - get: buildpacks-ci
+          - get: cflinuxfs4-release
+            params:
+              include_source_tarball: true
+      - in_parallel:
+          - task: categorize-security-notices-cflinuxfs4
+            file: buildpacks-ci/tasks/categorize-security-notices/task.yml
+            params:
+              TRACKER_PROJECT_ID: 2537714
+              TRACKER_PROJECT_REQUESTER: 1431988
+              TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
+              STACK: cflinuxfs4
 
   - name: new-rootfs-cves-cflinuxfs4
     serial: true
