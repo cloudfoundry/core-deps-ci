@@ -260,6 +260,7 @@ jobs:
         operations/experimental/fast-deploy-with-downtime-and-danger.yml
         operations/use-compiled-releases.yml
         operations/scale-to-one-az.yml
+        operations/test/scale-to-one-az-addon-parallel-cats.yml
         (@= "\n".join(buildpack_ops_file_paths) @)
   - task: open-asgs-for-credhub
     file: cf-deployment-concourse-tasks/open-asgs-for-bosh-instance-group/task.yml
@@ -312,7 +313,6 @@ jobs:
       toolsmiths-env: cf-deployment-env
     params:
       CONFIG_FILE_PATH: integration-config.json
-      NODES: 6
 
 - name: unclaim-cf-deployment-env
   public: true
