@@ -312,6 +312,7 @@ jobs:
       toolsmiths-env: cf-deployment-env
     params:
       CONFIG_FILE_PATH: integration-config.json
+      NODES: 6
 
 - name: unclaim-cf-deployment-env
   public: true
