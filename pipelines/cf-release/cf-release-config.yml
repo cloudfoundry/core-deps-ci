@@ -18,7 +18,7 @@ supported_languages:
 - name: php
   stacks: #@ default_stacks
 - name: python
-  stacks: #@ default_stacks
+  stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: r
   stacks: #@ default_stacks
 - name: ruby
@@ -39,7 +39,7 @@ supported_languages_without_java:
 - name: php
   stacks: #@ default_stacks
 - name: python
-  stacks: #@ default_stacks
+  stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: r
   stacks: #@ default_stacks
 - name: ruby
