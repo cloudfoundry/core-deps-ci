@@ -10,7 +10,7 @@ supported_languages:
 - name: go
   stacks: #@ default_stacks
 - name: java
-  stacks: #@ default_stacks
+  stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: nginx
   stacks: #@ default_stacks
 - name: nodejs
