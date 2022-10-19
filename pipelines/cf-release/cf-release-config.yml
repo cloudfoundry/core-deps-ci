@@ -8,7 +8,7 @@ supported_languages:
 - name: dotnet-core
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: go
-  stacks: #@ default_stacks
+  stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: java
   stacks: #@ default_stacks
 - name: nginx
@@ -31,7 +31,7 @@ supported_languages_without_java:
 - name: dotnet-core
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: go
-  stacks: #@ default_stacks
+  stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: nginx
   stacks: #@ default_stacks
 - name: nodejs
