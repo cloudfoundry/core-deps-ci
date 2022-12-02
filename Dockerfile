@@ -21,7 +21,7 @@ RUN curl -sL "https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key"
 
 RUN apt-get -qqy update \
   && apt-get -qqy install \
-    cf7-cli \
+    cf8-cli \
     git \
     jq \
     unzip \
