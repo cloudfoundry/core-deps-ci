@@ -22,7 +22,7 @@ supported_languages:
 - name: r
   stacks: #@ default_stacks
 - name: ruby
-  stacks: #@ default_stacks
+  stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: staticfile
   stacks: #@ default_stacks
 supported_languages_without_java:
@@ -43,6 +43,6 @@ supported_languages_without_java:
 - name: r
   stacks: #@ default_stacks
 - name: ruby
-  stacks: #@ default_stacks
+  stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: staticfile
   stacks: #@ default_stacks
