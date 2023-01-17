@@ -308,6 +308,7 @@ jobs:
       toolsmiths-env: cf-deployment-env
   - task: run-cats
     file: cf-deployment-concourse-tasks/run-cats/task.yml
+    attempts: 3
     input_mapping:
       integration-config: cats-integration-config
       toolsmiths-env: cf-deployment-env
