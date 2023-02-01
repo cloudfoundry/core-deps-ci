@@ -20,7 +20,7 @@ supported_languages:
 - name: python
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: r
-  stacks: #@ default_stacks
+  stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: ruby
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: staticfile
@@ -41,7 +41,7 @@ supported_languages_without_java:
 - name: python
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: r
-  stacks: #@ default_stacks
+  stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: ruby
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: staticfile
