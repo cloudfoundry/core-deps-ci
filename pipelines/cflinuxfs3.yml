@@ -173,8 +173,8 @@ resources:
   type: docker-image
   source:
     repository: cloudfoundry/cflinuxfs3
-    username: ((buildpacks-docker-user.username))
-    password: ((buildpacks-docker-user.password))
+    username: ((cfbuildpacks-dockerhub-user.username))
+    password: ((cfbuildpacks-dockerhub-user.password))
     email: cf-buildpacks-eng@pivotal.io
 
 - name: cflinuxfs3-github-release
