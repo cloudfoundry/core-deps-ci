@@ -12,7 +12,7 @@ supported_languages:
 - name: java
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: nginx
-  stacks: #@ default_stacks
+  stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: nodejs
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: php
@@ -33,7 +33,7 @@ supported_languages_without_java:
 - name: go
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: nginx
-  stacks: #@ default_stacks
+  stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: nodejs
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: php
