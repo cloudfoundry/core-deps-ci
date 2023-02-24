@@ -29,6 +29,12 @@ get_version() {
 }
 
 buildpack_blob_is_latest() {
+  local buildpack_name
+  buildpack_name="$(get_buildpack_name)"
+  if [[ $buildpack_name == "staticfile-buildpack" ]]; then
+    return 1
+  fi
+
   local new_version=$1
 
   local existing_version
