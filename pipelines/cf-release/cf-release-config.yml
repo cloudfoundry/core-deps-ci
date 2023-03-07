@@ -16,7 +16,7 @@ supported_languages:
 - name: nodejs
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: php
-  stacks: #@ default_stacks
+  stacks: #@ default_stacks + ["cflinuxfs4"] 
 - name: python
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: r
@@ -37,7 +37,7 @@ supported_languages_without_java:
 - name: nodejs
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: php
-  stacks: #@ default_stacks
+  stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: python
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: r
