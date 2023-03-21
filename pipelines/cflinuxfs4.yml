@@ -362,13 +362,14 @@ jobs:
         - gcp-stemcell/*.tgz
         ops_files:
         - cf-deployment/operations/experimental/fast-deploy-with-downtime-and-danger.yml
+        - cf-deployment/operations/use-latest-stemcell.yml
+        - cf-deployment/operations/disable-dynamic-asgs.yml
+        - cf-deployment/operations/use-compiled-releases.yml
         - buildpacks-ci/deployments/operations/substitute-with-cflinuxfs4-trusted-certs.yml #! Because currently cflinuxfs3 is the default in cf-deployment
         - buildpacks-ci/deployments/operations/do-not-pre-install-buildpacks.yml #! We do not have cflinuxfs4 based buildpacks yet
         - rootfs-release-artifacts/use-dev-release-opsfile.yml
         - capi-release-artifacts/use-dev-release-opsfile.yml
         - capi-release-artifacts/use-rootfs-as-default-stack.yml
-        - cf-deployment/operations/use-latest-stemcell.yml
-        - cf-deployment/operations/disable-dynamic-asgs.yml
         vars:
           system_domain: cflinuxfs4.buildpacks-gcp.ci.cf-app.com
     on_failure: #@ failure_alert()

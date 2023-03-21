@@ -380,13 +380,14 @@ jobs:
         stemcells:
         - gcp-stemcell/*.tgz
         ops_files:
-        - buildpacks-opsfile/use-latest-buildpack-releases.yml
         - cf-deployment/operations/experimental/fast-deploy-with-downtime-and-danger.yml
+        - cf-deployment/operations/use-latest-stemcell.yml
+        - cf-deployment/operations/use-compiled-releases.yml
+        - buildpacks-opsfile/use-latest-buildpack-releases.yml
         - buildpacks-ci/deployments/operations/cflinuxfs3-rootfs-certs-as-list.yml
         - rootfs-release-artifacts/use-dev-release-opsfile.yml
         - capi-release-artifacts/use-dev-release-opsfile.yml
         - capi-release-artifacts/use-rootfs-as-default-stack.yml
-        - cf-deployment/operations/use-latest-stemcell.yml
         vars:
           system_domain: cflinuxfs3.buildpacks-gcp.ci.cf-app.com
     on_failure: #@ failure_alert()
