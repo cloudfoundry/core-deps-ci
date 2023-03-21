@@ -151,7 +151,7 @@ resources:
 - name: gcp-stemcell
   type: bosh-io-stemcell
   source:
-    name: bosh-google-kvm-ubuntu-bionic-go_agent
+    name: bosh-google-kvm-ubuntu-jammy-go_agent
 
 - name: cflinuxfs4-image
   type: docker-image
@@ -326,7 +326,6 @@ jobs:
       - get: gcp-stemcell
       - get: cf-deployment-concourse-tasks
       - get: bosh-deployment
-
     - in_parallel:
       - task: create-deployment-source-config
         file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
@@ -362,13 +361,9 @@ jobs:
         stemcells:
         - gcp-stemcell/*.tgz
         ops_files:
-        - buildpacks-ci/deployments/operations/no-canaries.yml
-        #! Because currently cflinuxfs3 is the default in cf-deployment
-        - buildpacks-ci/deployments/operations/substitute-with-cflinuxfs4-trusted-certs.yml
-        #! We do not have cflinuxfs4 based buildpacks yet
-        - buildpacks-ci/deployments/operations/do-not-pre-install-buildpacks.yml
-        #! temporary because we need https://github.com/cloudfoundry/garden-runc-release/pull/229
-        - buildpacks-ci/deployments/operations/use-garden-runc-1-20.7.yml
+        - cf-deployment/operations/experimental/fast-deploy-with-downtime-and-danger.yml
+        - buildpacks-ci/deployments/operations/substitute-with-cflinuxfs4-trusted-certs.yml #! Because currently cflinuxfs3 is the default in cf-deployment
+        - buildpacks-ci/deployments/operations/do-not-pre-install-buildpacks.yml #! We do not have cflinuxfs4 based buildpacks yet
         - rootfs-release-artifacts/use-dev-release-opsfile.yml
         - capi-release-artifacts/use-dev-release-opsfile.yml
         - capi-release-artifacts/use-rootfs-as-default-stack.yml
