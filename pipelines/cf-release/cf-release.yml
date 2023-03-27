@@ -38,7 +38,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/cf-acceptance-tests
-    branch: main
+    branch: v11.1.0
 
 - name: cf-deployment-env
   type: toolsmiths-envs
