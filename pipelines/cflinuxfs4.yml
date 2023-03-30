@@ -47,7 +47,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/cf-acceptance-tests.git
-    branch: main
+    branch: develop #! TODO switch to main when https://github.com/cloudfoundry/cf-acceptance-tests/pull/819 is merged and available on main
 
 - name: bbl-state
   type: git
