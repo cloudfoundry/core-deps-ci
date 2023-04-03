@@ -22,6 +22,14 @@ resource_types:
     repository: cloudfoundry/bosh-deployment-resource
 
 resources:
+#@ for buildpack in buildpacks:
+- name: #@ buildpack + "-buildpack-release"
+  type: git
+  source:
+    branch: master
+    uri: #@ "https://github.com/cloudfoundry/{}-buildpack-release.git".format(buildpack)
+#@ end
+
 - name: cf-deployment-concourse-tasks
   type: git
   source:
@@ -34,6 +42,12 @@ resources:
   source:
     branch: main
     uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+
+- name: cf-acceptance-tests
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/cf-acceptance-tests.git
+    branch: develop #! TODO switch to main when https://github.com/cloudfoundry/cf-acceptance-tests/pull/819 is merged and available on main
 
 - name: bbl-state
   type: git
@@ -185,12 +199,6 @@ resources:
     access_key_id: ((pivotal-buildpacks-s3-access-key))
     secret_access_key: ((pivotal-buildpacks-s3-secret-key))
 
-- name: test-go-buildpack
-  type: git
-  source:
-    uri: https://github.com/cloudfoundry/go-buildpack
-    branch: hacky-cflinuxfs4
-
 - name: failure-alert
   type: slack-notification
   source:
@@ -326,6 +334,9 @@ jobs:
       - get: gcp-stemcell
       - get: cf-deployment-concourse-tasks
       - get: bosh-deployment
+#@ for buildpack in buildpacks:
+      - get: #@ buildpack + "-buildpack-release"
+#@ end
     - in_parallel:
       - task: create-deployment-source-config
         file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
@@ -339,6 +350,11 @@ jobs:
         file: buildpacks-ci/tasks/create-capi-release-with-rootfs/task.yml
         params:
           STACK: cflinuxfs4
+      - task: use-new-buildpack-bosh-releases
+        file: buildpacks-ci/tasks/use-new-buildpack-bosh-releases/task.yml
+        params:
+          ACCESS_KEY_ID: ((pivotal-offline-buildpacks-s3-access-key))
+          SECRET_ACCESS_KEY: ((pivotal-offline-buildpacks-s3-secret-key))
     - put: cflinuxfs4-rootfs-smoke-test-deployment
       params:
         source_file: deployment-source-config/source_file.yml
@@ -358,34 +374,36 @@ jobs:
         releases:
         - rootfs-release-artifacts/dev_releases/cflinuxfs4/*.tgz
         - capi-release-artifacts/dev_releases/capi/*.tgz
+        - built-buildpacks-artifacts/*.tgz
         stemcells:
         - gcp-stemcell/*.tgz
         ops_files:
         - cf-deployment/operations/experimental/fast-deploy-with-downtime-and-danger.yml
         - cf-deployment/operations/use-latest-stemcell.yml
-        - cf-deployment/operations/disable-dynamic-asgs.yml
         - cf-deployment/operations/use-compiled-releases.yml
-        - buildpacks-ci/deployments/operations/substitute-with-cflinuxfs4-trusted-certs.yml #! Because currently cflinuxfs3 is the default in cf-deployment
-        - buildpacks-ci/deployments/operations/do-not-pre-install-buildpacks.yml #! We do not have cflinuxfs4 based buildpacks yet
+        - cf-deployment/operations/experimental/add-cflinuxfs4.yml
+        - cf-deployment/operations/experimental/set-cflinuxfs4-default-stack.yml
+        - buildpacks-opsfile/use-latest-buildpack-releases.yml
         - rootfs-release-artifacts/use-dev-release-opsfile.yml
         - capi-release-artifacts/use-dev-release-opsfile.yml
-        - capi-release-artifacts/use-rootfs-as-default-stack.yml
         vars:
           system_domain: cflinuxfs4.buildpacks-gcp.ci.cf-app.com
     on_failure: #@ failure_alert()
 
-- name: test
+- name: cats
   serial: true
   serial_groups: [ cflinuxfs4 ]
   public: true
   plan:
   - in_parallel:
-    - get: test-go-buildpack
     - get: bbl-state
     - get: buildpacks-ci
+    - get: cf-deployment-concourse-tasks
+      resource: cf-deployment-concourse-tasks-latest
     - get: previous-rootfs-release
       resource: cflinuxfs4-github-tags
       passed: [ deploy ]
+    - get: cf-acceptance-tests
     - get: new-cves
       passed: [ deploy ]
     - get: stack-s3
@@ -403,60 +421,20 @@ jobs:
       file: buildpacks-ci/tasks/get-cf-creds/task.yml
       params:
         ENV_NAME: cflinuxfs4
-    - task: run-test
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: cfbuildpacks/ci
-        inputs:
-        - name: test-go-buildpack
-        - name: cf-admin-password
-        run:
-          dir: ""
-          path: bash
-          args:
-          - -c
-          - |
-            #!/bin/bash
-            set -e
-            password=$(cat cf-admin-password/password)
-            apps_domain="cflinuxfs4.buildpacks-gcp.ci.cf-app.com"
-            cf api api.${apps_domain} --skip-ssl-validation
-            cf login -u admin -p "${password}"
-            cf target -o system
-            cf create-space my-space
-            cf target -s my-space
-
-            pushd test-go-buildpack
-              ./scripts/package.sh --stack cflinuxfs4 --version 222.2.2
-              cf create-buildpack go_cflinuxfs4 ./build/buildpack.zip 1
-
-              cf push gomodapp -p fixtures/mod/simple -b go_cflinuxfs4 -s cflinuxfs4 | tee /tmp/cfpushlog
-              if ! grep -q "Ubuntu\s*22.04*" "/tmp/cfpushlog"; then
-                echo "cf push logs did not print out 'Ubuntu 22.04'" >&2
-                exit 1
-              fi
-
-              # stack should not contain python3 (libpython3 is OK)
-              if grep -q "^\s*python3" "/tmp/cfpushlog"; then
-                echo "Packages installed should not contain `python3`" >&2
-                exit 1
-              fi
-
-              # stack should not contain ruby (libruby is OK)
-              if grep -q "^\s*ruby" "/tmp/cfpushlog"; then
-                echo "Packages installed should not contain `ruby`" >&2
-                exit 1
-              fi
-
-              result=$(curl -s "gomodapp.${apps_domain}" | head -n1)
-              if [ "${result}" != "go, world" ]; then
-                echo "Unexpected result: ${result}" >&2
-                exit 1
-              fi
-            popd
+    - task: write-cats-config
+      file: buildpacks-ci/tasks/write-cats-config/task.yml
+      params:
+        APPS_DOMAIN: cflinuxfs4.buildpacks-gcp.ci.cf-app.com
+        DIEGO_DOCKER_ON: true
+        STACKS: cflinuxfs4
+    - task: cats
+      attempts: 3
+      file: cf-deployment-concourse-tasks/run-cats/task.yml
+      params:
+        NODES: 12
+        CONFIG_FILE_PATH: integration_config.json
+        SKIP_REGEXP: "Specifying a specific Stack"
+        FLAKE_ATTEMPTS: 3
     on_failure: #@ failure_alert()
 
 - name: check-for-race-condition
@@ -467,22 +445,22 @@ jobs:
   - in_parallel:
     - get: buildpacks-ci
     - get: version
-      passed: [ test ]
+      passed: [ cats ]
       trigger: true
     - get: latest-version
       resource: version
     - get: previous-rootfs-release
       resource: cflinuxfs4-github-tags
-      passed: [ test ]
+      passed: [ cats ]
     - get: new-cves
-      passed: [ test ]
+      passed: [ cats ]
     - get: stack-s3
-      passed: [ test ]
+      passed: [ cats ]
     - get: receipt-s3
-      passed: [ test ]
+      passed: [ cats ]
     - get: rootfs
       resource: cflinuxfs4
-      passed: [ test ]
+      passed: [ cats ]
   - task: check-for-rootfs-race-condition
     file: buildpacks-ci/tasks/check-for-rootfs-race-condition/task.yml
 
