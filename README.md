@@ -1,3 +1,4 @@
 # Core Deps CI
 
-Public CI for Core Dependencies
+## Deprecated - use https://github.com/cloudfoundry/buildpacks-ci instead
+
